@@ -10,6 +10,8 @@ var CRRTApp = (function() {
   var _currentCaseStudy;
   var _currentTime;
   var _labs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatine", "calcium"];
+  var _vitals = ["bloodPressure", "respiratoryRate", "temperature", "heartRate", "weight"];
+  var _physicalExam = ["general", "ENT", "heart", "lungs", "abdomen", "extremities", "psych"];
   // We are storing each of our lab values in an array. This allows
   // us to keep track of historical values. Since new values will
   // always be pushed onto the front of the array, current value will 
@@ -24,44 +26,12 @@ var CRRTApp = (function() {
     calcium: []
   }
 
-  function _caseStudyOld(
-      sodiumStarting,
-      potassiumStarting,
-      chlorideStarting,
-      bicarbonateStarting,
-      BUNStarting,
-      creatineStarting,
-      calciumStarting,
-      historyPresentIllnessOverview,
-      historyPresentIllnessPastMedicalHistory,
-      historyPresentIllnessPastSurgicalHistory,
-      historyPresentIllnessSocialHistory,
-      historyPresentIllnessFamilyHistory,
-      vitalSigns,
-      medications,
-      imaging,
-      physicalExamGeneral,
-      physicalExamENT,
-      physicalExamHeart,
-      physicalExamLungs,
-      physicalExamAbdomen,
-      physicalExamExtremities,
-      physicalExamPsych) {
-    this.sodiumStarting = sodiumStarting;
-    this.potassiumStarting = potassiumStarting;
-    this.chlorideStarting = chlorideStarting;
-    this.bicarbonateStarting = bicarbonateStarting;
-    this.BUNStarting = BUNStarting;
-    this.creatineStarting = creatineStarting;
-    this.calciumStarting = calciumStarting;
-    this.historyPresentIllnessOverview = historyPresentIllnessOverview;
-    this.historyPresentIllnessPastMedicalHistory = historyPresentIllnessPastMedicalHistory;
-    historyPresentIllnessPastSurgicalHistory = historyPresentIllnessPastSurgicalHistory;
-    historyPresentIllnessSocialHistory = historyPresentIllnessSocialHistory;
-    historyPresentIllnessFamilyHistory = historyPresentIllnessFamilyHistory;
-    vitalSigns = vitalSigns;
-    medications = medications;
-    imaging = imaging;
+  var _historicalVitals = {
+    bloodPressure: [],
+    respiratoryRate: [],
+    temperature: [],
+    heartRate: [],
+    weight: []
   }
 
   function _caseStudy(startingData) {
@@ -121,11 +91,11 @@ var CRRTApp = (function() {
         "physicalExam": {
           "general": "Appears acutely ill",
           "ENT": "Intubated",
-          "Heart": "Tachycardic, no murmurs, rubs, or gallops",
-          "Lungs": "Decreased breath sounds in the left lower lobe",
-          "Abdomen": "Non-distended",
-          "Extremities": "No edema",
-          "Psych": "Intubated and sedated"
+          "heart": "Tachycardic, no murmurs, rubs, or gallops",
+          "lungs": "Decreased breath sounds in the left lower lobe",
+          "abdomen": "Non-distended",
+          "extremities": "No edema",
+          "psych": "Intubated and sedated"
         }
       })
   }
@@ -141,20 +111,26 @@ var CRRTApp = (function() {
   function setPageVariables() {
     $("#currentTime").text(_currentTime);
     $("#currentCaseStudyId").text(_currentCaseStudyId);
+
     for(var i = 0; i < _labs.length; i++) {
       $("#previous"+_labs[i].capitalize()).text(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-2]);
       $("#current" +_labs[i].capitalize()).text(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-1]);
     }
+
+    for(var i = 0; i < _vitals.length; i++) {
+      $("#previous"+_vitals[i].capitalize()).text(_historicalVitals[_vitals[i]][_historicalVitals[_vitals[i]].length-2]);
+      $("#current" +_vitals[i].capitalize()).text(_historicalVitals[_vitals[i]][_historicalVitals[_vitals[i]].length-1]);
+    }
+
     $("#historyOfPresentIllness #overview").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["overview"]));
-    debugger;
     $("#historyOfPresentIllness #pastMedicalHistory").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["pastMedicalHistory"]));
-    debugger;
     $("#historyOfPresentIllness #pastSurgicalHistory").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["pastSurgicalHistory"]));
-    debugger;
     $("#historyOfPresentIllness #socialHistory").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["socialHistory"]));
-    debugger;
     $("#historyOfPresentIllness #familyHistory").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["familyHistory"]));
-    debugger;
+    $("#imaging").html(arrayToHTMLList(_currentCaseStudy.startingData["imaging"]));
+    for(var i = 0; i < _physicalExam.length; i++) {
+      $("#physicalExam #" + _physicalExam[i]).html(_currentCaseStudy.startingData["physicalExam"][_physicalExam[i]]);
+    }
   }
 
   function initializeCaseStudy() {
@@ -164,6 +140,9 @@ var CRRTApp = (function() {
     _currentTime = 0;
     for(var i = 0; i < _labs.length; i++) {
       _historicalLabs[_labs[i]].push(_currentCaseStudy.startingData[_labs[i]+"Starting"]);
+    }
+    for(var i = 0; i < _vitals.length; i++) {
+      _historicalVitals[_vitals[i]].push(_currentCaseStudy.startingData.vitalSigns[_vitals[i]+"Starting"]);
     }
     console.log("_currentCaseStudyId : ", _currentCaseStudyId);
     console.log("_currentCaseStudy : ", _currentCaseStudy);
@@ -230,12 +209,10 @@ var CRRTApp = (function() {
   function excelRound(val, num) {
     var coef = Math.pow(10, num);
     return (Math.round(val * coef))/coef
-
   }
 
   String.prototype.capitalize = function() {
     return this.charAt(0).toUpperCase() + this.slice(1);
-
   }
 
   return {
