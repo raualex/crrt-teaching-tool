@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>title</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+    <script src="script.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  </head>
+  <body>
+    <nav class="navbar navbar-light bg-faded">
+      <a class="navbar-brand" href="./index.html">
+        CRRT Education App
+      </a>
+    </nav>
+    <div class="container">
+      <h1>Continuous Renal Replacement Therapy Orders:
+      <h2>Case Time: 00:00</h2>
+      </h1>
+      <form action="./case-1-results.html" class="mt-3">
+        <fieldset class="form-group">
+          <legend><span>
+              Modality</span><span><i class="fa fa-question-circle-o ml-1"></i></span></legend>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="modality" id="modality1" value="modality1" checked>
+              pre-filter CVVH
+            </label>
+          </div>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="modality" id="modality2" value="modality2">
+              CVVHD
+            </label>
+          </div>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="modality" id="modality2" value="modality3">
+              CVVHDF
+            </label>
+          </div>
+        </fieldset>
+        <fieldset class="form-group">
+          <legend>Anticoagulation</legend>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="anticoagulation" id="anticoagulation1" value="anticoagulation1" checked>
+              None
+            </label>
+          </div>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="anticoagulation" id="anticoagulation2" value="anticoagulation2">
+              Citrate
+            </label>
+          </div>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="anticoagulation" id="anticoagulation3" value="anticoagulation3">
+              Heparin
+            </label>
+          </div>
+        </fieldset>
+        <div class="form-group">
+          <legend>Blood Flow Rate (mL/min)</legend>
+          <input type="bloodFlowRate" class="form-control" id="bloodFlowRate" placeholder="200">
+        </div>
+        <fieldset class="form-group">
+          <legend>Replacement Fluid</legend>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="replacementFluid" id="bloodFlowRate1" value="bloodFlowRate1" checked>
+              0K/3Ca
+            </label>
+          </div>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="replacementFluid" id="bloodFlowRate2" value="bloodFlowRate2">
+              4K/2.5Ca
+            </label>
+          </div>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="replacementFluid" id="bloodFlowRate3" value="bloodFlowRate3">
+              2K/0Ca
+            </label>
+          </div>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="replacementFluid" id="optionsRadios3" value="option3">
+              4K/0Ca
+            </label>
+          </div>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="replacementFluid" id="optionsRadios3" value="option3">
+              4K/0Ca low bicarbonate
+            </label>
+          </div>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="replacementFluid" id="optionsRadios3" value="option3">
+              2K/0Ca low bicarbonate
+            </label>
+          </div>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="replacementFluid" id="optionsRadios3" value="option3">
+              Mix
+            </label>
+          </div>
+          <div class="form-check">
+            <label class="form-check-label">
+              <input type="radio" class="form-check-input" name="replacementFluid" id="optionsRadios3" value="option3">
+              Custom
+            </label>
+          </div>
+        </fieldset>
+        <div class="form-group">
+          <legend>Replacement Fluid Flow Rate (L/hour)</legend>
+          <input type="replacementFluidFlowRate" class="form-control" id="replacementFluidFlowRate" placeholder="2000">
+        </div>
+        <div class="form-group">
+          <legend>Dialysis Fluid Flow Rate (L/hour)</legend>
+          <input type="dialysisFluidFlowRate" class="form-control" id="dialysisFluidFlowRate" placeholder="0">
+        </div>
+        <div class="form-group">
+          <legend>NET Hourly Fluid Removal in mL</legend>
+          <input type="netHourlyFluidRemoval" class="form-control" id="netHourlyFluidRemoval" placeholder="0">
+        </div>
+        <button type="submit" class="btn btn-primary">Go</button>
+      </form>
+    </div>
+  </body>
+</html>

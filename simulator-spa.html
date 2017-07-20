@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>title</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+    <script src="simulator-spa.js"></script>
+  </head>
+  <body>
+    <nav class="navbar navbar-light bg-faded">
+      <a class="navbar-brand" href="./index.html">
+        CRRT Education App
+      </a>
+    </nav>
+    <div class="container">
+      <h1>Case: <span id="currentCaseStudyId"></span></h1>
+      <h2>Time: <span id="currentTime"></span></h2>
+      <div class="btn-group mt-3" role="group" aria-label="Basic example">
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#historyOfPresentIllnessModal">History of Present Illness</button>
+        <!-- History of Present Illness Modal -->
+        <div class="modal fade" id="historyOfPresentIllnessModal" tabindex="-1" role="dialog" aria-labelledby="historyOfPresentIllnessModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="historyOfPresentIllnessModalLabel">History of Present Illness</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div id="historyOfPresentIllness"class="modal-body">
+                <h6>Overview</h6>
+                <div id="overview"></div>
+                <h6>Past Medical History</h6>
+                <div id="pastMedicalHistory"></div>
+                <h6>Past Surgical History</h6>
+                <div id="pastSurgicalHistory"></div>
+                <h6>Social History</h6>
+                <div id="socialHistory"></div>
+                <h6>Family History</h6>
+                <div id="familyHistory"></div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#vitalSignsModal">Vital Signs</button>
+        <!-- Vital Signs Modal -->
+        <div class="modal fade" id="vitalSignsModal" tabindex="-1" role="dialog" aria-labelledby="vitalSignsModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="vitalSignsModalLabel">Vital Signs</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                ...
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#medicationsModal">Medications</button>
+        <!-- Medications Modal -->
+        <div class="modal fade" id="medicationsModal" tabindex="-1" role="dialog" aria-labelledby="medicationsModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="medicationsModalLabel">Medications</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                ...
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#imagingModal">Imaging</button>
+        <!-- Imaging Modal -->
+        <div class="modal fade" id="imagingModal" tabindex="-1" role="dialog" aria-labelledby="imagingModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="imagingModalLabel">Imaging</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                ...
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#physicalExamModal">Physical Exam</button>
+        <!-- Physical Exam Modal -->
+        <div class="modal fade" id="physicalExamModal" tabindex="-1" role="dialog" aria-labelledby="physicalExamModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="physicalExamModalLabel">Physical Exam</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                ...
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6">
+          <table class="table table-hover mt-4">
+            <thead>
+              <tr>
+                <th></th>
+                <th>Previous</th>
+                <th>Current</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <th scope="row">Sodium</th>
+                <td id="previousSodium"></td>
+                <td id="currentSodium"></td>
+              </tr>
+              <tr>
+                <th scope="row">Potassium</th>
+                <td id="previousPotassium"></td>
+                <td id="currentPotassium"></td>
+              </tr>
+              <tr>
+                <th scope="row">Chloride</th>
+                <td id="previousChloride"></td>
+                <td id="currentChloride"></td>
+              </tr>
+              <tr>
+                <th scope="row">Bicarbonate</th>
+                <td id="previousBicarbonate"></td>
+                <td id="currentBicarbonate"></td>
+              </tr>
+              <tr>
+                <th scope="row">BUN</th>
+                <td id="previousBUN"></td>
+                <td id="currentBUN"></td>
+              </tr>
+              <tr>
+                <th scope="row">Creatine</th>
+                <td id="previousCreatine"></td>
+                <td id="currentCreatine"></td>
+              </tr>
+              <tr>
+                <th scope="row">Calcium</th>
+                <td id="previousCalcium"></td>
+                <td id="currentCalcium"></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="col-md-6">
+          <form id="orderForm" class="mt-3">
+            <div class="row">
+              <div class="col-md-6">
+                <fieldset class="form-group">
+                  <legend><span>
+                      Modality</span><span><i class="fa fa-question-circle-o ml-1"></i></span></legend>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="modality" id="modality1" value="modality1" checked>
+                      pre-filter CVVH
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="modality" id="modality2" value="modality2">
+                      CVVHD
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="modality" id="modality2" value="modality3">
+                      CVVHDF
+                    </label>
+                  </div>
+                </fieldset>
+                <fieldset class="form-group">
+                  <legend>Anticoagulation</legend>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="anticoagulation" id="anticoagulation1" value="anticoagulation1" checked>
+                      None
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="anticoagulation" id="anticoagulation2" value="anticoagulation2">
+                      Citrate
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="anticoagulation" id="anticoagulation3" value="anticoagulation3">
+                      Heparin
+                    </label>
+                  </div>
+                </fieldset>
+                <div class="form-group">
+                  <legend>Blood Flow Rate (mL/min)</legend>
+                <input type="bloodFlowRate" class="form-control" id="bloodFlowRate" placeholder="200">
+                </div>
+                <div class="form-group">
+                  <legend>Dialysis Fluid Flow Rate (L/hour)</legend>
+                  <input type="dialysisFluidFlowRate" class="form-control" id="dialysisFluidFlowRate" placeholder="0">
+                </div>
+              </div>
+              <div class="col-md-6">
+                <fieldset class="form-group">
+                  <legend>Replacement Fluid</legend>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="replacementFluid" id="bloodFlowRate1" value="bloodFlowRate1" checked>
+                      0K/3Ca
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="replacementFluid" id="bloodFlowRate2" value="bloodFlowRate2">
+                      4K/2.5Ca
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="replacementFluid" id="bloodFlowRate3" value="bloodFlowRate3">
+                      2K/0Ca
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="replacementFluid" id="optionsRadios3" value="option3">
+                      4K/0Ca
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="replacementFluid" id="optionsRadios3" value="option3">
+                      4K/0Ca low bicarbonate
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="replacementFluid" id="optionsRadios3" value="option3">
+                      2K/0Ca low bicarbonate
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="replacementFluid" id="optionsRadios3" value="option3">
+                      Mix
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="replacementFluid" id="optionsRadios3" value="option3">
+                      Custom
+                    </label>
+                  </div>
+                </fieldset>
+                <div class="form-group">
+                  <legend>Replacement Fluid Flow Rate (L/hour)</legend>
+                  <input type="replacementFluidFlowRate" class="form-control" id="replacementFluidFlowRate" placeholder="2000">
+                </div>
+                <div class="form-group">
+                  <legend>NET Hourly Fluid Removal in mL</legend>
+                  <input type="netHourlyFluidRemoval" class="form-control" id="netHourlyFluidRemoval" placeholder="0">
+                </div>
+              </div>
+            </div>
+            <button id="runLabs" class="btn btn-primary">Go</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
