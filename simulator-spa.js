@@ -12,6 +12,45 @@ var CRRTApp = (function() {
   var _labs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatine", "calcium"];
   var _vitals = ["bloodPressure", "respiratoryRate", "temperature", "heartRate", "weight"];
   var _physicalExam = ["general", "ENT", "heart", "lungs", "abdomen", "extremities", "psych"];
+  var _dialysateValues = {
+    "0K/3Ca": {
+      "lactate": 0,
+      "bicarbonate": 35,
+      "potassium": 0,
+      "sodium": 140,
+      "calcium": 3,
+      "magnesium": 1,
+      "chloride": 109
+    },
+    "2K/0Ca": {
+      "lactate": 0,
+      "bicarbonate": 35,
+      "potassium": 2,
+      "sodium": 140,
+      "calcium": 0,
+      "magnesium": 1.5,
+      "chloride": 108.5
+    },
+    "4K/2.5Ca": {
+      "lactate": 0,
+      "bicarbonate": 35,
+      "potassium": 4,
+      "sodium": 140,
+      "calcium": 2.5,
+      "magnesium": 1.5,
+      "chloride": 113
+    },
+    "2K/0Ca/lb": {
+      "lactate": 0,
+      "bicarbonate": 25,
+      "potassium": 2,
+      "sodium": 130,
+      "calcium": 0,
+      "magnesium": 1.5,
+      "chloride": 108.5
+    }
+  }
+
   // We are storing each of our lab values in an array. This allows
   // us to keep track of historical values. Since new values will
   // always be pushed onto the front of the array, current value will 
@@ -105,7 +144,30 @@ var CRRTApp = (function() {
     initializeCaseStudy();
     setPageVariables();
     handleClicks();
+    initializeOrderForm();
     preventOrderFormDefault();
+  }
+
+  function initializeOrderForm() {
+    handleOrderFormChanges();
+    var startingAnticoagulationValue = $('input[name=anticoagulation]:checked').val();
+    setAnticoagulationFormElements(startingAnticoagulationValue);
+  }
+
+  function setAnticoagulationFormElements(anticoagulationValue) {
+    switch(anticoagulationValue) {
+      case "citrate":
+        showCitrateFormOptions();
+        break;
+      case "heparin":
+        showHeparinFormOptions();
+        break;
+      case "none":
+        showNoAnticoagulationFormOptions();
+        break;
+      default:
+        showNoAnticoagulationFormOptions();
+    }
   }
 
   function setPageVariables() {
@@ -151,6 +213,20 @@ var CRRTApp = (function() {
   function runLabs() {
     console.log("runLabs()");
     var newLabs = {};
+    var dialysate = {}; 
+    var orders = {
+      fluid : $('input[name=fluid]:checked').val(),
+      fluidDialysateValues : _dialysateValues[$('input[name=fluid]:checked').val()],
+      modality : $('input[name=modality]:checked').val(),
+      BFR : $('#bloodFlowRate').val(),
+      Qr : $('#fluidFlowRate').val(),
+      Qd : $('#fluidFlowRate').val(),
+      GrossUF : $('#grossHourlyFluidRemoval').val()
+    }
+
+    var effluentFlowRate = calculateEffluentFlowRate(orders);
+    debugger;
+
     newLabs["sodium"] = calculateLab(_historicalLabs["sodium"][_historicalLabs["sodium"].length-1], 140, 2, 24, 70, 42, 0);
     newLabs["potassium"] = calculateLab(_historicalLabs["potassium"][_historicalLabs["potassium"].length-1], 4, 2, 24, 70, 42, 0);
     newLabs["chloride"] = calculateLab(_historicalLabs["chloride"][_historicalLabs["chloride"].length-1], 100, 2, 24, 70, 42, 0);
@@ -162,8 +238,27 @@ var CRRTApp = (function() {
     for(var i=0;i<_labs.length;i++) {
       _historicalLabs[_labs[i]].push(newLabs[_labs[i]]);
     }
-
     setPageVariables();
+  }
+
+  function calculateEffluentFlowRate(orders) {
+    var efr;
+    debugger;
+    switch(orders["modality"]) {
+      case "pre-filter-cvvh":
+        efr = (orders["BFR"]*60/1000) / ((orders["BFR"]*60/1000)+orders["Qr"]) * (orders["Qr"] + orders["grossUF"]/1,000);
+        debugger;
+        break;
+      case "post-filter-cvvh":
+        efr = orders["Qr"] + orders["GrossUF"]/1,000;
+        debugger;
+        break;
+      case "cvvhd":
+        efr = orders["Qd"] + orders["GrossUF"]/1,000;
+        debugger;
+        break;
+    }
+    return efr;
   }
 
   function arrayToHTMLList(array){
@@ -189,10 +284,58 @@ var CRRTApp = (function() {
     })
   }
 
+  function handleOrderFormChanges() {
+    handleModalityChanges();
+    handleAnticoagulationChanges();
+  }
+
+  function handleModalityChanges() {
+    $(".modality-input").change(function() {
+      if (this.value == "cvvhd") {
+        showCVVHDFormOptions();
+      } else {
+        showCVVHFormOptions();
+      }
+    })
+  }
+
+  function handleAnticoagulationChanges() {
+    $(".anticoagulation-input").change(function() {
+      setAnticoagulationFormElements(this.value);
+    });
+  }
+
+  function showCVVHDFormOptions() {
+    $("#fluidLegend").text("Dialysate Fluid");
+    $("#fluidFlowLegend").text("Dialysate Fluid Flow Rate (L/hr)");
+  }
+
+  function showCVVHFormOptions() {
+    $("#fluidLegend").text("Replacement Fluid");
+    $("#fluidFlowLegend").text("Replacement Fluid Flow Rate (L/hr)");
+
+  }
+
   function preventOrderFormDefault() {
     $("#orderForm").submit(function(e){
       return false;
     });
+  }
+
+  function showCitrateFormOptions() {
+    console.log("showCitrateFormOptions()");
+    $(".citrate").show();
+    $(".heparin").hide();
+  }
+
+  function showHeparinFormOptions() {
+    $(".heparin").show();
+    $(".citrate").hide();
+  }
+
+  function showNoAnticoagulationFormOptions() {
+    $(".heparin").hide();
+    $(".citrate").hide();
   }
 
 
