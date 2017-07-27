@@ -20,7 +20,11 @@ var CRRTApp = (function() {
       "sodium": 140,
       "calcium": 3,
       "magnesium": 1,
-      "chloride": 109
+      "chloride": 109,
+      // TODO: Joel added values of zero for creatine and BUN - need to ensure with Ben that this is correct
+      "BUN": 0,
+      "creatine": 0
+
     },
     "2K/0Ca": {
       "lactate": 0,
@@ -29,7 +33,9 @@ var CRRTApp = (function() {
       "sodium": 140,
       "calcium": 0,
       "magnesium": 1.5,
-      "chloride": 108.5
+      "chloride": 108.5,
+      "BUN": 0,
+      "creatine": 0
     },
     "4K/2.5Ca": {
       "lactate": 0,
@@ -38,7 +44,9 @@ var CRRTApp = (function() {
       "sodium": 140,
       "calcium": 2.5,
       "magnesium": 1.5,
-      "chloride": 113
+      "chloride": 113,
+      "BUN": 0,
+      "creatine": 0
     },
     "2K/0Ca/lb": {
       "lactate": 0,
@@ -47,10 +55,13 @@ var CRRTApp = (function() {
       "sodium": 130,
       "calcium": 0,
       "magnesium": 1.5,
-      "chloride": 108.5
+      "chloride": 108.5,
+      "BUN": 0,
+      "creatine": 0
     }
   }
 
+  // Note:
   // We are storing each of our lab values in an array. This allows
   // us to keep track of historical values. Since new values will
   // always be pushed onto the front of the array, current value will 
@@ -80,12 +91,21 @@ var CRRTApp = (function() {
   _caseStudies = {
     1: new _caseStudy({
         "sodiumStarting": 130,
+        "sodiumProductionRate": 0,
         "potassiumStarting" : 4.3,
+        "potassiumProductionRate" : 4.3,
         "chlorideStarting" : 85,
+        "chlorideProductionRate" : 0,
         "bicarbonateStarting" : 10,
+        "bicarbonateProductionRate" : -20,
         "BUNStarting" : 120,
+        "BUNProductionRate" : 40,
         "creatineStarting" : 5,
+        "creatineProductionRate" : 3,
         "calciumStarting" : 8.5,
+        "calciumProductionRate" : 0,
+        "gender" : "female",
+        "usualWeight" : 86.8,
         "historyOfPresentIllness" : {
           "overview" : [
             "A 72 year old lady with a history of HTN, COPD, and DM is brought to the Emergency Department by ambulance after being found unresponsive by family members.",
@@ -120,7 +140,7 @@ var CRRTApp = (function() {
           "respiratoryRateStarting": 30,
           "temperatureStarting": 39.1,
           "heartRateStarting": 128,
-          "weightStarting": 65
+          "weightStarting": 102
         },
         "medications": [],
         "imaging" : [
@@ -212,6 +232,10 @@ var CRRTApp = (function() {
 
   function runLabs() {
     console.log("runLabs()");
+    // Note: For some reason we need to reset the _currentCaseStudy -- not sure why this is. Apparently there
+    // is a weird quirck of JavaScript I don't fully understand.
+    _currentCaseStudyId = getParameterByName("caseId");
+    _currentCaseStudy = _caseStudies[_currentCaseStudyId];
     var newLabs = {};
     var dialysate = {}; 
     var orders = {
@@ -221,19 +245,22 @@ var CRRTApp = (function() {
       BFR : $('#bloodFlowRate').val(),
       Qr : $('#fluidFlowRate').val(),
       Qd : $('#fluidFlowRate').val(),
-      GrossUF : $('#grossHourlyFluidRemoval').val()
+      grossUF : $('#grossHourlyFluidRemoval').val(),
+      timeToNextLabs : calculateTimeToNextSetOfLabs()
     }
-
+    var currentWeight = calculateCurrentWeight(orders);
+    _historicalVitals["weight"].push(currentWeight);
     var effluentFlowRate = calculateEffluentFlowRate(orders);
-    debugger;
+    var volumeOfDistribution = calculateVolumeOfDistribution(orders);
 
-    newLabs["sodium"] = calculateLab(_historicalLabs["sodium"][_historicalLabs["sodium"].length-1], 140, 2, 24, 70, 42, 0);
-    newLabs["potassium"] = calculateLab(_historicalLabs["potassium"][_historicalLabs["potassium"].length-1], 4, 2, 24, 70, 42, 0);
-    newLabs["chloride"] = calculateLab(_historicalLabs["chloride"][_historicalLabs["chloride"].length-1], 100, 2, 24, 70, 42, 0);
-    newLabs["bicarbonate "] = calculateLab(_historicalLabs["bicarbonate"][_historicalLabs["bicarbonate"].length-1], 35, 2, 24, 70, 42, -20);
-    newLabs["BUN"] = calculateLab(_historicalLabs["BUN"][_historicalLabs["BUN"].length-1], 0, 2, 24, 70, 42, 40);
-    newLabs["creatine"] = calculateLab(_historicalLabs["creatine"][_historicalLabs["creatine"].length-1], 0, 2, 24, 70, 42, 3);
-    newLabs["calcium"] = calculateLab(_historicalLabs["calcium"][_historicalLabs["calcium"].length-1], 10, 2, 24, 70, 42, 0);
+    // Note: Params for calculateLab(): initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate
+    var sodiumInitial = _historicalLabs["sodium"][_historicalLabs["sodium"].length-1];
+    var sodiumDialysate = orders.fluidDialysateValues["sodium"];
+    var sodiumProductionRate = _currentCaseStudy.startingData["sodium"+"ProductionRate"];
+
+    for(var i = 0; i < _labs.length; i++) {
+      newLabs[_labs[i]] = calculateLab(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-1], orders.fluidDialysateValues[_labs[i]], effluentFlowRate, orders["timeToNextLabs"], currentWeight, volumeOfDistribution, _currentCaseStudy.startingData[_labs[i]+"ProductionRate"]);
+    }
 
     for(var i=0;i<_labs.length;i++) {
       _historicalLabs[_labs[i]].push(newLabs[_labs[i]]);
@@ -241,24 +268,51 @@ var CRRTApp = (function() {
     setPageVariables();
   }
 
+  function calculateCurrentWeight(orders) {
+    // TODO: We are currently ignoring fluid in for our calculations, need to ask ben how it should be calculated
+    var fluidIn = 0;
+    var previousWeight = _historicalVitals['weight'][_historicalVitals['weight'].length-1];
+    var currentWeight = previousWeight + (fluidIn - orders["grossUF"]/1000);
+    return currentWeight;
+  }
+
   function calculateEffluentFlowRate(orders) {
     var efr;
-    debugger;
     switch(orders["modality"]) {
       case "pre-filter-cvvh":
-        efr = (orders["BFR"]*60/1000) / ((orders["BFR"]*60/1000)+orders["Qr"]) * (orders["Qr"] + orders["grossUF"]/1,000);
-        debugger;
+        efr = (orders["BFR"]*60/1000) / ((orders["BFR"]*60/1000)+orders["Qr"]) * (orders["Qr"] + orders["grossUF"]/1000);
         break;
       case "post-filter-cvvh":
-        efr = orders["Qr"] + orders["GrossUF"]/1,000;
-        debugger;
+        efr = orders["Qr"] + orders["grossUF"]/1000;
         break;
       case "cvvhd":
-        efr = orders["Qd"] + orders["GrossUF"]/1,000;
-        debugger;
+        efr = orders["Qd"] + orders["grossUF"]/1000;
         break;
     }
     return efr;
+  }
+
+  function calculateVolumeOfDistribution(orders) {
+    return _currentCaseStudy.startingData["usualWeight"] * getVolumeOfDistributionGenderCoefficient() + calculateEdema(orders);
+  }
+
+  function calculateEdema(orders) {
+    // Note: edema = current weight - usual weight
+    return _historicalVitals["weight"][_historicalVitals["weight"].length-1] - _currentCaseStudy.startingData["usualWeight"];
+  }
+
+  function getVolumeOfDistributionGenderCoefficient() {
+    if (_currentCaseStudy.startingData["gender"] == "male") {
+      return 0.6;
+    } else {
+      return 0.5;
+    }
+  }
+
+  function calculateTimeToNextSetOfLabs() {
+    // Note: Certain things, like clotting, could alter
+    // this value. For now, we're just setting it to 6 hours.
+    return 6;
   }
 
   function arrayToHTMLList(array){
