@@ -191,25 +191,50 @@ var CRRTApp = (function() {
   }
 
   function setPageVariables() {
-    $("#currentTime").text(_currentTime);
-    $("#currentCaseStudyId").text(_currentCaseStudyId);
+    setPageTime();
+    setPageCaseStudyId();
+    setPageLabs();
+    setPageVitals();
+    setPageHistoryOfPresentIllness();
+    setPageImaging();
+    setPagePhysicalExam();
+  }
 
+  function setPageLabs(){
     for(var i = 0; i < _labs.length; i++) {
       $("#previous"+_labs[i].capitalize()).text(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-2]);
       $("#current" +_labs[i].capitalize()).text(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-1]);
     }
+  }
 
+  function setPageTime() {
+    $("#currentTime").text(_currentTime);
+  }
+
+  function setPageCaseStudyId() {
+    $("#currentCaseStudyId").text(_currentCaseStudyId);
+  }
+
+  function setPageVitals() {
     for(var i = 0; i < _vitals.length; i++) {
       $("#previous"+_vitals[i].capitalize()).text(_historicalVitals[_vitals[i]][_historicalVitals[_vitals[i]].length-2]);
       $("#current" +_vitals[i].capitalize()).text(_historicalVitals[_vitals[i]][_historicalVitals[_vitals[i]].length-1]);
     }
+  }
 
+  function setPageHistoryOfPresentIllness() {
     $("#historyOfPresentIllness #overview").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["overview"]));
     $("#historyOfPresentIllness #pastMedicalHistory").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["pastMedicalHistory"]));
     $("#historyOfPresentIllness #pastSurgicalHistory").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["pastSurgicalHistory"]));
     $("#historyOfPresentIllness #socialHistory").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["socialHistory"]));
     $("#historyOfPresentIllness #familyHistory").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["familyHistory"]));
+  }
+
+  function setPageImaging() {
     $("#imaging").html(arrayToHTMLList(_currentCaseStudy.startingData["imaging"]));
+  }
+
+  function setPagePhysicalExam() {
     for(var i = 0; i < _physicalExam.length; i++) {
       $("#physicalExam #" + _physicalExam[i]).html(_currentCaseStudy.startingData["physicalExam"][_physicalExam[i]]);
     }
@@ -242,6 +267,7 @@ var CRRTApp = (function() {
       fluid : $('input[name=fluid]:checked').val(),
       fluidDialysateValues : _dialysateValues[$('input[name=fluid]:checked').val()],
       modality : $('input[name=modality]:checked').val(),
+      anticoagulation : $('input[name=anticoagulation]:checked').val(),
       BFR : $('#bloodFlowRate').val(),
       Qr : $('#fluidFlowRate').val(),
       Qd : $('#fluidFlowRate').val(),
@@ -262,10 +288,67 @@ var CRRTApp = (function() {
       newLabs[_labs[i]] = calculateLab(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-1], orders.fluidDialysateValues[_labs[i]], effluentFlowRate, orders["timeToNextLabs"], currentWeight, volumeOfDistribution, _currentCaseStudy.startingData[_labs[i]+"ProductionRate"]);
     }
 
+    // If using citrate, re-calculate bicarbonate and calcium values. Also, add ionized calcium and final post filter calcium to results
+    if(orders.anticoagulation === 'citrate') {
+      // TODO: only hard-coding this for testin purposes. Reset when done.
+      var effluentFlowRate = 2;
+
+      var citrateFlowRateInMlPerHr = $('#citrateFlowRate').val();
+      var citrateFlowRateInLPerHr = citrateFlowRateInMlPerHr/1000;
+      var citrateBloodConcentrationConstant = 112.9;
+      var citrateBloodConcentration = citrateFlowRateInLPerHr*citrateBloodConcentrationConstant/((orders["BFR"]*60/1000)+citrateFlowRateInLPerHr);
+      var dialysateCalcium = orders["fluidDialysateValues"]["calcium"];
+      // TODO: Where does calciumInitial value come from initially, in the first set of orders? I know
+      // in the future the ionized calcium becomes the new calciumInitial - just not sure which value to use
+      // initially. Right now simply hardcoding to 1.2;
+      var calciumInitial = 1.2;
+      var citrateInitial = citrateBloodConcentration;
+      // TODO: Should caCitInitial be hard-coded?
+      var caCitInitial = 0;
+      // TODO: Should kForCaCit be hard-coded?
+      var kForCaCit = 1;
+      var caCitFinalPreFilter = (-1*(-calciumInitial-citrateInitial-kForCaCit)-Math.sqrt(Math.pow(-calciumInitial-citrateInitial-kForCaCit, 2)-4*(1)*(calciumInitial*citrateInitial)))/(2*(1))
+      var caFinalPreFilter = calciumInitial - caCitFinalPreFilter;
+      var citratFinalPreFilter = citrateInitial - caCitFinalPreFilter;
+
+      // TODO: should iCal/bicarbonate be hard-coded?
+      var iCalInitial = 1.1;
+      var bicarbonateWithCitrateInitial = 24;
+
+      var caFinalPostFilter = caFinalPreFilter*(1-(effluentFlowRate/(orders.BFR*60/1000))*((caFinalPreFilter-(dialysateCalcium/2))/caFinalPreFilter));
+      var citratFinalPostFilter = citratFinalPreFilter*(1-(effluentFlowRate/(orders.BFR*60/1000)));
+      var caCitFinalPostFilter = caCitFinalPreFilter*(1-(effluentFlowRate/(orders.BFR*60/1000)));
+      // TODO: should citrateMetabolism  be hard-coded?
+      var citrateMetabolismFactor = 1;
+      // TODO: should be hard-coded?
+      var calciumClInMmolPerL = 54;
+      var calciumClFlowRateInMlPerHr = $('#caclInfusionRate').val();
+      var calciumClFlowRateInLPerHr = calciumClFlowRateInMlPerHr/1000;
+      var iCalTotal = (caFinalPostFilter*(orders.BFR*60/1000)+calciumClInMmolPerL*calciumClFlowRateInLPerHr)/((orders.BFR*60/1000)+calciumClFlowRateInLPerHr)+caCitFinalPostFilter/2*citrateMetabolismFactor;
+      // Note: Params for calculateLab(): initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate
+      // TODO: only setting currentWeight for testing purposes
+      var currentWeight = 70;
+
+      // NOTE: Pick up here. Next step is to make sure we're calculating everything we need, saving the data, and displaying it on our labs screen. After that, need to calculate filtration fraction and pH. Then, calculate hyptonic saline. After that, test to make sure we're running all the necessary calculations. After that:
+      // 1) Add tables of (relatively) static lab data
+      // 2) Add logic to conditionally display correct lab data based on certain conditions (weight/time/etc)
+      // 3) Add messaging sub-system
+      // 4) Start working on IF/THEN statements to implement the actual case
+      var iCalFinal = calculateLab(iCalInitial, iCalTotal, effluentFlowRate, orders["timeToNextLabs"], currentWeight, currentWeight*0.6, 0);
+      var bicarbonateWithCitrateDialysate = 25+(((citratFinalPostFilter+caCitFinalPostFilter)*3)*citrateMetabolismFactor);
+      var bicarbonateWithCitrateFinal = calculateLab(bicarbonateWithCitrateInitial, bicarbonateWithCitrateDialysate, effluentFlowRate, orders["timeToNextLabs"], currentWeight, currentWeight*0.6, -10);
+    }
+
+
     for(var i=0;i<_labs.length;i++) {
       _historicalLabs[_labs[i]].push(newLabs[_labs[i]]);
     }
+    incrementTime(orders["timeToNextLabs"]);
     setPageVariables();
+  }
+
+  function incrementTime(time) {
+    _currentTime = _currentTime + time;
   }
 
   function calculateCurrentWeight(orders) {
