@@ -9,7 +9,7 @@ var CRRTApp = (function() {
   var _currentCaseStudyId;
   var _currentCaseStudy;
   var _currentTime;
-  var _labs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatine", "calcium"];
+  var _labs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatine", "calcium", "ionizedCalcium", "calciumFinalPostFilter", "filtrationFraction", "PH"];
   var _vitals = ["bloodPressure", "respiratoryRate", "temperature", "heartRate", "weight"];
   var _physicalExam = ["general", "ENT", "heart", "lungs", "abdomen", "extremities", "psych"];
   var _dialysateValues = {
@@ -24,7 +24,6 @@ var CRRTApp = (function() {
       // TODO: Joel added values of zero for creatine and BUN - need to ensure with Ben that this is correct
       "BUN": 0,
       "creatine": 0
-
     },
     "2K/0Ca": {
       "lactate": 0,
@@ -73,7 +72,11 @@ var CRRTApp = (function() {
     bicarbonate: [],
     BUN: [],
     creatine: [],
-    calcium: []
+    calcium: [],
+    ionizedCalcium: [],
+    calciumFinalPostFilter: [],
+    filtrationFraction: [],
+    PH: []
   }
 
   var _historicalVitals = {
@@ -104,6 +107,8 @@ var CRRTApp = (function() {
         "creatineProductionRate" : 3,
         "calciumStarting" : 8.5,
         "calciumProductionRate" : 0,
+        "ionizedCalciumStarting": 1.2,
+        "filtrationFractionStarting": 0,
         "gender" : "female",
         "usualWeight" : 86.8,
         "historyOfPresentIllness" : {
@@ -251,8 +256,19 @@ var CRRTApp = (function() {
     for(var i = 0; i < _vitals.length; i++) {
       _historicalVitals[_vitals[i]].push(_currentCaseStudy.startingData.vitalSigns[_vitals[i]+"Starting"]);
     }
+    // Set initial pH
+    var pH = calculatePH(_historicalLabs["bicarbonate"][_historicalLabs["bicarbonate"].length-1]);
+    _historicalLabs["PH"][0] = pH;
+
     console.log("_currentCaseStudyId : ", _currentCaseStudyId);
     console.log("_currentCaseStudy : ", _currentCaseStudy);
+  }
+
+  function calculatePH(bicarbonate) {
+    // TODO: How should pCO2 be set?
+    var pCO2 = 30.5;
+    var pH = 6.1 + Math.log(bicarbonate/(0.03*pCO2)) / Math.log(10);
+    return pH;
   }
 
   function runLabs() {
@@ -268,10 +284,10 @@ var CRRTApp = (function() {
       fluidDialysateValues : _dialysateValues[$('input[name=fluid]:checked').val()],
       modality : $('input[name=modality]:checked').val(),
       anticoagulation : $('input[name=anticoagulation]:checked').val(),
-      BFR : $('#bloodFlowRate').val(),
-      Qr : $('#fluidFlowRate').val(),
-      Qd : $('#fluidFlowRate').val(),
-      grossUF : $('#grossHourlyFluidRemoval').val(),
+      BFR : parseInt($('#bloodFlowRate').val()),
+      Qr : parseInt($('#fluidFlowRate').val()),
+      Qd : parseInt($('#fluidFlowRate').val()),
+      grossUF : parseInt($('#grossHourlyFluidRemoval').val()),
       timeToNextLabs : calculateTimeToNextSetOfLabs()
     }
     var currentWeight = calculateCurrentWeight(orders);
@@ -288,61 +304,62 @@ var CRRTApp = (function() {
       newLabs[_labs[i]] = calculateLab(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-1], orders.fluidDialysateValues[_labs[i]], effluentFlowRate, orders["timeToNextLabs"], currentWeight, volumeOfDistribution, _currentCaseStudy.startingData[_labs[i]+"ProductionRate"]);
     }
 
+    newLabs["ionizedCalcium"] = _historicalLabs['calcium'][_historicalLabs['calcium'].length-1]/8;
+    newLabs["filtrationFraction"] = calculateFiltrationFraction(orders);
+
     // If using citrate, re-calculate bicarbonate and calcium values. Also, add ionized calcium and final post filter calcium to results
     if(orders.anticoagulation === 'citrate') {
-      // TODO: only hard-coding this for testin purposes. Reset when done.
-      var effluentFlowRate = 2;
-
       var citrateFlowRateInMlPerHr = $('#citrateFlowRate').val();
       var citrateFlowRateInLPerHr = citrateFlowRateInMlPerHr/1000;
       var citrateBloodConcentrationConstant = 112.9;
       var citrateBloodConcentration = citrateFlowRateInLPerHr*citrateBloodConcentrationConstant/((orders["BFR"]*60/1000)+citrateFlowRateInLPerHr);
       var dialysateCalcium = orders["fluidDialysateValues"]["calcium"];
-      // TODO: Where does calciumInitial value come from initially, in the first set of orders? I know
-      // in the future the ionized calcium becomes the new calciumInitial - just not sure which value to use
-      // initially. Right now simply hardcoding to 1.2;
-      var calciumInitial = 1.2;
+      var ionizedCalciumInitial = newLabs["ionizedCalcium"];
+      var previousIonizedCalcium = _historicalLabs['ionizedCalcium'][_historicalLabs['ionizedCalcium'].length-1];
       var citrateInitial = citrateBloodConcentration;
-      // TODO: Should caCitInitial be hard-coded?
+      // Note: For now,  caCitInitial will be hard-coded.
       var caCitInitial = 0;
-      // TODO: Should kForCaCit be hard-coded?
       var kForCaCit = 1;
-      var caCitFinalPreFilter = (-1*(-calciumInitial-citrateInitial-kForCaCit)-Math.sqrt(Math.pow(-calciumInitial-citrateInitial-kForCaCit, 2)-4*(1)*(calciumInitial*citrateInitial)))/(2*(1))
-      var caFinalPreFilter = calciumInitial - caCitFinalPreFilter;
+      var caCitFinalPreFilter = (-1*(-ionizedCalciumInitial-citrateInitial-kForCaCit)-Math.sqrt(Math.pow(-ionizedCalciumInitial-citrateInitial-kForCaCit, 2)-4*(1)*(ionizedCalciumInitial*citrateInitial)))/(2*(1))
+      var caFinalPreFilter = ionizedCalciumInitial - caCitFinalPreFilter;
       var citratFinalPreFilter = citrateInitial - caCitFinalPreFilter;
-
-      // TODO: should iCal/bicarbonate be hard-coded?
-      var iCalInitial = 1.1;
       var bicarbonateWithCitrateInitial = 24;
-
       var caFinalPostFilter = caFinalPreFilter*(1-(effluentFlowRate/(orders.BFR*60/1000))*((caFinalPreFilter-(dialysateCalcium/2))/caFinalPreFilter));
       var citratFinalPostFilter = citratFinalPreFilter*(1-(effluentFlowRate/(orders.BFR*60/1000)));
       var caCitFinalPostFilter = caCitFinalPreFilter*(1-(effluentFlowRate/(orders.BFR*60/1000)));
-      // TODO: should citrateMetabolism  be hard-coded?
+
+      // Note: In case 2 This number will change based on the case time
+      // TODO: Add ability to change this number with time
       var citrateMetabolismFactor = 1;
-      // TODO: should be hard-coded?
       var calciumClInMmolPerL = 54;
       var calciumClFlowRateInMlPerHr = $('#caclInfusionRate').val();
       var calciumClFlowRateInLPerHr = calciumClFlowRateInMlPerHr/1000;
-      var iCalTotal = (caFinalPostFilter*(orders.BFR*60/1000)+calciumClInMmolPerL*calciumClFlowRateInLPerHr)/((orders.BFR*60/1000)+calciumClFlowRateInLPerHr)+caCitFinalPostFilter/2*citrateMetabolismFactor;
+      var ionizedCalciumTotal = (caFinalPostFilter*(orders.BFR*60/1000)+calciumClInMmolPerL*calciumClFlowRateInLPerHr)/((orders.BFR*60/1000)+calciumClFlowRateInLPerHr)+caCitFinalPostFilter/2*citrateMetabolismFactor;
       // Note: Params for calculateLab(): initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate
-      // TODO: only setting currentWeight for testing purposes
-      var currentWeight = 70;
 
-      // NOTE: Pick up here. Next step is to make sure we're calculating everything we need, saving the data, and displaying it on our labs screen. After that, need to calculate filtration fraction and pH. Then, calculate hyptonic saline. After that, test to make sure we're running all the necessary calculations. After that:
+      // NOTE: Pick up here. Next step is to make sure we're calculating everything we need, saving the data, and displaying it on our labs screen. After that, need to calculate filtration fraction and pH. Then, calculate hyptonic saline. After that, test to make sure we're running all the necessary calculations. After that (not necessarily in order):
       // 1) Add tables of (relatively) static lab data
       // 2) Add logic to conditionally display correct lab data based on certain conditions (weight/time/etc)
       // 3) Add messaging sub-system
       // 4) Start working on IF/THEN statements to implement the actual case
-      var iCalFinal = calculateLab(iCalInitial, iCalTotal, effluentFlowRate, orders["timeToNextLabs"], currentWeight, currentWeight*0.6, 0);
+      // 5) Make sure all the data we are pulling is dynamic
+      var ionizedCalciumFinal = calculateLab(ionizedCalciumInitial, ionizedCalciumTotal, effluentFlowRate, orders["timeToNextLabs"], currentWeight, currentWeight*0.6, 0);
       var bicarbonateWithCitrateDialysate = 25+(((citratFinalPostFilter+caCitFinalPostFilter)*3)*citrateMetabolismFactor);
       var bicarbonateWithCitrateFinal = calculateLab(bicarbonateWithCitrateInitial, bicarbonateWithCitrateDialysate, effluentFlowRate, orders["timeToNextLabs"], currentWeight, currentWeight*0.6, -10);
+      var calciumTotal = ((caFinalPostFilter*(orders.BFR*60/1000)+calciumClInMmolPerL*calciumClFlowRateInLPerHr)/((orders.BFR*60/1000)+calciumClFlowRateInLPerHr))*8+caCitFinalPostFilter*4;
+      newLabs["bicarbonate"] = bicarbonateWithCitrateFinal;
+      newLabs["calcium"] = calciumTotal;
+      newLabs["ionizedCalcium"] = ionizedCalciumFinal;
+      newLabs["calciumFinalPostFilter"] = caFinalPostFilter;
     }
-
+    newLabs["PH"] = calculatePH(newLabs["bicarbonate"]);
 
     for(var i=0;i<_labs.length;i++) {
       _historicalLabs[_labs[i]].push(newLabs[_labs[i]]);
     }
+    
+
+
     incrementTime(orders["timeToNextLabs"]);
     setPageVariables();
   }
@@ -357,6 +374,25 @@ var CRRTApp = (function() {
     var previousWeight = _historicalVitals['weight'][_historicalVitals['weight'].length-1];
     var currentWeight = previousWeight + (fluidIn - orders["grossUF"]/1000);
     return currentWeight;
+  }
+
+  function calculateFiltrationFraction(orders) {
+    var ff;
+    // TODO: Is hct hard-coded?
+    var hct = 0.3;
+
+    switch(orders["modality"]) {
+      case "pre-filter-cvvh":
+        ff = (orders["Qr"] + (orders["grossUF"]/1000)) / ((orders["BFR"]*60/1000) * (1-hct) + orders["Qr"])*100;
+        break;
+      case "post-filter-cvvh":
+        ff = (orders["Qr"] + (orders["grossUF"/1000])) / ((orders["BFR"]*60/1000) * (1-hct))*100;
+        break;
+      case "cvvhd":
+        ff = (orders["grossUF"/1000]) / ((orders["BFR"]*60/1000) * (1-hct))*100;
+        break;
+    }
+    return ff;
   }
 
   function calculateEffluentFlowRate(orders) {
