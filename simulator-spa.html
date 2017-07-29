@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="utf-8">
-    <title>title</title>
+    <title>Sim SPA</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
     <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
@@ -261,6 +261,11 @@
                 <td id="currentCalciumFinalPostFilter"></td>
               </tr>
               <tr>
+                <th scope="row">Calcium Final Post Filter</th>
+                <td id="previousCalciumFinalPostFilter"></td>
+                <td id="currentCalciumFinalPostFilter"></td>
+              </tr>
+              <tr>
                 <th scope="row">Filtration Fraction</th>
                 <td id="previousFiltrationFraction"></td>
                 <td id="currentFiltrationFraction"></td>
@@ -276,47 +281,6 @@
         <div class="col-md-6">
           <form id="orderForm" class="mt-3">
             <div class="row">
-              <div class="col-md-6">
-                <fieldset class="form-group">
-                  <legend id="fluidLegend">Replacement Fluid</legend>
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="fluid" id="fluid" value="0K/3Ca">
-                      0K/3Ca
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="fluid" id="fluid" value="2K/0Ca" checked>
-                      2K/0Ca
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="fluid" id="fluid" value="4K/2.5Ca">
-                      4K/2.5Ca
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="fluid" id="fluid" value="2K/0Ca/lb">
-                      2K/0Ca (low bicarbonate)
-                    </label>
-                  </div>
-                </fieldset>
-                <div class="form-group">
-                  <legend>Gross Fluid Removal (ml/Hr)</legend>
-                  <input type="grossHourlyFluidRemoval" class="form-control" id="grossHourlyFluidRemoval" value="0">
-                </div>
-                <div class="form-group">
-                  <legend>Blood Flow Rate (mL/min)</legend>
-                <input type="bloodFlowRate" class="form-control" id="bloodFlowRate" value="200">
-                </div>
-                <div class="form-group">
-                  <legend id="fluidFlowLegend">Replacement Fluid Flow Rate (L/hr)</legend>
-                  <input type="fluidFlowRate" class="form-control" id="fluidFlowRate" value="2">
-                </div>
-              </div>
               <div class="col-md-6">
                 <fieldset class="form-group">
                   <legend><span>
@@ -341,23 +305,91 @@
                   </div>
                 </fieldset>
                 <fieldset class="form-group">
+                  <legend id="fluidLegend"><strong>Replacement Fluid</strong></legend>
+
+                  <div id="replacement-fluid-values">
+                    <legend>Sodium</legend>
+                    <input class="form-control" id="replacement-fluid-sodium-value">
+                    <legend>Potassium</legend>
+                    <input class="form-control" id="replacement-fluid-potassium-value">
+                    <legend>Chloride</legend>
+                    <input class="form-control" id="replacement-fluid-chloride-value">
+                    <legend>Bicarbonate</legend>
+                    <input class="form-control" id="replacement-fluid-bicarbonate-value">
+                    <legend>Calcium</legend>
+                    <input class="form-control" id="replacement-fluid-calcium-value">
+                    <legend>Magnesium</legend>
+                    <input class="form-control" id="replacement-fluid-magnesium-value">
+                    <legend>Phosphorous</legend>
+                    <input class="form-control" id="replacement-fluid-phosphorous-value">
+                  </div>
+                  <!--
+
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="fluid" id="fluid" value="0K/3Ca">
+                      0K/3Ca
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="fluid" id="fluid" value="2K/0Ca" checked>
+                      2K/0Ca
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="fluid" id="fluid" value="4K/2.5Ca">
+                      4K/2.5Ca
+                    </label>
+                  </div>
+                  <div class="form-check">
+                    <label class="form-check-label">
+                      <input type="radio" class="form-check-input" name="fluid" id="fluid" value="2K/0Ca/lb">
+                      2K/0Ca (low bicarbonate)
+                    </label>
+                  </div>
+                  -->
+                </fieldset>
+              </div>
+              <div class="col-md-6">
+                <div class="form-group">
+                  <legend>Gross Fluid Removal (ml/Hr)</legend>
+                  <input type="grossHourlyFluidRemoval" class="form-control" id="grossHourlyFluidRemoval" value="0">
+                </div>
+                <div class="form-group">
+                  <legend>Blood Flow Rate (mL/min)</legend>
+                <input type="bloodFlowRate" class="form-control" id="bloodFlowRate" value="200">
+                </div>
+                <div class="form-group">
+                  <legend id="fluidFlowLegend">Replacement Fluid Flow Rate (L/hr)</legend>
+                  <input type="fluidFlowRate" class="form-control" id="fluidFlowRate" value="2">
+                </div>
+                <fieldset class="form-group">
                   <legend>Other Fluids/Medications</legend>
                   <label class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input">
-                    <span class="custom-control-indicator" name="otherFluidsMedications" value="saline3%"></span>
+                    <input id="other-fluids-saline" type="checkbox" class="custom-control-input other-fluids">
+                    <span class="custom-control-indicator" name="otherFluidsMedications"></span>
                     <span class="custom-control-description">Saline 3%</span>
                   </label>
                   <label class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input">
-                    <span class="custom-control-indicator" name="otherFluidsMedications" value="D5W"></span>
+                    <input id="other-fluids-D5W" type="checkbox" class="custom-control-input other-fluids">
+                    <span class="custom-control-indicator" name="otherFluidsMedications"></span>
                     <span class="custom-control-description">D5W</span>
                   </label>
                   <label class="custom-control custom-checkbox">
-                    <input type="checkbox" class="custom-control-input">
-                    <span class="custom-control-indicator" name="otherFluidsMedications" value="sodiumPhosphate"></span>
-                    <span class="custom-control-description">Sodium Phosphate</span>
+                    <input id="other-fluids-sodium-phosphate" type="checkbox" class="custom-control-input other-fluids">
+                    <span class="custom-control-indicator" name="otherFluidsMedications"></span>
+                    <span class="custom-control-description">Sodium Phosphate (15mmol and 100mL)</span>
                   </label>
                 </fieldset>
+                <div id="other-fluids-values">
+                  <legend id="other-fluids-bolus-text">Sodium Bolus (mL)</legend>
+                  <input class="form-control" id="other-fluids-bolus-value">
+                  <legend id="other-fluids-infusion-text">Sodium Continuous Infusion Rate (mL/Hr)</legend>
+                  <input class="form-control" id="other-fluids-infusion-value">
+                </div>
+
                 <fieldset class="form-group">
                   <legend>Anticoagulation</legend>
                   <div class="form-check">
