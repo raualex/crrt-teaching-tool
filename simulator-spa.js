@@ -9,6 +9,11 @@ var CRRTApp = (function() {
   var _currentCaseStudy;
   var _currentCaseStudySheet;
   var _currentTime;
+  var _dynamicLabs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "pH"];
+  var _staticLabs = ["lactate", "albumin", "WBC", "hemoglobin", "hematocrit", "plateletCount", "PC02", "granularCasts", "renalEpithelialCasts", "bloodCulture", "urineCulture"];
+
+  var _allLabs = _dynamicLabs.concat(_staticLabs);
+
   var _labs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "calciumFinalPostFilter", "filtrationFraction", "PH"];
   var _vitals = ["bloodPressure", "respiratoryRate", "temperature", "heartRate", "weight"];
   var _physicalExam = ["general", "ENT", "heart", "lungs", "abdomen", "extremities", "psych"];
@@ -77,8 +82,22 @@ var CRRTApp = (function() {
     phosphorous: [],
     calciumFinalPostFilter: [],
     filtrationFraction: [],
-    PH: []
+    pH: [],
+    lactate: [],
+    albumin: [],
+    WBC: [],
+    hemoglobin: [],
+    hematocrit: [],
+    plateletCount: [],
+    PC02: [],
+    granularCasts: [],
+    renalEpithelialCasts: [],
+    bloodCulture: [],
+    urineCulture: []
   }
+
+  var _dynamicLabs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "pH"];
+  var _staticLabs = ["lactate", "albumin", "WBC", "hemoglobin", "hematocrit", "plateletCount", "PC02", "granularCasts", "renalEpithelialCasts", "bloodCulture", "urineCulture"];
 
   var _historicalVitals = {
     bloodPressure: [],
@@ -199,13 +218,14 @@ var CRRTApp = (function() {
   function setPageVariables() {
     setPageTime();
     setPageCaseStudyId();
-    setPageLabs();
+    //setPageLabs();
     setPageVitals();
     setPageHistoryOfPresentIllness();
     setPageImaging();
     setPagePhysicalExam();
     setInputOutputTable();
     setVitalsTable();
+    setLabsTable();
   }
 
   function setInputOutputTable() {
@@ -254,9 +274,9 @@ var CRRTApp = (function() {
   }
 
   function setPageLabs(){
-    for(var i = 0; i < _labs.length; i++) {
-      $("#previous"+_labs[i].capitalize()).text(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-2]);
-      $("#current" +_labs[i].capitalize()).text(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-1]);
+    for(var i = 0; i < _allLabs.length; i++) {
+      $("#previous"+_allLabs[i].capitalize()).text(_historicalLabs[_allLabs[i]][_historicalLabs[_allLabs[i]].length-2]);
+      $("#current" +_allLabs[i].capitalize()).text(_historicalLabs[_allLabs[i]][_historicalLabs[_allLabs[i]].length-1]);
     }
   }
 
@@ -306,6 +326,60 @@ var CRRTApp = (function() {
     $("#vitals").append(table);
   }
 
+  function setLabsTable() {
+    // If table already exists, remove, so we can rebuid it.
+    if ($(".labsTable")) {
+      $(".labsTable").remove();
+    }
+
+    var table = $('<table></table>').addClass('labsTable table table-hover');
+    // Note: This number reflects the number of rows of initial data.
+    var initialValuesOffset = 2;
+    var columnOffset = 0;
+    var numLabs = _allLabs.length;
+    var numColumns = 2;
+    var currentLabSet;
+    var previousLabSet;
+
+    // Note:
+    // Start here. Need to fix labs calculation when running orders -- dynamic labs are not
+    // returning corrent values to the table (showing N/A for most cells)
+
+    if (_currentTime === 0) {
+      currentLabSet = 1;
+      previousLabSet = 0;
+    } else {
+      debugger;
+      currentLabSet = (_currentTime/6) + 1;
+      previousLabSet = currentLabSet - 1;
+    }
+
+    var head = $('<thead></thead');
+    var row = $('<tr></tr>');
+    head.append(row);
+
+    row.append($("<th></th>"));
+    for(i=currentLabSet-numColumns; i<currentLabSet; i++) {
+      //var th = $('<th></th>').text(_currentCaseStudySheet.labs.elements[i+initialValuesOffset].time);
+      var th = $('<th></th>').text(i-1);
+      row.append(th);
+    }
+    table.append(head);
+
+    for(i=0; i<numLabs; i++) {
+      var row = $('<tr></tr>');
+      var data = $('<td></td').text(_allLabs[i]);
+      row.append(data);
+
+      var previous = $('<td></td>').text(_historicalLabs[_allLabs[i]][previousLabSet]);
+      var current = $('<td></td>').text(_historicalLabs[_allLabs[i]][currentLabSet]);
+      row.append(previous);
+      row.append(current);
+      table.append(row);
+    }
+    $("#labs").append(table);
+  }
+
   function setPageTime() {
     $("#currentTime").text(_currentTime);
   }
@@ -344,12 +418,13 @@ var CRRTApp = (function() {
     _currentCaseStudyId = getParameterByName("caseId");
     _currentCaseStudy = _caseStudies[_currentCaseStudyId];
     _currentTime = 0;
-    for(var i = 0; i < _labs.length; i++) {
+    for(var i = 0; i < _allLabs.length; i++) {
       //_historicalLabs[_labs[i]].push(_currentCaseStudy.startingData[_labs[i]+"Starting"]);
-      if (!_historicalLabs[_labs[i]]) {
+      if (!_historicalLabs[_allLabs[i]]) {
         debugger;
       }
-      _historicalLabs[_labs[i]].push(_currentCaseStudySheet.labs.elements[1][_labs[i]]);
+      _historicalLabs[_allLabs[i]].push(_currentCaseStudySheet.labs.elements[0][_allLabs[i]]);
+      _historicalLabs[_allLabs[i]].push(_currentCaseStudySheet.labs.elements[1][_allLabs[i]]);
     }
     for(var i = 0; i < _vitals.length; i++) {
       //_historicalVitals[_vitals[i]].push(_currentCaseStudy.startingData.vitalSigns[_vitals[i]+"Starting"]);
@@ -357,7 +432,7 @@ var CRRTApp = (function() {
     }
     // Set initial pH
     var pH = calculatePH(_historicalLabs["bicarbonate"][_historicalLabs["bicarbonate"].length-1]);
-    _historicalLabs["PH"][0] = pH;
+    _historicalLabs["pH"][0] = pH;
 
     console.log("_currentCaseStudyId : ", _currentCaseStudyId);
     console.log("_currentCaseStudy : ", _currentCaseStudy);
@@ -431,8 +506,12 @@ var CRRTApp = (function() {
     var sodiumDialysate = orders.fluidDialysateValues["sodium"];
     var sodiumProductionRate = _currentCaseStudy.startingData["sodium"+"ProductionRate"];
 
-    for(var i = 0; i < _labs.length; i++) {
-      newLabs[_labs[i]] = calculateLab(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-1], orders.fluidDialysateValues[_labs[i]], effluentFlowRate, orders["timeToNextLabs"], startingWeight, volumeOfDistribution, _currentCaseStudy.startingData[_labs[i]+"ProductionRate"]);
+    //for(var i = 0; i < _labs.length; i++) {
+    //  newLabs[_labs[i]] = calculateLab(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-1], orders.fluidDialysateValues[_labs[i]], effluentFlowRate, orders["timeToNextLabs"], startingWeight, volumeOfDistribution, _currentCaseStudy.startingData[_labs[i]+"ProductionRate"]);
+    //}
+    
+    for(var i = 0; i < _dynamicLabs.length; i++) {
+      newLabs[_dynamicLabs[i]] = calculateLab(_historicalLabs[_dynamicLabs[i]][_historicalLabs[_dynamicLabs[i]].length-1], orders.fluidDialysateValues[_labs[i]], effluentFlowRate, orders["timeToNextLabs"], startingWeight, volumeOfDistribution, _currentCaseStudy.startingData[_labs[i]+"ProductionRate"]);
     }
 
     newLabs["ionizedCalcium"] = _historicalLabs['calcium'][_historicalLabs['calcium'].length-1]/8;
@@ -483,10 +562,10 @@ var CRRTApp = (function() {
       newLabs["ionizedCalcium"] = ionizedCalciumFinal;
       newLabs["calciumFinalPostFilter"] = caFinalPostFilter;
     }
-    newLabs["PH"] = calculatePH(newLabs["bicarbonate"]);
+    newLabs["pH"] = calculatePH(newLabs["bicarbonate"]);
 
-    for(var i=0;i<_labs.length;i++) {
-      _historicalLabs[_labs[i]].push(newLabs[_labs[i]]);
+    for(var i=0;i<_dynamicLabs.length;i++) {
+      _historicalLabs[_dynamicLabs[i]].push(newLabs[_dynamicLabs[i]]);
     }
     
     incrementTime(orders["timeToNextLabs"]);
