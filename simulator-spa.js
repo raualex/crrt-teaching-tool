@@ -624,8 +624,8 @@ var CRRTApp = (function() {
       timeToNextLabs : calculateTimeToNextSetOfLabs()
     }
 
-    var currentWeight = calculateCurrentWeight(orders);
-    _historicalVitals["weight"].push(currentWeight);
+    var startingWeight = _historicalVitals["weight"][_historicalVitals["weight"].length-1];
+
     var effluentFlowRate = calculateEffluentFlowRate(orders);
     var volumeOfDistribution = calculateVolumeOfDistribution(orders);
 
@@ -635,7 +635,7 @@ var CRRTApp = (function() {
     var sodiumProductionRate = _currentCaseStudy.startingData["sodium"+"ProductionRate"];
 
     for(var i = 0; i < _labs.length; i++) {
-      newLabs[_labs[i]] = calculateLab(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-1], orders.fluidDialysateValues[_labs[i]], effluentFlowRate, orders["timeToNextLabs"], currentWeight, volumeOfDistribution, _currentCaseStudy.startingData[_labs[i]+"ProductionRate"]);
+      newLabs[_labs[i]] = calculateLab(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-1], orders.fluidDialysateValues[_labs[i]], effluentFlowRate, orders["timeToNextLabs"], startingWeight, volumeOfDistribution, _currentCaseStudy.startingData[_labs[i]+"ProductionRate"]);
     }
 
     newLabs["ionizedCalcium"] = _historicalLabs['calcium'][_historicalLabs['calcium'].length-1]/8;
@@ -677,9 +677,9 @@ var CRRTApp = (function() {
       // 3) Add messaging sub-system
       // 4) Start working on IF/THEN statements to implement the actual case
       // 5) Make sure all the data we are pulling is dynamic
-      var ionizedCalciumFinal = calculateLab(ionizedCalciumInitial, ionizedCalciumTotal, effluentFlowRate, orders["timeToNextLabs"], currentWeight, currentWeight*0.6, 0);
+      var ionizedCalciumFinal = calculateLab(ionizedCalciumInitial, ionizedCalciumTotal, effluentFlowRate, orders["timeToNextLabs"], startingWeight, startingWeight*0.6, 0);
       var bicarbonateWithCitrateDialysate = 25+(((citratFinalPostFilter+caCitFinalPostFilter)*3)*citrateMetabolismFactor);
-      var bicarbonateWithCitrateFinal = calculateLab(bicarbonateWithCitrateInitial, bicarbonateWithCitrateDialysate, effluentFlowRate, orders["timeToNextLabs"], currentWeight, currentWeight*0.6, -10);
+      var bicarbonateWithCitrateFinal = calculateLab(bicarbonateWithCitrateInitial, bicarbonateWithCitrateDialysate, effluentFlowRate, orders["timeToNextLabs"], startingWeight, startingWeight*0.6, -10);
       var calciumTotal = ((caFinalPostFilter*(orders.BFR*60/1000)+calciumClInMmolPerL*calciumClFlowRateInLPerHr)/((orders.BFR*60/1000)+calciumClFlowRateInLPerHr))*8+caCitFinalPostFilter*4;
       newLabs["bicarbonate"] = bicarbonateWithCitrateFinal;
       newLabs["calcium"] = calciumTotal;
@@ -693,6 +693,10 @@ var CRRTApp = (function() {
     }
     
     incrementTime(orders["timeToNextLabs"]);
+
+    var newWeight = calculateNewWeight(orders);
+    _historicalVitals["weight"].push(newWeight);
+
     setPageVariables();
   }
 
@@ -700,15 +704,17 @@ var CRRTApp = (function() {
     _currentTime = _currentTime + time;
   }
 
-  function calculateCurrentWeight(orders) {
-    // TODO: We are currently ignoring fluid in for our calculations, need to ask ben how it should be calculated
-    // old weight + difference between input and output
+  function calculateNewWeight(orders) {
+    // Note:
+    // new weight = old weight + difference between input and output
     // 1L = 1Kg
     // output = ultrafiltration rate = Gross fluid removal = Gross ultrafiltration 
-    var fluidIn = 0;
-    var previousWeight = _historicalVitals['weight'][_historicalVitals['weight'].length-1];
-    var currentWeight = previousWeight + (fluidIn - orders["grossUF"]/1000);
-    return currentWeight;
+    // TODO: Not currently factoring in citrate, D5W, or 3%NS
+    var fluidInPastSixHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
+    var grossFiltrationPastSixHoursInLiters = (orders["grossUF"]/1000)*6;
+    var previousWeightInKilos = _historicalVitals['weight'][_historicalVitals['weight'].length-1];
+    var currentWeightInKilos = previousWeightInKilos + (fluidInPastSixHoursInLiters - grossFiltrationPastSixHoursInLiters);
+    return currentWeightInKilos;
   }
 
   function calculateFiltrationFraction(orders) {
