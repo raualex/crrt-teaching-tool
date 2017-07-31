@@ -1,13 +1,13 @@
-$( document  ).ready(function() {
+$( document ).ready(function() {
   CRRTApp.run();
 });
-
 
 var CRRTApp = (function() {
 
   var _caseStudies;
   var _currentCaseStudyId;
   var _currentCaseStudy;
+  var _currentCaseStudySheet;
   var _currentTime;
   var _labs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatine", "calcium", "ionizedCalcium", "calciumFinalPostFilter", "filtrationFraction", "PH"];
   var _vitals = ["bloodPressure", "respiratoryRate", "temperature", "heartRate", "weight"];
@@ -94,996 +94,6 @@ var CRRTApp = (function() {
     1: new _caseStudy({
       "intakeOutputPrior": {
         "normalSalineBolus": 8000
-      },
-      "intakeOutput": {
-        "fentanyl": [
-          5,  //1
-          5,  //2
-          5,  //3
-          5,  //4
-          5,  //5
-          5,  //6
-          5,  //7
-          5,  //8
-          5,  //9
-          5,  //10
-          5,  //11
-          5,  //12
-          5,  //13
-          5,  //14
-          5,  //15
-          5,  //16
-          5,  //17
-          5,  //18
-          5,  //19
-          5,  //20
-          5,  //21
-          5,  //22
-          5,  //23
-          5,  //24
-          5,  //25
-          5,  //26
-          5,  //27
-          5,  //28
-          5,  //29
-          5,  //30
-          5,  //31
-          5,  //32
-          5,  //33
-          5,  //34
-          5,  //35
-          5,  //36
-          5,  //37
-          5,  //38
-          5,  //39
-          5,  //40
-          5,  //41
-          5,  //42
-          5,  //43
-          5,  //44
-          5,  //45
-          5,  //46
-          5,  //47
-          5,  //48
-          5,  //49
-          5,  //50
-          5,  //51
-          5,  //52
-          5,  //53
-          5,  //54
-          5,  //55
-          5,  //56
-          5,  //57
-          5,  //58
-          5,  //59
-          5,  //60
-          5,  //61
-          5,  //62
-          5,  //63
-          5,  //64
-          5,  //65
-          5,  //66
-          5,  //67
-          5,  //68
-          5,  //69
-          5,  //70
-          5,  //71
-          5,  //72
-          5,  //73
-          5,  //74
-          5,  //75
-          5,  //76
-          5,  //77
-          5,  //78
-          5,  //79
-          5,  //80
-          5,  //81
-          5   //82
-          5,  //83
-          5,  //84
-          5,  //85
-          5,  //86
-          5,  //87
-          5,  //88
-          5,  //89
-          5   //90
-        ],
-        "vasopressin": [
-          6,  // 1
-          6,  // 2
-          6,  // 3
-          6,  // 4
-          6,  // 5
-          6,  // 6
-          6,  // 7
-          6,  // 8
-          6,  // 9
-          6,  // 10
-          6,  // 11
-          6,  // 12
-          6,  // 13
-          6,  // 14
-          6,  // 15
-          6,  // 16
-          6,  // 17
-          6,  // 18
-          6,  // 19
-          6,  // 20
-          6,  // 21
-          6,  // 22
-          6,  // 23
-          6,  // 24
-          6,  // 25
-          6,  // 26
-          6,  // 27
-          6,  // 28
-          6,  // 29
-          6,  // 30
-          6,  // 31
-          6,  // 32
-          6,  // 33
-          6,  // 34
-          6,  // 35
-          6,  // 36
-          6,  // 37
-          6,  // 38
-          6,  // 39
-          6,  // 40
-          6,  // 41
-          6,  // 42
-          6,  // 43
-          6,  // 44
-          6,  // 45
-          6,  // 46
-          6,  // 47
-          6,  // 48
-          6,  // 49
-          6,  // 50
-          6,  // 51
-          6,  // 52
-          6,  // 53
-          6,  // 54
-          6,  // 55
-          6,  // 56
-          6,  // 57
-          6,  // 58
-          6,  // 59
-          6,  // 60
-          6,  // 61
-          6,  // 62
-          6,  // 63
-          6,  // 64
-          6,  // 65
-          6,  // 66
-          6,  // 67
-          6,  // 68
-          6,  // 69
-          6,  // 70
-          6,  // 71
-          6,  // 72
-          6,  // 73
-          6,  // 74
-          6,  // 75
-          6,  // 76
-          6,  // 77
-          6,  // 78
-          6,  // 79
-          12, // 80
-          12, // 81
-          12, // 82
-          12, // 83
-          12, // 84
-          12, // 85
-          12, // 86
-          12, // 87
-          12, // 88
-          12, // 89
-          6  // 90
-        ],
-        "cisatracurium" : [
-          20,    //1
-          20,    //2
-          25,    //3
-          25,    //4
-          30,    //5
-          30,    //6
-          30,    //7
-          30,    //8
-          22,    //9
-          22,    //10
-          22,    //11
-          22,    //12
-          22,    //13
-          22,    //14
-          22,    //15
-          22,    //16
-          22,    //17
-          22,    //18
-          22,    //19
-          22,    //20
-          22,   //21
-          22,   //22
-          22,   //23
-          22,   //24
-          22,   //25
-          22,   //26
-          22,   //27
-          22,   //28
-          22,   //29
-          22,   //30
-          22,   //31
-          22,   //32
-          22,   //33
-          22,   //34
-          22,   //35
-          22,   //36
-          22,   //37
-          22,   //38
-          22,   //39
-          22,   //40
-          14,   //41
-          14,   //42
-          14,   //43
-          14,   //44
-          10,   //45
-          7,    //46
-          0,    //47
-          0,    //48
-          0,    //49
-          0,    //50
-          0,    //51
-          0,    //52
-          0,    //53
-          0,    //54
-          0,    //55
-          0,    //56
-          0,    //57
-          0,    //58
-          0,    //59
-          0,    //60
-          0,    //61
-          0,    //62
-          0,    //63
-          0,    //64
-          0,    //65
-          0,    //66
-          0,    //67
-          0,    //68
-          0,    //69
-          0,    //70
-          0,    //71
-          0,    //72
-          0,    //73
-          0,    //74
-          0,    //75
-          0,    //76
-          0,    //77
-          0,    //78
-          0,    //79
-          0,    //80
-          0,    //81
-          0,    //82
-          0,    //83
-          0,    //84
-          0,    //85
-          0,    //86
-          0,    //87
-          0,    //88
-          0,    //89
-          0     //90
-        ],
-        "midazolam" : [
-          5,    //1
-          5,    //2
-          5,    //3
-          5,    //4
-          5,    //5
-          5,    //6
-          5,    //7
-          5,    //8
-          5,    //9
-          5,    //10
-          5,    //11
-          5,    //12
-          5,    //13
-          5,    //14
-          5,    //15
-          5,    //16
-          5,    //17
-          5,    //18
-          5,    //19
-          5,    //20
-          5,    //21
-          5,    //22
-          5,    //23
-          5,    //24
-          5,    //25
-          5,    //26
-          5,    //27
-          5,    //28
-          5,    //29
-          5,    //30
-          5,    //31
-          5,    //32
-          5,    //33
-          5,    //34
-          5,    //35
-          5,    //36
-          5,    //37
-          5,    //38
-          5,    //39
-          5,    //40
-          5,    //41
-          5,    //42
-          5,    //43
-          5,    //44
-          5,    //45
-          5,    //46
-          2,    //47
-          2,    //48
-          2,    //49
-          2,    //50
-          2,    //51
-          0,    //52
-          0,    //53
-          0,    //54
-          0,    //55
-          0,    //56
-          0,    //57
-          0,    //58
-          0,    //59
-          0,    //60
-          0,    //61
-          0,    //62
-          0,    //63
-          0,    //64
-          0,    //65
-          0,    //66
-          0,    //67
-          0,    //68
-          0,    //69
-          0,    //70
-          0,    //71
-          0,    //72
-          2,    //73
-          2,    //74
-          2,    //75
-          0,    //76
-          0,    //77
-          0,    //78
-          0,    //79
-          0,    //80
-          0,    //81
-          0,    //82
-          0,    //83
-          0,    //84
-          0,    //85
-          0,    //86
-          0,    //87
-          0,    //88
-          0,    //89
-          0     //90
-        ], 
-        "norepinephrine" : [
-          350, //1
-          350,    //2
-          350,    //3
-          350,    //4
-          150,    //5
-          150,    //6
-          150,    //7
-          150,    //8
-          115,    //9
-          115,    //10
-          115,    //11
-          115,    //12
-          150,    //13
-          150,    //14
-          150,    //15
-          150,    //16
-          90,    //17
-          90,    //18
-          90,    //19
-          90,    //20
-          90,    //21
-          90,    //22
-          90,    //23
-          90,    //24
-          50,    //25
-          50,    //26
-          50,    //27
-          50,    //28
-          50,    //29
-          50,    //30
-          50,    //31
-          50,    //32
-          40,    //33
-          40,    //34
-          40,    //35
-          40,    //36
-          40,    //37
-          40,    //38
-          40,    //39
-          40,    //40
-          20,    //41
-          20,    //42
-          20,    //43
-          20,    //44
-          20,    //45
-          20,    //46
-          20,    //47
-          20,    //48
-          20,    //49
-          20,    //50
-          10,    //51
-          10,    //52
-          10,    //53
-          10,    //54
-           0,    //55
-           0,    //56
-           0,    //57
-           0,    //58
-           0,    //59
-           0,    //60
-           0,    //61
-           0,    //62
-           0,    //63
-           0,    //64
-           0,    //65
-          0   //66
-        ],
-        "normalSalineCarrier": [
-          40, //1
-          40, //2
-          40, //3
-          40, //4
-          10, //5
-          10, //6
-          10, //7
-          10, //8
-          22, //9
-          23, //10
-          21, //11
-          20, //12
-          80, //13
-          75, //14
-          77, //15
-          70, //16
-          5,  //17
-          5,  //18
-          5,  //19
-          5,  //20
-          8,  //21
-          7,  //22
-          9,  //23
-          6,  //24
-          7,  //25
-          8,  //26
-          6,  //27
-          6,  //28
-          6,  //29
-          6,  //30
-          6,  //31
-          6,  //32
-          6,  //33
-          6,  //34
-          6,  //35
-          6,  //36
-          6,  //37
-          6,  //38
-          6,  //39
-          6,  //40
-          6,  //41
-          6,  //42
-          6,  //43
-          6,  //44
-          6,  //45
-          6,  //46
-          6,  //47
-          6,  //48
-          6,  //49
-          6,  //50
-          6,  //51
-          6,  //52
-          6,  //53
-          6,  //54
-          6,  //55
-          6,  //56
-          6,  //57
-          6,  //58
-          6,  //59
-          6,  //60
-          6,  //61
-          6,  //62
-          6,  //63
-          6,  //64
-          6,  //65
-          6   //66
-        ],
-        "meropenem" : [
-          55, //1
-          17,  //2
-          38,  //3
-          30,  //4
-          30,  //5
-          57.5,  //6
-          17, //7
-          12, //8
-          45, //9
-          30, //10
-          34, //11
-          26, //12
-          30, //13
-          15, //14
-          36, //15
-          36, //16
-          36, //17
-          36, //18
-          36, //19
-          36, //20
-          36, //21
-          36, //22
-          36, //23
-          36, //24
-          36, //25
-          36, //26
-          36, //27
-          36, //28
-          36, //29
-          36, //30
-          36, //31
-          36, //32
-          36, //33
-          36, //34
-          36, //35
-          36, //36
-          36, //37
-          36, //38
-          36, //39
-          36, //40
-          36, //41
-          36, //42
-          36, //43
-          36, //44
-          36, //45
-          36, //46
-          36, //47
-          36, //48
-          36, //49
-          36, //50
-          36, //51
-          36, //52
-          36, //53
-          36, //54
-          36, //55
-          36, //56
-          36, //57
-          36, //58
-          36, //59
-          36, //60
-          36, //61
-          36, //62
-          36, //63
-          36, //64
-          36, //65
-          36  //66
-        ],
-        "levoflaxacin" : [
-          150,      //1
-          0,      //2
-          0,      //3
-          0,      //4
-          0,      //5
-          0,      //6
-          0,      //7
-          0,      //8
-          0,      //9
-          0,      //10
-          0,      //11
-          0,      //12
-          0,      //13
-          0,      //14
-          0,      //15
-          0,      //16
-          0,      //17
-          0,      //18
-          0,      //19
-          0,      //20
-          0,      //21
-          0,      //22
-          0,      //23
-          150,    //24
-          0,     //25
-          0,     //26
-          0,     //27
-          0,     //28
-          0,     //29
-          0,     //30
-          0,     //31
-          0,     //32
-          0,     //33
-          0,     //34
-          0,     //35
-          0,     //36
-          0,     //37
-          0,     //38
-          0,     //39
-          0,     //40
-          0,     //41
-          0,     //42
-          0,     //43
-          0,     //44
-          0,     //45
-          0,     //46
-          0,     //47
-          150,   //48
-                //49
-                //50
-                //51
-                //52
-                //53
-                //54
-                //55
-                //56
-                //57
-                //58
-                //59
-                //60
-                //61
-                //62
-                //63
-                //64
-                //65
-                //66
-
-          ],
-          "calciumGluconate" : [
-                //1
-                //2
-                //3
-                //4
-                //5
-                //6
-                //7
-                //8
-                //9
-                //10
-                //11
-                //12
-                //13
-                //14
-                //15
-                //16
-                //17
-                //18
-                //19
-                //20
-                //21
-                //22
-                //23
-                //24
-                //25
-                //26
-                //27
-                //28
-                //29
-                //30
-                //31
-                //32
-                //33
-                //34
-                //35
-                //36
-                //37
-                //38
-                //39
-                //40
-                //41
-                //42
-                //43
-                //44
-                //45
-                //46
-                //47
-                //48
-                //49
-                //50
-                //51
-                //52
-                //53
-                //54
-                //55
-                //56
-                //57
-                //58
-                //59
-                //60
-                //61
-                //62
-                //63
-                //64
-                //65
-                //66
-
-          ],
-          "albumin" : [
-                //1
-                //2
-                //3
-                //4
-                //5
-                //6
-                //7
-                //8
-                //9
-                //10
-                //11
-                //12
-                //13
-                //14
-                //15
-                //16
-                //17
-                //18
-                //19
-                //20
-                //21
-                //22
-                //23
-                //24
-                //25
-                //26
-                //27
-                //28
-                //29
-                //30
-                //31
-                //32
-                //33
-                //34
-                //35
-                //36
-                //37
-                //38
-                //39
-                //40
-                //41
-                //42
-                //43
-                //44
-                //45
-                //46
-                //47
-                //48
-                //49
-                //50
-                //51
-                //52
-                //53
-                //54
-                //55
-                //56
-                //57
-                //58
-                //59
-                //60
-                //61
-                //62
-                //63
-                //64
-                //65
-                //66
-
-          ],
-          "vancomycin" : [
-                //1
-                //2
-                //3
-                //4
-                //5
-                //6
-                //7
-                //8
-                //9
-                //10
-                //11
-                //12
-                //13
-                //14
-                //15
-                //16
-                //17
-                //18
-                //19
-                //20
-                //21
-                //22
-                //23
-                //24
-                //25
-                //26
-                //27
-                //28
-                //29
-                //30
-                //31
-                //32
-                //33
-                //34
-                //35
-                //36
-                //37
-                //38
-                //39
-                //40
-                //41
-                //42
-                //43
-                //44
-                //45
-                //46
-                //47
-                //48
-                //49
-                //50
-                //51
-                //52
-                //53
-                //54
-                //55
-                //56
-                //57
-                //58
-                //59
-                //60
-                //61
-                //62
-                //63
-                //64
-                //65
-                //66
-
-          ],
-          "tubeFeeds" : [
-                //1
-                //2
-                //3
-                //4
-                //5
-                //6
-                //7
-                //8
-                //9
-                //10
-                //11
-                //12
-                //13
-                //14
-                //15
-                //16
-                //17
-                //18
-                //19
-                //20
-                //21
-                //22
-                //23
-                //24
-                //25
-                //26
-                //27
-                //28
-                //29
-                //30
-                //31
-                //32
-                //33
-                //34
-                //35
-                //36
-                //37
-                //38
-                //39
-                //40
-                //41
-                //42
-                //43
-                //44
-                //45
-                //46
-                //47
-                //48
-                //49
-                //50
-                //51
-                //52
-                //53
-                //54
-                //55
-                //56
-                //57
-                //58
-                //59
-                //60
-                //61
-                //62
-                //63
-                //64
-                //65
-                //66
-
-          ],
-          "totalStatic" : [
-                //1
-                //2
-                //3
-                //4
-                //5
-                //6
-                //7
-                //8
-                //9
-                //10
-                //11
-                //12
-                //13
-                //14
-                //15
-                //16
-                //17
-                //18
-                //19
-                //20
-                //21
-                //22
-                //23
-                //24
-                //25
-                //26
-                //27
-                //28
-                //29
-                //30
-                //31
-                //32
-                //33
-                //34
-                //35
-                //36
-                //37
-                //38
-                //39
-                //40
-                //41
-                //42
-                //43
-                //44
-                //45
-                //46
-                //47
-                //48
-                //49
-                //50
-                //51
-                //52
-                //53
-                //54
-                //55
-                //56
-                //57
-                //58
-                //59
-                //60
-                //61
-                //62
-                //63
-                //64
-                //65
-                //66
-
-          ]
-
-
       },
       "labValues": {
           "sodium": [145,145],
@@ -1211,7 +221,7 @@ var CRRTApp = (function() {
             ""  // 14
           ],
           "granularCasts": [
-            10-20/LPF, // initial 1
+            "10-20/LPF", // initial 1
             "", // initial 2
             "", // 1
             "", // 2
@@ -1229,7 +239,7 @@ var CRRTApp = (function() {
             ""  // 14
           ],
           "renalEpithelialCasts": [
-            5-10/HPF, // initial 1
+            "5-10/HPF", // initial 1
             "", // initial 2
             "", // 1
             "", // 2
@@ -1356,11 +366,14 @@ var CRRTApp = (function() {
 
   function initialize() {
     console.log("CRRTApp : initialize()");
-    initializeCaseStudy();
-    setPageVariables();
-    handleClicks();
-    initializeOrderForm();
-    preventOrderFormDefault();
+    var d1 = $.Deferred();
+    initializeCaseStudy(d1);
+    $.when(d1).done(function() {
+      setPageVariables();
+      handleClicks();
+      initializeOrderForm();
+      preventOrderFormDefault();
+    })
   }
 
   function initializeOrderForm() {
@@ -1397,6 +410,53 @@ var CRRTApp = (function() {
     setPageHistoryOfPresentIllness();
     setPageImaging();
     setPagePhysicalExam();
+    setInputOutputTable();
+    setVitalsTable();
+  }
+
+  function setInputOutputTable() {
+    // If table already exists, remove, so we can rebuid it.
+    if ($(".inputOutputTable")) {
+      $(".inputOutputTable").remove();
+    }
+
+    var table = $('<table></table>').addClass('inputOutputTable table table-hover');
+    var numFluidInputs = _currentCaseStudySheet.inputOutput.elements[0]["numInputs"];
+    // Note: This number reflects the number of rows of initial data.
+    var initialValuesOffset = 2;
+    // Note: These data are being pulled from a Google spreadsheet. This number represents the number of 
+    // "extra" columns (notes, ID, etc.) before we get to the "real" data. Keep in mind, this number could change
+    // if the spreadsheet is modified and additional columns are added before the columns storing our data.
+    var columnOffset = 3;
+    var numColumns;
+    if (_currentTime === 0) {
+      numColumns = 2;
+    } else {
+      numColumns = 6;
+    }
+
+    var head = $('<thead></thead');
+    var row = $('<tr></tr>');
+    head.append(row);
+
+    row.append($("<th></th>"));
+    for(i=_currentTime-numColumns; i<_currentTime; i++) {
+      var th = $('<th></th>').text(_currentCaseStudySheet.inputOutput.elements[i+initialValuesOffset].time);
+      row.append(th);
+    }
+    table.append(head);
+
+    for(i=0; i<numFluidInputs; i++) {
+      var row = $('<tr></tr>');
+      var data = $('<td></td').text(_currentCaseStudySheet.inputOutput.columnNames[i+columnOffset]);
+      row.append(data);
+      for(j=_currentTime-numColumns; j<_currentTime; j++) {
+        var data = $('<td></td>').text(_currentCaseStudySheet.inputOutput.elements[j+initialValuesOffset][_currentCaseStudySheet.inputOutput.columnNames[i+columnOffset]]);
+        row.append(data);
+      }
+      table.append(row);
+    }
+    $("#inputOutput").append(table);
   }
 
   function setPageLabs(){
@@ -1404,6 +464,52 @@ var CRRTApp = (function() {
       $("#previous"+_labs[i].capitalize()).text(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-2]);
       $("#current" +_labs[i].capitalize()).text(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-1]);
     }
+  }
+
+  function setVitalsTable() {
+    // If table already exists, remove, so we can rebuid it.
+    if ($(".vitalsTable")) {
+      $(".vitalsTable").remove();
+    }
+
+    var initialValuesOffset = 1;
+    var table = $('<table></table>').addClass('vitalsTable table table-hover');
+    // Note: This number reflects the number of rows of initial data.
+    var initialValuesOffset = 1;
+    // Note: These data are being pulled from a Google spreadsheet. This number represents the number of 
+    // "extra" columns (notes, ID, etc.) before we get to the "real" data. Keep in mind, this number could change
+    // if the spreadsheet is modified and additional columns are added before the columns storing our data.
+    var columnOffset = 3;
+    var numVitals = _currentCaseStudySheet.vitals.elements[0]["numInputs"];
+    var numColumns;
+    if (_currentTime === 0) {
+      numColumns = 1;
+    } else {
+      numColumns = 6;
+    }
+
+    var head = $('<thead></thead');
+    var row = $('<tr></tr>');
+    head.append(row);
+
+    row.append($("<th></th>"));
+    for(i=_currentTime-numColumns; i<_currentTime; i++) {
+      var th = $('<th></th>').text(_currentCaseStudySheet.vitals.elements[i+initialValuesOffset].time);
+      row.append(th);
+    }
+    table.append(head);
+
+    for(i=0; i<numVitals; i++) {
+      var row = $('<tr></tr>');
+      var data = $('<td></td').text(_currentCaseStudySheet.vitals.columnNames[i+columnOffset]);
+      row.append(data);
+      for(j=_currentTime-numColumns; j<_currentTime; j++) {
+        var data = $('<td></td>').text(_currentCaseStudySheet.vitals.elements[j+initialValuesOffset][_currentCaseStudySheet.vitals.columnNames[i+columnOffset]]);
+        row.append(data);
+      }
+      table.append(row);
+    }
+    $("#vitals").append(table);
   }
 
   function setPageTime() {
@@ -1439,7 +545,7 @@ var CRRTApp = (function() {
     }
   }
 
-  function initializeCaseStudy() {
+  function initializeCaseStudy(promise) {
     console.log("CRRTApp : initializeCaseStudy()");
     _currentCaseStudyId = getParameterByName("caseId");
     _currentCaseStudy = _caseStudies[_currentCaseStudyId];
@@ -1454,8 +560,28 @@ var CRRTApp = (function() {
     var pH = calculatePH(_historicalLabs["bicarbonate"][_historicalLabs["bicarbonate"].length-1]);
     _historicalLabs["PH"][0] = pH;
 
+    initializeSpreadsheet(promise);
+
     console.log("_currentCaseStudyId : ", _currentCaseStudyId);
     console.log("_currentCaseStudy : ", _currentCaseStudy);
+  }
+
+  function initializeSpreadsheet(promise) {
+    var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/1KAn-DDLp-R1Msdju4w8fqhgPSd9n5ShfCIzJ7DFtkJQ/pubhtml';
+
+    // Check and see if case study is in local storage. If it is, no need to hit the Google API
+   // if (localStorage.getItem(publicSpreadsheetUrl)) {
+   //   _currentCaseStudySheet = localStorage.getItem(publicSpreadsheetUrl);
+   //   promise.resolve();
+   //   return;
+   // }
+
+    Tabletop.init( { key: publicSpreadsheetUrl, callback: showInfo, simpleSheet: false } );
+    function showInfo(data, tabletop) {
+      _currentCaseStudySheet = data;
+      promise.resolve();
+      console.log(data);
+    }
   }
 
   function calculatePH(bicarbonate) {
@@ -1777,4 +903,4 @@ var CRRTApp = (function() {
       initialize();
     }
   }
-
+})();

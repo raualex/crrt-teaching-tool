@@ -8,6 +8,7 @@
     <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.1/tabletop.min.js'></script>
     <script src="simulator-spa.js"></script>
   </head>
   <body>
@@ -49,56 +50,18 @@
             </div>
           </div>
         </div>
-
-        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#vitalSignsModal">Vital Signs</button>
-        <!-- Vital Signs Modal -->
-        <div class="modal fade" id="vitalSignsModal" tabindex="-1" role="dialog" aria-labelledby="vitalSignsModalLabel" aria-hidden="true">
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#inputOutputModal">Input/Output</button>
+        <!-- Input / Output Modal -->
+        <div class="modal fade" id="inputOutputModal" tabindex="-1" role="dialog" aria-labelledby="inputOutputModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
               <div class="modal-header">
-                <h5 class="modal-title" id="vitalSignsModalLabel">Vital Signs</h5>
+                <h5 class="modal-title" id="inputOutputModalLabel">Input/Output</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
-              <div class="modal-body">
-                <table class="table table-hover">
-                  <thead>
-                    <tr>
-                      <th></th>
-                      <th>Previous</th>
-                      <th>Current</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row">Blood Pressure</th>
-                      <td id="previousBloodPressure"></td>
-                      <td id="currentBloodPressure"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Respiratory Rate</th>
-                      <td id="previousRespiratoryRate"></td>
-                      <td id="currentRespiratoryRate"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Temperature</th>
-                      <td id="previousTemperature"></td>
-                      <td id="currentTemperature"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Heart Rate</th>
-                      <td id="previousHeartRate"></td>
-                      <td id="currentHeartRate"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Weight</th>
-                      <td id="previousWeight"></td>
-                      <td id="currentWeight"></td>
-                    </tr>
-                    <tr>
-                  </tbody>
-                </table>
+              <div id="inputOutput"class="modal-body">
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -106,6 +69,27 @@
             </div>
           </div>
         </div>
+
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#vitalsModal">Vitals</button>
+        <!-- Vitals Modal -->
+        <div class="modal fade" id="vitalsModal" tabindex="-1" role="dialog" aria-labelledby="vitalsModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="vitalsModalLabel">Vitals</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div id="vitals"class="modal-body">
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#medicationsModal">Medications</button>
         <!-- Medications Modal -->
         <div class="modal fade" id="medicationsModal" tabindex="-1" role="dialog" aria-labelledby="medicationsModalLabel" aria-hidden="true">
