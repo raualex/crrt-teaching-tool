@@ -9,7 +9,7 @@ var CRRTApp = (function() {
   var _currentCaseStudy;
   var _currentCaseStudySheet;
   var _currentTime;
-  var _labs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatine", "calcium", "ionizedCalcium", "calciumFinalPostFilter", "filtrationFraction", "PH"];
+  var _labs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "calciumFinalPostFilter", "filtrationFraction", "PH"];
   var _vitals = ["bloodPressure", "respiratoryRate", "temperature", "heartRate", "weight"];
   var _physicalExam = ["general", "ENT", "heart", "lungs", "abdomen", "extremities", "psych"];
   var _dialysateValues = {
@@ -22,7 +22,7 @@ var CRRTApp = (function() {
       "magnesium": 1,
       "chloride": 109,
       "BUN": 0,
-      "creatine": 0
+      "creatinine": 0
     },
     "2K/0Ca": {
       "lactate": 0,
@@ -33,7 +33,7 @@ var CRRTApp = (function() {
       "magnesium": 1.5,
       "chloride": 108.5,
       "BUN": 0,
-      "creatine": 0
+      "creatinine": 0
     },
     "4K/2.5Ca": {
       "lactate": 0,
@@ -44,7 +44,7 @@ var CRRTApp = (function() {
       "magnesium": 1.5,
       "chloride": 113,
       "BUN": 0,
-      "creatine": 0
+      "creatinine": 0
     },
     "2K/0Ca/lb": {
       "lactate": 0,
@@ -55,7 +55,7 @@ var CRRTApp = (function() {
       "magnesium": 1.5,
       "chloride": 108.5,
       "BUN": 0,
-      "creatine": 0
+      "creatinine": 0
     }
   }
 
@@ -70,9 +70,11 @@ var CRRTApp = (function() {
     chloride: [],
     bicarbonate: [],
     BUN: [],
-    creatine: [],
+    creatinine: [],
     calcium: [],
     ionizedCalcium: [],
+    magnesium: [],
+    phosphorous: [],
     calciumFinalPostFilter: [],
     filtrationFraction: [],
     PH: []
@@ -92,283 +94,75 @@ var CRRTApp = (function() {
 
   _caseStudies = {
     1: new _caseStudy({
-      "intakeOutputPrior": {
-        "normalSalineBolus": 8000
-      },
-      "labValues": {
-          "sodium": [145,145],
-          "potassium": [3.6,3.4],
-          "chloride": [123,116],
-          "bicarbonate": [14,13],
-          "BUN": [44,48],
-          "creatine": [2.27,3.12],
-          "calcium": [7.7,7.6],
-          "ionizedCalcium": [0.95,0.97],
-          "magnesium": [1.7,1.9],
-          "phosphorous": [4.4,6.3],
-          "lactate": [3.3,6.1],
-          "albumin": [3.1],
-          "WBC": [
-            29.3, // initial 1
-            29.3, // initial 2
-            34.5, // 1
-            37.1, // 2
-            29.2, // 3
-            29.4, // 4
-            30.4, // 5
-            25.2, // 6
-            22.8, // 7
-            20.3, // 8
-            17,   // 9
-            14.5, // 10
-            22.8, // 11
-            20.3, // 12
-            17,   // 13
-            14.5  // 14
-          ],
-          "hemoglobin": [
-            9.4,  // initial 1
-            9.4,  // initial 2
-            10.7, // 1
-            10.7, // 2
-            9,    // 3
-            8.3,  // 4
-            8.4,  // 5
-            8.7,  // 6
-            8.5,  // 7
-            8.9,  // 8
-            8.9,  // 9
-            8.8,  // 10
-            8.5,  // 11
-            8.9,  // 12
-            8.9,  // 13
-            8.8   // 14
-          ],
-          "hematocrit": [
-            28.5, // initial 1
-            28.5, // initial 2
-            32.9, // 1
-            32.3, // 2
-            26.7, // 3
-            24.8, // 4
-            25.8, // 5
-            27,   // 6
-            25.7, // 7
-            27.1, // 8
-            26.9, // 9
-            27,   // 10
-            25.7, // 11
-            27.1, // 12
-            26.9, // 13
-            27    // 14
-          ],
-          "plateletCount": [
-            48, // initial 1
-            48, // initial 2
-            41, // 1
-            36, // 2
-            26, // 3
-            21, // 4
-            19, // 5
-            19, // 6
-            24, // 7
-            30, // 8
-            45, // 9
-            55, // 10
-            24, // 11
-            30, // 12
-            45, // 13
-            55  // 14
-          ],
-          "pH":[
-            7.07,  // initial 1
-            7.2183 // initial 2
-          ],
-          "PCO2": [
-            46, // initial 1
-            33, // initial 2
-            34, // 1
-            33, // 2
-            35, // 3
-            33, // 4
-            32, // 5
-            34, // 6
-            35, // 7
-            40, // 8
-            38, // 9
-            40, // 10
-            35, // 11 NOTE: value was not given, used 4 previous values
-            40, // 12 NOTE: value was not given, used 4 previous values
-            38, // 13 NOTE: value was not given, used 4 previous values
-            40  // 14 NOTE: value was not given, used 4 previous values
-          ],
-          "urineMicroscopy":[
-            "", // initial 1
-            "", // initial 2
-            "", // 1
-            "", // 2
-            "", // 3
-            "", // 4
-            "", // 5
-            "", // 6
-            "", // 7
-            "", // 8
-            "", // 9
-            "", // 10
-            "", // 11
-            "", // 12
-            "", // 13
-            ""  // 14
-          ],
-          "granularCasts": [
-            "10-20/LPF", // initial 1
-            "", // initial 2
-            "", // 1
-            "", // 2
-            "", // 3
-            "", // 4
-            "", // 5
-            "", // 6
-            "", // 7
-            "", // 8
-            "", // 9
-            "", // 10
-            "", // 11
-            "", // 12
-            "", // 13
-            ""  // 14
-          ],
-          "renalEpithelialCasts": [
-            "5-10/HPF", // initial 1
-            "", // initial 2
-            "", // 1
-            "", // 2
-            "", // 3
-            "", // 4
-            "", // 5
-            "", // 6
-            "", // 7
-            "", // 8
-            "", // 9
-            "", // 10
-            "", // 11
-            "", // 12
-            "", // 13
-            ""  // 14
-          ],
-          "bloodCulture": [
-            "No Growth", // initial 1
-            "",          // initial 2
-            "No Growth", // 1
-            "",          // 2
-            "No Growth", // 3
-            "",          // 4
-            "",          // 5
-            "",          // 6
-            "",          // 7
-            "",          // 8
-            "",          // 9
-            "",          // 10
-            "",          // 11
-            "",          // 12
-            "",          // 13
-            "Positive for S. Pneumonia"  // 14
-          ],
-          "urineCulture":[
-            "No Growth", // initial 1
-            "",          // initial 2
-            "",          // 1
-            "No Growth", // 2
-            "",          // 3
-            "",          // 4
-            "",          // 5
-            "",          // 6
-            "",          // 7
-            "",          // 8
-            "",          // 9
-            "",          // 10
-            "",          // 11
-            "",          // 12
-            "",          // 13
-            ""           // 14
-          ]
-        },
-        "sodiumStarting": 130,
-        "sodiumProductionRate": 0,
-        "potassiumStarting" : 4.3,
-        "potassiumProductionRate" : 4.3,
-        "chlorideStarting" : 85,
-        "chlorideProductionRate" : 0,
-        "bicarbonateStarting" : 10,
-        "bicarbonateProductionRate" : -20,
-        "BUNStarting" : 120,
-        "BUNProductionRate" : 40,
-        "creatineStarting" : 5,
-        "creatineProductionRate" : 3,
-        "calciumStarting" : 8.5,
-        "calciumProductionRate" : 0,
-        "ionizedCalciumStarting": 1.2,
-        "filtrationFractionStarting": 0,
-        "gender" : "female",
-        "usualWeight" : 86.8,
-        "historyOfPresentIllness" : {
-          "overview" : [
-            "A 72 year old lady with a history of HTN, COPD, and DM is brought to the Emergency Department by ambulance after being found unresponsive by family members.",
-            "Upon arrival she is found to be in acute hypoxemic respiratory failure requiring emergent intubation.",
-            "Initial vital signs are temperature 39.1 C, HR 128, BP 78/53, RR 30.",
-            "A chest x-ray shows a left lower lobe infiltrate.",
-            "The patient is started on norepinephrine.",
-            "Creatinine is 2.7, up from 0.86 one month earlier.",
-            "Her urine output in the first 4 hours is 44 cc’s of urine.",
-            "The decision is made to start the patient on continuous renal replacement therapy. A 15 cm Mahurkar in the right internal jugular vein."
-          ],
-          "pastMedicalHistory" : [
-            "Hypertension",
-            "Insulin-dependent Diabetes Mellitus Type 2",
-            "COPD",
-            "CKD 3 (baseline creatinine 1.4 - 1.6)"
-          ],
-          "pastSurgicalHistory": [
-            "Abdominal hernia repair"
-          ],
-          "socialHistory": [
-            "Current smoker, 1/2 pack per day. Has been smoking since age 17.",
-            "No alcohol or other drug use.",
-            "Retired from work in retail."
-          ],
-          "familyHistory": [
-            "No family history of renal disease."
-          ]
-        },
-        "vitalSigns": {
-          "bloodPressureStarting": "78/53",
-          "respiratoryRateStarting": 30,
-          "temperatureStarting": 39.1,
-          "heartRateStarting": 128,
-          "weightStarting": 102
-        },
-        "medications": [],
-        "imaging" : [
-          "1500: Chest X-ray",
-          "The chest x-ray shows a left lower lobe consolidation consistent with infection. The remainder of the lungs are clear."
+      "sodiumProductionRate": 0,
+      "potassiumProductionRate" : 4.3,
+      "chlorideProductionRate" : 0,
+      "bicarbonateProductionRate" : -20,
+      "BUNProductionRate" : 40,
+      "creatinineProductionRate" : 3,
+      "calciumProductionRate" : 0,
+      "filtrationFractionStarting": 0,
+      "gender" : "female",
+      "usualWeight" : 86.8,
+      "historyOfPresentIllness" : {
+        "overview" : [
+          "A 72 year old lady with a history of HTN, COPD, and DM is brought to the Emergency Department by ambulance after being found unresponsive by family members.",
+          "Upon arrival she is found to be in acute hypoxemic respiratory failure requiring emergent intubation.",
+          "Initial vital signs are temperature 39.1 C, HR 128, BP 78/53, RR 30.",
+          "A chest x-ray shows a left lower lobe infiltrate.",
+          "The patient is started on norepinephrine.",
+          "Creatinine is 2.7, up from 0.86 one month earlier.",
+          "Her urine output in the first 4 hours is 44 cc’s of urine.",
+          "The decision is made to start the patient on continuous renal replacement therapy. A 15 cm Mahurkar in the right internal jugular vein."
         ],
-        "physicalExam": {
-          "general": "Appears acutely ill",
-          "ENT": "Intubated",
-          "heart": "Tachycardic, no murmurs, rubs, or gallops",
-          "lungs": "Decreased breath sounds in the left lower lobe",
-          "abdomen": "Non-distended",
-          "extremities": "No edema",
-          "psych": "Intubated and sedated"
-        }
-      })
+        "pastMedicalHistory" : [
+          "Hypertension",
+          "Insulin-dependent Diabetes Mellitus Type 2",
+          "COPD",
+          "CKD 3 (baseline creatinine 1.4 - 1.6)"
+        ],
+        "pastSurgicalHistory": [
+          "Abdominal hernia repair"
+        ],
+        "socialHistory": [
+          "Current smoker, 1/2 pack per day. Has been smoking since age 17.",
+          "No alcohol or other drug use.",
+          "Retired from work in retail."
+        ],
+        "familyHistory": [
+          "No family history of renal disease."
+        ]
+      },
+      "vitalSigns": {
+        "bloodPressureStarting": "78/53",
+        "respiratoryRateStarting": 30,
+        "temperatureStarting": 39.1,
+        "heartRateStarting": 128,
+        "weightStarting": 102
+      },
+      "medications": [],
+      "imaging" : [
+        "1500: Chest X-ray",
+        "The chest x-ray shows a left lower lobe consolidation consistent with infection. The remainder of the lungs are clear."
+      ],
+      "physicalExam": {
+        "general": "Appears acutely ill",
+        "ENT": "Intubated",
+        "heart": "Tachycardic, no murmurs, rubs, or gallops",
+        "lungs": "Decreased breath sounds in the left lower lobe",
+        "abdomen": "Non-distended",
+        "extremities": "No edema",
+        "psych": "Intubated and sedated"
+      }
+    })
   }
 
   function initialize() {
     console.log("CRRTApp : initialize()");
     var d1 = $.Deferred();
-    initializeCaseStudy(d1);
+    initializeSpreadsheet(d1);
     $.when(d1).done(function() {
+      initializeCaseStudy();
       setPageVariables();
       handleClicks();
       initializeOrderForm();
@@ -545,22 +339,25 @@ var CRRTApp = (function() {
     }
   }
 
-  function initializeCaseStudy(promise) {
+  function initializeCaseStudy() {
     console.log("CRRTApp : initializeCaseStudy()");
     _currentCaseStudyId = getParameterByName("caseId");
     _currentCaseStudy = _caseStudies[_currentCaseStudyId];
     _currentTime = 0;
     for(var i = 0; i < _labs.length; i++) {
-      _historicalLabs[_labs[i]].push(_currentCaseStudy.startingData[_labs[i]+"Starting"]);
+      //_historicalLabs[_labs[i]].push(_currentCaseStudy.startingData[_labs[i]+"Starting"]);
+      if (!_historicalLabs[_labs[i]]) {
+        debugger;
+      }
+      _historicalLabs[_labs[i]].push(_currentCaseStudySheet.labs.elements[1][_labs[i]]);
     }
     for(var i = 0; i < _vitals.length; i++) {
-      _historicalVitals[_vitals[i]].push(_currentCaseStudy.startingData.vitalSigns[_vitals[i]+"Starting"]);
+      //_historicalVitals[_vitals[i]].push(_currentCaseStudy.startingData.vitalSigns[_vitals[i]+"Starting"]);
+      _historicalVitals[_vitals[i]].push(_currentCaseStudySheet.vitals.elements[0][_vitals[i]]);
     }
     // Set initial pH
     var pH = calculatePH(_historicalLabs["bicarbonate"][_historicalLabs["bicarbonate"].length-1]);
     _historicalLabs["PH"][0] = pH;
-
-    initializeSpreadsheet(promise);
 
     console.log("_currentCaseStudyId : ", _currentCaseStudyId);
     console.log("_currentCaseStudy : ", _currentCaseStudy);
@@ -613,7 +410,7 @@ var CRRTApp = (function() {
         "magnesium": parseInt($("#replacement-fluid-magnesium-value").val()),
         "phosphorous": parseInt($("#replacement-fluid-phosphorous-value").val()),
         "BUN": 0,
-        "creatine": 0
+        "creatinine": 0
       },
       modality : $('input[name=modality]:checked').val(),
       anticoagulation : $('input[name=anticoagulation]:checked').val(),
@@ -720,6 +517,7 @@ var CRRTApp = (function() {
   function calculateFiltrationFraction(orders) {
     var ff;
     // TODO: Is hct hard-coded?
+    // hct is a percent-value. Take this value from labs (divide by 100)
     var hct = 0.3;
 
     switch(orders["modality"]) {

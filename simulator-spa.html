@@ -20,7 +20,155 @@
     <div class="container">
       <h1>Case: <span id="currentCaseStudyId"></span></h1>
       <h2>Time: <span id="currentTime"></span></h2>
+
       <div class="btn-group mt-3" role="group" aria-label="Basic example">
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#ordersModal">Orders</button>
+        <!-- Input / Output Modal -->
+        <div class="modal fade" id="ordersModal" tabindex="-1" role="dialog" aria-labelledby="ordersModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="ordersModalLabel">Orders</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div id="orders"class="modal-body">
+                <form id="orderForm" class="mt-3">
+                  <div class="row">
+                    <div class="col-md-6">
+                      <fieldset class="form-group">
+                        <legend><span>
+                            Modality</span><span><i class="fa fa-question-circle-o ml-1"></i></span></legend>
+                        <div class="form-check">
+                          <label class="form-check-label">
+                            <input type="radio" class="form-check-input modality-input" name="modality" id="pre-filter-cvvh" value="pre-filter-cvvh" checked>
+                            Pre-filter CVVH
+                          </label>
+                        </div>
+                        <div class="form-check">
+                          <label class="form-check-label">
+                            <input type="radio" class="form-check-input modality-input" name="modality" id="post-filter-cvvh" value="post-filter-cvvh">
+                            Post-filter CVVH
+                          </label>
+                        </div>
+                        <div class="form-check">
+                          <label class="form-check-label">
+                            <input type="radio" class="form-check-input modality-input" name="modality" id="cvvhd" value="cvvhd">
+                            CVVHD
+                          </label>
+                        </div>
+                      </fieldset>
+                      <fieldset class="form-group">
+                        <legend id="fluidLegend"><strong>Replacement Fluid</strong></legend>
+
+                        <div id="replacement-fluid-values">
+                          <legend>Sodium</legend>
+                          <input class="form-control" id="replacement-fluid-sodium-value">
+                          <legend>Potassium</legend>
+                          <input class="form-control" id="replacement-fluid-potassium-value">
+                          <legend>Chloride</legend>
+                          <input class="form-control" id="replacement-fluid-chloride-value">
+                          <legend>Bicarbonate</legend>
+                          <input class="form-control" id="replacement-fluid-bicarbonate-value">
+                          <legend>Calcium</legend>
+                          <input class="form-control" id="replacement-fluid-calcium-value">
+                          <legend>Magnesium</legend>
+                          <input class="form-control" id="replacement-fluid-magnesium-value">
+                          <legend>Phosphorous</legend>
+                          <input class="form-control" id="replacement-fluid-phosphorous-value">
+                        </div>
+                      </fieldset>
+                    </div>
+                    <div class="col-md-6">
+                      <div class="form-group">
+                        <legend>Gross Fluid Removal (ml/Hr)</legend>
+                        <input type="grossHourlyFluidRemoval" class="form-control" id="grossHourlyFluidRemoval" value="0">
+                      </div>
+                      <div class="form-group">
+                        <legend>Blood Flow Rate (mL/min)</legend>
+                      <input type="bloodFlowRate" class="form-control" id="bloodFlowRate" value="200">
+                      </div>
+                      <div class="form-group">
+                        <legend id="fluidFlowLegend">Replacement Fluid Flow Rate (L/hr)</legend>
+                        <input type="fluidFlowRate" class="form-control" id="fluidFlowRate" value="2">
+                      </div>
+                      <fieldset class="form-group">
+                        <legend>Other Fluids/Medications</legend>
+                        <label class="custom-control custom-checkbox">
+                          <input id="other-fluids-saline" type="checkbox" class="custom-control-input other-fluids">
+                          <span class="custom-control-indicator" name="otherFluidsMedications"></span>
+                          <span class="custom-control-description">Saline 3%</span>
+                        </label>
+                        <label class="custom-control custom-checkbox">
+                          <input id="other-fluids-D5W" type="checkbox" class="custom-control-input other-fluids">
+                          <span class="custom-control-indicator" name="otherFluidsMedications"></span>
+                          <span class="custom-control-description">D5W</span>
+                        </label>
+                        <label class="custom-control custom-checkbox">
+                          <input id="other-fluids-sodium-phosphate" type="checkbox" class="custom-control-input other-fluids">
+                          <span class="custom-control-indicator" name="otherFluidsMedications"></span>
+                          <span class="custom-control-description">Sodium Phosphate (15mmol and 100mL)</span>
+                        </label>
+                      </fieldset>
+                      <div id="other-fluids-values">
+                        <legend id="other-fluids-bolus-text">Sodium Bolus (mL)</legend>
+                        <input class="form-control" id="other-fluids-bolus-value">
+                        <legend id="other-fluids-infusion-text">Sodium Continuous Infusion Rate (mL/Hr)</legend>
+                        <input class="form-control" id="other-fluids-infusion-value">
+                      </div>
+
+                      <fieldset class="form-group">
+                        <legend>Anticoagulation</legend>
+                        <div class="form-check">
+                          <label class="form-check-label">
+                            <input type="radio" class="form-check-input anticoagulation-input" name="anticoagulation" id="anticoagulation1" value="none">
+                            None
+                          </label>
+                        </div>
+                        <div class="form-check">
+                          <label class="form-check-label">
+                            <input type="radio" class="form-check-input anticoagulation-input" name="anticoagulation" id="anticoagulation2" value="citrate" checked>
+                            Citrate
+                          </label>
+                        </div>
+                        <!-- Note: hiding heparin for now, based on conversation with Ben on 7/27/17. Ben said he wants
+                          students using citrate for anticoagulation instead of Heparin -->
+
+                          <!--
+                        <div class="form-check">
+                          <label class="form-check-label">
+                            <input type="radio" class="form-check-input anticoagulation-input" name="anticoagulation" id="anticoagulation3" value="heparin">
+                            Heparin
+                          </label>
+                        </div>
+                        -->
+
+                      </fieldset>
+                      <div class="form-group citrate">
+                        <legend id="citrateFlowLegend">Citrate Flow Rate (mL/hr)</legend>
+                        <input type="citrateFlowRate" class="form-control" id="citrateFlowRate" placeholder="0" value="300">
+                      </div>
+                      <div class="form-group citrate">
+                        <legend id="citrateFlowLegend">CaCl Infusion Rate (mL/hr)</legend>
+                        <input type="caclInfusionRate" class="form-control" id="caclInfusionRate" placeholder="0" value="100">
+                      </div>
+                      <div class="form-group heparin">
+                        <legend id="heparinAmountLegend">Heparin amount (units/hr)</legend>
+                        <input type="heparinAmount" class="form-control" id="heparinAmount" placeholder="0">
+                      </div>
+                    </div>
+                  </div>
+                  <button id="runLabs" class="btn btn-primary">Go</button>
+                </form>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#historyOfPresentIllnessModal">History of Present Illness</button>
         <!-- History of Present Illness Modal -->
         <div class="modal fade" id="historyOfPresentIllnessModal" tabindex="-1" role="dialog" aria-labelledby="historyOfPresentIllnessModalLabel" aria-hidden="true">
@@ -82,6 +230,96 @@
                 </button>
               </div>
               <div id="vitals"class="modal-body">
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#labsModal">Laboratory Data</button>
+        <!-- Labs Modal -->
+        <div class="modal fade" id="labsModal" tabindex="-1" role="dialog" aria-labelledby="labsModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="labsModalLabel">Laboratory Data</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div id="labs"class="modal-body">
+                <table class="table table-hover mt-4">
+                  <thead>
+                    <tr>
+                      <th></th>
+                      <th>Previous</th>
+                      <th>Current</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th scope="row">Sodium</th>
+                      <td id="previousSodium"></td>
+                      <td id="currentSodium"></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Potassium</th>
+                      <td id="previousPotassium"></td>
+                      <td id="currentPotassium"></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Chloride</th>
+                      <td id="previousChloride"></td>
+                      <td id="currentChloride"></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Bicarbonate</th>
+                      <td id="previousBicarbonate"></td>
+                      <td id="currentBicarbonate"></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">BUN</th>
+                      <td id="previousBUN"></td>
+                      <td id="currentBUN"></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Creatinine</th>
+                      <td id="previousCreatinine"></td>
+                      <td id="currentCreatinine"></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Calcium</th>
+                      <td id="previousCalcium"></td>
+                      <td id="currentCalcium"></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Ionized Calcium</th>
+                      <td id="previousIonizedCalcium"></td>
+                      <td id="currentIonizedCalcium"></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Calcium Final Post Filter</th>
+                      <td id="previousCalciumFinalPostFilter"></td>
+                      <td id="currentCalciumFinalPostFilter"></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Calcium Final Post Filter</th>
+                      <td id="previousCalciumFinalPostFilter"></td>
+                      <td id="currentCalciumFinalPostFilter"></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Filtration Fraction</th>
+                      <td id="previousFiltrationFraction"></td>
+                      <td id="currentFiltrationFraction"></td>
+                    </tr>
+                    <tr>
+                      <th scope="row">pH</th>
+                      <td id="previousPH"></td>
+                      <td id="currentPH"></td>
+                    </tr>
+                  </tbody>
+                </table>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -189,234 +427,18 @@
         </div>
       </div>
       <div class="row">
-        <div class="col-md-6">
-          <table class="table table-hover mt-4">
-            <thead>
-              <tr>
-                <th></th>
-                <th>Previous</th>
-                <th>Current</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <th scope="row">Sodium</th>
-                <td id="previousSodium"></td>
-                <td id="currentSodium"></td>
-              </tr>
-              <tr>
-                <th scope="row">Potassium</th>
-                <td id="previousPotassium"></td>
-                <td id="currentPotassium"></td>
-              </tr>
-              <tr>
-                <th scope="row">Chloride</th>
-                <td id="previousChloride"></td>
-                <td id="currentChloride"></td>
-              </tr>
-              <tr>
-                <th scope="row">Bicarbonate</th>
-                <td id="previousBicarbonate"></td>
-                <td id="currentBicarbonate"></td>
-              </tr>
-              <tr>
-                <th scope="row">BUN</th>
-                <td id="previousBUN"></td>
-                <td id="currentBUN"></td>
-              </tr>
-              <tr>
-                <th scope="row">Creatine</th>
-                <td id="previousCreatine"></td>
-                <td id="currentCreatine"></td>
-              </tr>
-              <tr>
-                <th scope="row">Calcium</th>
-                <td id="previousCalcium"></td>
-                <td id="currentCalcium"></td>
-              </tr>
-              <tr>
-                <th scope="row">Ionized Calcium</th>
-                <td id="previousIonizedCalcium"></td>
-                <td id="currentIonizedCalcium"></td>
-              </tr>
-              <tr>
-                <th scope="row">Calcium Final Post Filter</th>
-                <td id="previousCalciumFinalPostFilter"></td>
-                <td id="currentCalciumFinalPostFilter"></td>
-              </tr>
-              <tr>
-                <th scope="row">Calcium Final Post Filter</th>
-                <td id="previousCalciumFinalPostFilter"></td>
-                <td id="currentCalciumFinalPostFilter"></td>
-              </tr>
-              <tr>
-                <th scope="row">Filtration Fraction</th>
-                <td id="previousFiltrationFraction"></td>
-                <td id="currentFiltrationFraction"></td>
-              </tr>
-              <tr>
-                <th scope="row">pH</th>
-                <td id="previousPH"></td>
-                <td id="currentPH"></td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <div class="col-md-6">
-          <form id="orderForm" class="mt-3">
-            <div class="row">
-              <div class="col-md-6">
-                <fieldset class="form-group">
-                  <legend><span>
-                      Modality</span><span><i class="fa fa-question-circle-o ml-1"></i></span></legend>
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input modality-input" name="modality" id="pre-filter-cvvh" value="pre-filter-cvvh" checked>
-                      Pre-filter CVVH
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input modality-input" name="modality" id="post-filter-cvvh" value="post-filter-cvvh">
-                      Post-filter CVVH
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input modality-input" name="modality" id="cvvhd" value="cvvhd">
-                      CVVHD
-                    </label>
-                  </div>
-                </fieldset>
-                <fieldset class="form-group">
-                  <legend id="fluidLegend"><strong>Replacement Fluid</strong></legend>
-
-                  <div id="replacement-fluid-values">
-                    <legend>Sodium</legend>
-                    <input class="form-control" id="replacement-fluid-sodium-value">
-                    <legend>Potassium</legend>
-                    <input class="form-control" id="replacement-fluid-potassium-value">
-                    <legend>Chloride</legend>
-                    <input class="form-control" id="replacement-fluid-chloride-value">
-                    <legend>Bicarbonate</legend>
-                    <input class="form-control" id="replacement-fluid-bicarbonate-value">
-                    <legend>Calcium</legend>
-                    <input class="form-control" id="replacement-fluid-calcium-value">
-                    <legend>Magnesium</legend>
-                    <input class="form-control" id="replacement-fluid-magnesium-value">
-                    <legend>Phosphorous</legend>
-                    <input class="form-control" id="replacement-fluid-phosphorous-value">
-                  </div>
-                  <!--
-
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="fluid" id="fluid" value="0K/3Ca">
-                      0K/3Ca
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="fluid" id="fluid" value="2K/0Ca" checked>
-                      2K/0Ca
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="fluid" id="fluid" value="4K/2.5Ca">
-                      4K/2.5Ca
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input" name="fluid" id="fluid" value="2K/0Ca/lb">
-                      2K/0Ca (low bicarbonate)
-                    </label>
-                  </div>
-                  -->
-                </fieldset>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group">
-                  <legend>Gross Fluid Removal (ml/Hr)</legend>
-                  <input type="grossHourlyFluidRemoval" class="form-control" id="grossHourlyFluidRemoval" value="0">
-                </div>
-                <div class="form-group">
-                  <legend>Blood Flow Rate (mL/min)</legend>
-                <input type="bloodFlowRate" class="form-control" id="bloodFlowRate" value="200">
-                </div>
-                <div class="form-group">
-                  <legend id="fluidFlowLegend">Replacement Fluid Flow Rate (L/hr)</legend>
-                  <input type="fluidFlowRate" class="form-control" id="fluidFlowRate" value="2">
-                </div>
-                <fieldset class="form-group">
-                  <legend>Other Fluids/Medications</legend>
-                  <label class="custom-control custom-checkbox">
-                    <input id="other-fluids-saline" type="checkbox" class="custom-control-input other-fluids">
-                    <span class="custom-control-indicator" name="otherFluidsMedications"></span>
-                    <span class="custom-control-description">Saline 3%</span>
-                  </label>
-                  <label class="custom-control custom-checkbox">
-                    <input id="other-fluids-D5W" type="checkbox" class="custom-control-input other-fluids">
-                    <span class="custom-control-indicator" name="otherFluidsMedications"></span>
-                    <span class="custom-control-description">D5W</span>
-                  </label>
-                  <label class="custom-control custom-checkbox">
-                    <input id="other-fluids-sodium-phosphate" type="checkbox" class="custom-control-input other-fluids">
-                    <span class="custom-control-indicator" name="otherFluidsMedications"></span>
-                    <span class="custom-control-description">Sodium Phosphate (15mmol and 100mL)</span>
-                  </label>
-                </fieldset>
-                <div id="other-fluids-values">
-                  <legend id="other-fluids-bolus-text">Sodium Bolus (mL)</legend>
-                  <input class="form-control" id="other-fluids-bolus-value">
-                  <legend id="other-fluids-infusion-text">Sodium Continuous Infusion Rate (mL/Hr)</legend>
-                  <input class="form-control" id="other-fluids-infusion-value">
-                </div>
-
-                <fieldset class="form-group">
-                  <legend>Anticoagulation</legend>
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input anticoagulation-input" name="anticoagulation" id="anticoagulation1" value="none">
-                      None
-                    </label>
-                  </div>
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input anticoagulation-input" name="anticoagulation" id="anticoagulation2" value="citrate" checked>
-                      Citrate
-                    </label>
-                  </div>
-                  <!-- Note: hiding heparin for now, based on conversation with Ben on 7/27/17. Ben said he wants
-                    students using citrate for anticoagulation instead of Heparin -->
-
-                    <!--
-                  <div class="form-check">
-                    <label class="form-check-label">
-                      <input type="radio" class="form-check-input anticoagulation-input" name="anticoagulation" id="anticoagulation3" value="heparin">
-                      Heparin
-                    </label>
-                  </div>
-                  -->
-
-                </fieldset>
-                <div class="form-group citrate">
-                  <legend id="citrateFlowLegend">Citrate Flow Rate (mL/hr)</legend>
-                  <input type="citrateFlowRate" class="form-control" id="citrateFlowRate" placeholder="0" value="300">
-                </div>
-                <div class="form-group citrate">
-                  <legend id="citrateFlowLegend">CaCl Infusion Rate (mL/hr)</legend>
-                  <input type="caclInfusionRate" class="form-control" id="caclInfusionRate" placeholder="0" value="100">
-                </div>
-                <div class="form-group heparin">
-                  <legend id="heparinAmountLegend">Heparin amount (units/hr)</legend>
-                  <input type="heparinAmount" class="form-control" id="heparinAmount" placeholder="0">
-                </div>
-              </div>
+        <div class="col-md-12">
+          <div class="card mt-3">
+            <div class="card-block">
+              <p class="card-text">
+                <span>
+                  <samp>
+                    Welcome to the CRRT education application simulator! Important information about the current case will appear in this box.
+                  </samp>
+                </span>
+              </p>
             </div>
-            <button id="runLabs" class="btn btn-primary">Go</button>
-          </form>
+          </div>
         </div>
       </div>
     </div>
