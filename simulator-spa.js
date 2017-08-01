@@ -25,7 +25,6 @@ var CRRTApp = (function() {
   var _currentCaseStudyId;
   var _currentCaseStudy;
   var _currentCaseStudySheet;
-  var _currentTime;
   var _dynamicLabs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "pH"];
   var _staticLabs = ["lactate", "albumin", "WBC", "hemoglobin", "hematocrit", "plateletCount", "PC02", "granularCasts", "renalEpithelialCasts", "bloodCulture", "urineCulture"];
 
@@ -157,7 +156,6 @@ var CRRTApp = (function() {
       setPageVariables();
       handleClicks();
       initializeOrderForm();
-      preventOrderFormDefault();
     })
   }
 
@@ -227,17 +225,11 @@ var CRRTApp = (function() {
         "fluidFlowRate": "The CRRT machine cannot deliver fluid above 8 L/hr",
         "gross-hourly-fluid-removal": "The CRRT machine will not accept ultrafiltration rates above 1,000 mL/hour"
       },
-      // Make sure the form is submitted to the destination defined
-      // in the "action" attribute of the form when valid
       submitHandler: function(form) {
-        debugger;
         runLabs();
       }
     });
-
   }
-
-
 
   function setAnticoagulationFormElements(anticoagulationValue) {
     switch(anticoagulationValue) {
@@ -283,7 +275,7 @@ var CRRTApp = (function() {
     // if the spreadsheet is modified and additional columns are added before the columns storing our data.
     var columnOffset = 3;
     var numColumns;
-    if (_currentTime === 0) {
+    if (window._currentTime === 0) {
       numColumns = 2;
     } else {
       numColumns = 6;
@@ -294,7 +286,7 @@ var CRRTApp = (function() {
     head.append(row);
 
     row.append($("<th></th>"));
-    for(i=_currentTime-numColumns; i<_currentTime; i++) {
+    for(i=window._currentTime-numColumns; i<window._currentTime; i++) {
       var th = $('<th></th>').text(window._currentCaseStudySheet.inputOutput.elements[i+initialValuesOffset].time);
       row.append(th);
     }
@@ -304,7 +296,7 @@ var CRRTApp = (function() {
       var row = $('<tr></tr>');
       var data = $('<td></td').text(window._currentCaseStudySheet.inputOutput.columnNames[i+columnOffset]);
       row.append(data);
-      for(j=_currentTime-numColumns; j<_currentTime; j++) {
+      for(j=window._currentTime-numColumns; j<window._currentTime; j++) {
         var data = $('<td></td>').text(window._currentCaseStudySheet.inputOutput.elements[j+initialValuesOffset][window._currentCaseStudySheet.inputOutput.columnNames[i+columnOffset]]);
         row.append(data);
       }
@@ -336,7 +328,7 @@ var CRRTApp = (function() {
     var columnOffset = 3;
     var numVitals = _currentCaseStudySheet.vitals.elements[0]["numInputs"];
     var numColumns;
-    if (_currentTime === 0) {
+    if (window._currentTime === 0) {
       numColumns = 1;
     } else {
       numColumns = 6;
@@ -347,7 +339,7 @@ var CRRTApp = (function() {
     head.append(row);
 
     row.append($("<th></th>"));
-    for(i=_currentTime-numColumns; i<_currentTime; i++) {
+    for(i=window._currentTime-numColumns; i<window._currentTime; i++) {
       var th = $('<th></th>').text(_currentCaseStudySheet.vitals.elements[i+initialValuesOffset].time);
       row.append(th);
     }
@@ -357,7 +349,7 @@ var CRRTApp = (function() {
       var row = $('<tr></tr>');
       var data = $('<td></td').text(_currentCaseStudySheet.vitals.columnNames[i+columnOffset]);
       row.append(data);
-      for(j=_currentTime-numColumns; j<_currentTime; j++) {
+      for(j=window._currentTime-numColumns; j<window._currentTime; j++) {
         var data = $('<td></td>').text(_currentCaseStudySheet.vitals.elements[j+initialValuesOffset][_currentCaseStudySheet.vitals.columnNames[i+columnOffset]]);
         row.append(data);
       }
@@ -385,11 +377,11 @@ var CRRTApp = (function() {
     // Start here. Need to fix labs calculation when running orders -- dynamic labs are not
     // returning correct values to the table (showing N/A for most cells)
 
-    if (_currentTime === 0) {
+    if (window._currentTime === 0) {
       currentLabSet = 1;
       previousLabSet = 0;
     } else {
-      currentLabSet = (_currentTime/6) + 1;
+      currentLabSet = (window._currentTime/6) + 1;
       previousLabSet = currentLabSet - 1;
     }
 
@@ -420,7 +412,7 @@ var CRRTApp = (function() {
   }
 
   function setPageTime() {
-    $("#currentTime").text(_currentTime);
+    $("#currentTime").text(window._currentTime);
   }
 
   function setPageCaseStudyId() {
@@ -456,7 +448,7 @@ var CRRTApp = (function() {
     console.log("CRRTApp : initializeCaseStudy()");
     _currentCaseStudyId = getParameterByName("caseId");
     _currentCaseStudy = _caseStudies[_currentCaseStudyId];
-    _currentTime = 0;
+    window._currentTime = 0;
     for(var i = 0; i < _allLabs.length; i++) {
       //_historicalLabs[_labs[i]].push(_currentCaseStudy.startingData[_labs[i]+"Starting"]);
       if (!_historicalLabs[_allLabs[i]]) {
@@ -510,6 +502,7 @@ var CRRTApp = (function() {
   }
 
   function runLabs() {
+    // TODO: It would be nice to clean up this function as it is starting to get unwieldy.
     console.log("runLabs()");
     // Note: For some reason we need to reset the _currentCaseStudy -- not sure why this is. Apparently there
     // is a weird quirck of JavaScript I don't fully understand.
@@ -641,7 +634,7 @@ var CRRTApp = (function() {
   }
 
   function incrementTime(time) {
-    _currentTime = _currentTime + time;
+    window._currentTime = window._currentTime + time;
   }
 
   function calculateNewWeight(orders) {
@@ -650,7 +643,7 @@ var CRRTApp = (function() {
     // 1L = 1Kg
     // output = ultrafiltration rate = Gross fluid removal = Gross ultrafiltration 
     // TODO: Not currently factoring in citrate, D5W, or 3%NS
-    var fluidInPastSixHoursInLiters = (parseFloat(window._currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
+    var fluidInPastSixHoursInLiters = (parseFloat(window._currentCaseStudySheet.inputOutput.elements[window._currentTime+1]["previousSixHourTotal"]))/1000;
 
     var totalHoursOfFiltration = 6;
     // Note: If BFR is <= 150, grossUF for two hours is 0, therefore, we only have 4 hours of filtration. (This *might* only be for case study #1)
@@ -659,7 +652,7 @@ var CRRTApp = (function() {
     }
 
     var grossFiltrationPastSixHoursInLiters = (orders["grossUF"]/1000)*totalHoursOfFiltration;
-    var previousWeightInKilos = _historicalVitals['weight'][_historicalVitals['weight'].length-1];
+    var previousWeightInKilos = parseFloat(_historicalVitals['weight'][_historicalVitals['weight'].length-1]);
     var currentWeightInKilos = previousWeightInKilos + (fluidInPastSixHoursInLiters - grossFiltrationPastSixHoursInLiters);
     return currentWeightInKilos;
   }
@@ -756,6 +749,12 @@ var CRRTApp = (function() {
   }
 
   function postLabChecks() {
+    checkSodium();
+    checkPotassium();
+    checkChloride();
+    checkBicarbonate();
+    checkCalcium();
+    checkMagnesium();
 
   }
 
@@ -788,7 +787,6 @@ var CRRTApp = (function() {
     if (_currentOrders["BFR"] >= 200 && _currentOrders["BFR"] <= 300) {
       console.log("checkBloodFlowRate() : within bounds ", _currentOrders["BFR"]);
       totalPoints = totalPoints + 5;
-      _points.bloodFlowRateInRange.push(5);
     }
 
     if (_currentOrders["BFR"] <= 150) {
@@ -810,35 +808,203 @@ var CRRTApp = (function() {
   }
 
   function checkSodium() {
+    var totalPoints = 0;
+    var currentSodium = _historicalLabs["sodium"][_historicalLabs["sodium"].length-1];
+    if (currentSodium >= 135 && currentSodium <= 145) {
+      console.log("checkSodium() : within bounds ", currentSodium);
+      totalPoints = totalPoints + 5;
+    }
 
+    if (currentSodium < 135) {
+      var msg = "The primary team is concerned about the patient's hyponatremia. Please modify the CRRT prescription.";
+      _messages.push(msg);
+      showMessage(msg);
+      totalPoints = totalPoints - 100;
+    }
+
+    if (currentSodium > 145) {
+      var msg = "The primary team is concerned about the patient's hypernatremia. Please modify the CRRT prescription.";
+      _messages.push(msg);
+      showMessage(msg);
+      totalPoints = totalPoints - 100;
+    }
+
+    _points.sodiumInRange.push(totalPoints);
+    return;
   }
 
   function checkPotassium() {
+    var totalPoints = 0;
+    var currentPotassium = _historicalLabs["potassium"][_historicalLabs["potassium"].length-1];
+      
+    if (currentPotassium > 3.3) {
+      console.log("checkPotassium() : within bounds ", currentPotassium);
+      totalPoints = totalPoints + 5;
+    }
+
+    if (currentPotassium < 3.3) {
+      var msg = "The primary team is concerned about the patient’s hypokalemia.  Please modify the CRRT prescription";
+      _messages.push(msg);
+      showMessage(msg);
+      totalPoints = totalPoints - 100;
+    }
+
+    _points.potassiumInRange.push(totalPoints);
+    return;
 
   }
 
   function checkChloride() {
-
+    // No errors associated with Chloride in Case #1
   }
 
   function checkBicarbonate() {
+    checkPH();
+  }
 
+  function checkPH() {
+    var totalPoints = 0;
+    var currentPH = _historicalLabs["pH"][_historicalLabs["pH"].length-1];
+      
+    if (currentPH <= 7.2 && currentPH >= 7.45) {
+      console.log("checkPH() : within bounds ", currentPH);
+      totalPoints = totalPoints + 10;
+    }
+
+    if (currentPH < 7.0) {
+      var msg = "The patient has died of overwhelming sepsis and acidosis.";
+      _messages.push(msg);
+      showMessage(msg);
+      totalPoints = totalPoints - 1000;
+    }
+
+    if (currentPH < 7.2 && currentPH > 7.0) {
+      var msg = "The primary team called with concerns regarding the patient's ongoing acidosis.  Please modify the CRRT prescription.";
+      _messages.push(msg);
+      showMessage(msg);
+      totalPoints = totalPoints - 100;
+    }
+
+    if (currentPH > 7.45 && currentPH < 7.5) {
+      var msg = "The primary team called with concerns regarding the patient's new alkalosis.  Please modify the CRRT prescription.”";
+      _messages.push(msg);
+      showMessage(msg);
+      totalPoints = totalPoints - 50;
+    }
+
+    if (currentPH > 7.5) {
+      var msg = "The ICU team is very concerned about the patient’s alkalosis.  They will be calling your attending if it is not addressed immediately.";
+      _messages.push(msg);
+      showMessage(msg);
+      totalPoints = totalPoints - 100;
+    }
+
+    _points.pHInRange.push(totalPoints);
+    return;
   }
 
   function checkCalcium() {
+    // TODO: Doc from Ben says "NOT when using citrate" -- do we not run these checks if we are using citrate?
+    var totalPoints = 0;
+    var currentCalcium = _historicalLabs["calcium"][_historicalLabs["calcium"].length-1];
 
+    if (currentCalcium >= 7.5 && currentCalcium <= 10) {
+      console.log("checkCalcium() : within bounds ", currentCalcium);
+      totalPoints = totalPoints + 5;
+    }
+
+    if (currentCalcium < 7.5) {
+      var msg = "The primary team is concerned about the patient's ongoing hypocalcemia. Please modify the prescription.";
+      _messages.push(msg);
+      showMessage(msg);
+      totalPoints = totalPoints - 1000;
+    }
+
+    if (currentCalcium > 10 && currentCalcium <= 12) {
+      var msg = "The primary team is concerned about the patient's new hypercalcemia. Please modify the prescription.";
+      _messages.push(msg);
+      showMessage(msg);
+      totalPoints = totalPoints - 100;
+    }
+
+    if (currentCalcium > 12) {
+      var msg = "The ICU team is very concerned about the patient's hypercalcemia. They will be calling your attending if it is not addressed immediately.";
+      _messages.push(msg);
+      showMessage(msg);
+      totalPoints = totalPoints - 200;
+    }
+
+    _points.calciumInRange.push(totalPoints);
+    return;
   }
 
   function checkMagnesium() {
+    var totalPoints = 0;
+    var currentMagnesium = _historicalLabs["magnesium"][_historicalLabs["magnesium"].length-1];
+      
+    if (currentMagnesium > 1.4) {
+      console.log("checkMagnesium() : within bounds ", currentMagnesium);
+      totalPoints = totalPoints + 5;
+    }
+
+    if (currentMagnesium < 1.4) {
+      var msg = "The primary team is concerned about the patient's hypomagnesemia, and would like you to address it";
+      _messages.push(msg);
+      showMessage(msg);
+      totalPoints = totalPoints - 50;
+    }
+
+    _points.magnesiumInRange.push(totalPoints);
+    return;
 
   }
   
   function checkPhosphorous() {
+    // TODO: There will be a scheduled sodium phosphorous replacement option for when the sodium goes low, TBD
+    //  - Adding sodium phosphate (15 mmol/dL) will modify the phosphate “[X] Dialysate” as follows:
+    //      - (465/t(which will equal 6)) (Effluent Flow Rate *10)
+    //      - This should reset after each cycle, so it’s not automatically given every 6 hours
+    var totalPoints = 0;
+    var currentPhosphorous = _historicalLabs["phosphorous"][_historicalLabs["phosphorous"].length-1];
+      
+    if (currentPhosphorous > 2.0) {
+      console.log("checkPhosphorous() : within bounds (> 2.0)", currentPhosphorous);
+      totalPoints = totalPoints + 10;
+    }
+
+    if (currentPhosphorous < 1) {
+      console.log("checkPhosphorous() : < 1 ", currentPhosphorous);
+      var msg = "The primary team is concerned about the patient's hypophosphatemia, and would like you to address the problem";
+      _messages.push(msg);
+      showMessage(msg);
+      totalPoints = totalPoints - 100;
+    }
+
+    _points.phosphorousInRange.push(totalPoints);
+    return;
 
   }
 
   function checkGrossUltrafiltration() {
+    var totalPoints = 0;
+    var fluidInPastSixHoursInLiters = (parseFloat(window._currentCaseStudySheet.inputOutput.elements[window._currentTime+1]["previousSixHourTotal"]))/1000;
+    var totalHoursOfFiltration = 6;
+    // Note: If BFR is <= 150, grossUF for two hours is 0, therefore, we only have 4 hours of filtration. (This *might* only be for case study #1)
+    if (_currentOrders["BFR"] <= 150) {
+      totalHoursOfFiltration = 4;
+    }
+    var grossFiltrationPastSixHoursInLiters = (orders["grossUF"]/1000)*totalHoursOfFiltration;
+    var filtrationRate = (grossFiltrationPastSixHoursInLiters - fluidInPastSixHoursInLiters)*1000;
 
+    if (filtrationRate > 200) {
+      console.log("checkGrossUltrafiltration() : > 200 ", filtrationRate);
+      var msg = "The patient's pressor requirements are increasing, and the team is concerned that the high rate of ultrafiltration is causing hemodynamic instability. Please reduce your ultrafiltration rate";
+      _messages.push(msg);
+      showMessage(msg);
+      totalPoints = totalPoints - 100;
+    }
+
+    _points.grossUltrafiltrationInRange.push(totalPoints);
   }
 
   function checkFilterClotting() {
@@ -917,12 +1083,6 @@ var CRRTApp = (function() {
 
   }
 
-  function preventOrderFormDefault() {
-    $("#orderForm").submit(function(e){
-      return false;
-    });
-  }
-
   function showCitrateFormOptions() {
     console.log("showCitrateFormOptions()");
     $(".citrate").show();
@@ -942,6 +1102,8 @@ var CRRTApp = (function() {
   function showMessage(msg) {
     var messageContainer = $('<p></p>').addClass('card-text');
     var message = $('<samp></samp>').text(msg);
+    var time = $('<p></p>').addClass('case-time').text("Case time: " + window._currentTime);
+    messageContainer.append(time)
     messageContainer.append(message);
     $("#message-box").prepend("<hr>");
     $("#message-box").prepend(messageContainer);
