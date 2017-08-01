@@ -13,7 +13,7 @@ var CRRTApp = (function() {
     magnesiumInRange: [],
     phosphourousInRange: [],
     grossUltrafiltrationInRange: [],
-    filterFractionInRange: [],
+    filtrationFractionInRange: [],
     doseInRange: []
   };
 
@@ -171,7 +171,9 @@ var CRRTApp = (function() {
   }
 
   function setOrderFormValidation() {
-    $("form[name='orderForm']").validate({
+    $("form[name='orderForm']").submit(function(e) {
+      e.preventDefault();
+    }).validate({
       // Specify validation rules
       rules: {
         // The key name on the left side is the name attribute
@@ -225,6 +227,7 @@ var CRRTApp = (function() {
         "gross-hourly-fluid-removal": "The CRRT machine will not accept ultrafiltration rates above 1,000 mL/hour"
       },
       submitHandler: function(form) {
+        $('#ordersModal').modal('hide');
         runLabs();
       }
     });
@@ -406,20 +409,20 @@ var CRRTApp = (function() {
   }
 
   function setPageHistoryOfPresentIllness() {
-    $("#historyOfPresentIllness #overview").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["overview"]));
-    $("#historyOfPresentIllness #pastMedicalHistory").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["pastMedicalHistory"]));
-    $("#historyOfPresentIllness #pastSurgicalHistory").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["pastSurgicalHistory"]));
-    $("#historyOfPresentIllness #socialHistory").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["socialHistory"]));
-    $("#historyOfPresentIllness #familyHistory").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["familyHistory"]));
+    $("#historyOfPresentIllness #overview").html(arrayToHTMLList(window._currentCaseStudy.startingData["historyOfPresentIllness"]["overview"]));
+    $("#historyOfPresentIllness #pastMedicalHistory").html(arrayToHTMLList(window._currentCaseStudy.startingData["historyOfPresentIllness"]["pastMedicalHistory"]));
+    $("#historyOfPresentIllness #pastSurgicalHistory").html(arrayToHTMLList(window._currentCaseStudy.startingData["historyOfPresentIllness"]["pastSurgicalHistory"]));
+    $("#historyOfPresentIllness #socialHistory").html(arrayToHTMLList(window._currentCaseStudy.startingData["historyOfPresentIllness"]["socialHistory"]));
+    $("#historyOfPresentIllness #familyHistory").html(arrayToHTMLList(window._currentCaseStudy.startingData["historyOfPresentIllness"]["familyHistory"]));
   }
 
   function setPageImaging() {
-    $("#imaging").html(arrayToHTMLList(_currentCaseStudy.startingData["imaging"]));
+    $("#imaging").html(arrayToHTMLList(window._currentCaseStudy.startingData["imaging"]));
   }
 
   function setPagePhysicalExam() {
     for(var i = 0; i < _physicalExam.length; i++) {
-      $("#physicalExam #" + _physicalExam[i]).html(_currentCaseStudy.startingData["physicalExam"][_physicalExam[i]]);
+      $("#physicalExam #" + _physicalExam[i]).html(window._currentCaseStudy.startingData["physicalExam"][_physicalExam[i]]);
     }
   }
 
@@ -427,6 +430,7 @@ var CRRTApp = (function() {
     console.log("CRRTApp : initializeCaseStudy()");
     _currentCaseStudyId = getParameterByName("caseId");
     _currentCaseStudy = _caseStudies[_currentCaseStudyId];
+    window._currentCaseStudy = _currentCaseStudy;
     window._currentTime = 0;
     for(var i = 0; i < _allLabs.length; i++) {
       //_historicalLabs[_labs[i]].push(_currentCaseStudy.startingData[_labs[i]+"Starting"]);
@@ -481,15 +485,115 @@ var CRRTApp = (function() {
   }
 
   function runLabs() {
-    // TODO: It would be nice to clean up this function as it is starting to get unwieldy.
-    console.log("runLabs()");
-    // Note: For some reason we need to reset the _currentCaseStudy -- not sure why this is. Apparently there
-    // is a weird quirck of JavaScript I don't fully understand.
+    // Note: For some reason we need to reset the _currentCaseStudy -- not sure why this is. Apparently there // is a weird quirck of JavaScript I don't fully understand.
     _currentCaseStudyId = getParameterByName("caseId");
     _currentCaseStudy = _caseStudies[_currentCaseStudyId];
     var newLabs = {};
     var dialysate = {}; 
+    var orders = getOrders();
+    // TODO: Remove occurences of orders and change to _currentOrders. This will eliminate the need
+    // to ping-pong this variable around the program.
+    _currentOrders = orders;
+    var startingWeight = _historicalVitals["weight"][_historicalVitals["weight"].length-1];
+    var effluentFlowRate = calculateEffluentFlowRate(orders);
+    var volumeOfDistribution = calculateVolumeOfDistribution(orders);
+    var productionRates = window._currentCaseStudySheet.productionRates.elements;
 
+    newLabs["filtrationFraction"] = orders.filtrationFraction;
+    preLabChecks();
+    for(var i = 0; i < productionRates.length; i++) {
+
+      console.log("calculateLab(): component: ", productionRates[i].component);
+      console.log("calculateLab(): initialValue: ", _historicalLabs[productionRates[i].component][_historicalLabs[productionRates[i].component].length-1]);
+      console.log("calculateLab(): dialysate: ", orders.fluidDialysateValues[productionRates[i].component]);
+      console.log("calculateLab(): effluentFlowRate: ", effluentFlowRate);
+      console.log("calculateLab(): time: ", orders["timeToNextLabs"]);
+      console.log("calculateLab(): weight: ", startingWeight);
+      console.log("calculateLab(): volumeOfDistribution: ", volumeOfDistribution);
+      console.log("calculateLab(): productionRate: ", productionRates[i].productionRate);
+
+      // Note: Params for calculateLab(): initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate
+      newLabs[productionRates[i].component] = calculateLab(
+          parseFloat(_historicalLabs[productionRates[i].component][_historicalLabs[productionRates[i].component].length-1]),
+          parseFloat(orders.fluidDialysateValues[productionRates[i].component]),
+          parseFloat(effluentFlowRate),
+          parseFloat(orders["timeToNextLabs"]),
+          parseFloat(startingWeight),
+          parseFloat(volumeOfDistribution),
+          parseFloat(productionRates[i].productionRate));
+      console.log("newLabs : ", newLabs);
+    }
+
+    newLabs["ionizedCalcium"] = _historicalLabs['calcium'][_historicalLabs['calcium'].length-1]/8;
+
+    if(orders.anticoagulation === 'citrate') {
+      var citrateResults = runCitrateCalculations(startingWeight, effluentFlowRate, newLabs["ionizedCalcium"])
+      newLabs["bicarbonate"] = citrateResults["bicarbonate"];
+      newLabs["calcium"] = citrateResults["calcium"];
+      newLabs["ionizedCalcium"] = citrateResults["ionizedCalcium"];
+      newLabs["calciumFinalPostFilter"] = citrateResults["calciumFinalPostFilter"];
+    }
+    newLabs["pH"] = calculatePH(newLabs["bicarbonate"]);
+
+    saveLabValues(newLabs);
+    incrementTime();
+    setNewWeight();
+    setPageVariables();
+    postLabChecks();
+  }
+
+  function saveLabValues(newLabs) {
+    for(var i=0;i<_dynamicLabs.length;i++) {
+      _historicalLabs[_dynamicLabs[i]].push(newLabs[_dynamicLabs[i]]);
+    }
+  }
+
+  function setNewWeight() {
+    var newWeight = calculateNewWeight(_currentOrders);
+    _historicalVitals["weight"].push(newWeight);
+  }
+
+  function runCitrateCalculations(startingWeight, effluentFlowRate, ionizedCalciumInitial) {
+    var results = {}
+    var citrateFlowRateInMlPerHr = $('#citrateFlowRate').val();
+    var citrateFlowRateInLPerHr = citrateFlowRateInMlPerHr/1000;
+    var citrateBloodConcentrationConstant = 112.9;
+    var citrateBloodConcentration = citrateFlowRateInLPerHr*citrateBloodConcentrationConstant/((_currentOrders["BFR"]*60/1000)+citrateFlowRateInLPerHr);
+    var dialysateCalcium = _currentOrders["fluidDialysateValues"]["calcium"];
+    var previousIonizedCalcium = _historicalLabs['ionizedCalcium'][_historicalLabs['ionizedCalcium'].length-1];
+    var citrateInitial = citrateBloodConcentration;
+    // Note: For now,  caCitInitial will be hard-coded.
+    var caCitInitial = 0;
+    var kForCaCit = 1;
+    var caCitFinalPreFilter = (-1*(-ionizedCalciumInitial-citrateInitial-kForCaCit)-Math.sqrt(Math.pow(-ionizedCalciumInitial-citrateInitial-kForCaCit, 2)-4*(1)*(ionizedCalciumInitial*citrateInitial)))/(2*(1))
+    var caFinalPreFilter = ionizedCalciumInitial - caCitFinalPreFilter;
+    var citratFinalPreFilter = citrateInitial - caCitFinalPreFilter;
+    var bicarbonateWithCitrateInitial = 24;
+    var caFinalPostFilter = caFinalPreFilter*(1-(effluentFlowRate/(_currentOrders.BFR*60/1000))*((caFinalPreFilter-(dialysateCalcium/2))/caFinalPreFilter));
+    var citratFinalPostFilter = citratFinalPreFilter*(1-(effluentFlowRate/(_currentOrders.BFR*60/1000)));
+    var caCitFinalPostFilter = caCitFinalPreFilter*(1-(effluentFlowRate/(_currentOrders.BFR*60/1000)));
+
+    // Note: In case 2 This number will change based on the case time
+    // TODO: Add ability to change this number with time
+    var citrateMetabolismFactor = 1;
+    var calciumClInMmolPerL = 54;
+    var calciumClFlowRateInMlPerHr = $('#caclInfusionRate').val();
+    var calciumClFlowRateInLPerHr = calciumClFlowRateInMlPerHr/1000;
+    var ionizedCalciumTotal = (caFinalPostFilter*(_currentOrders.BFR*60/1000)+calciumClInMmolPerL*calciumClFlowRateInLPerHr)/((_currentOrders.BFR*60/1000)+calciumClFlowRateInLPerHr)+caCitFinalPostFilter/2*citrateMetabolismFactor;
+
+    var ionizedCalciumFinal = calculateLab(ionizedCalciumInitial, ionizedCalciumTotal, effluentFlowRate, _currentOrders["timeToNextLabs"], startingWeight, startingWeight*0.6, 0);
+    var bicarbonateWithCitrateDialysate = 25+(((citratFinalPostFilter+caCitFinalPostFilter)*3)*citrateMetabolismFactor);
+    var bicarbonateWithCitrateFinal = calculateLab(bicarbonateWithCitrateInitial, bicarbonateWithCitrateDialysate, effluentFlowRate, _currentOrders["timeToNextLabs"], startingWeight, startingWeight*0.6, -10);
+    var calciumTotal = ((caFinalPostFilter*(_currentOrders.BFR*60/1000)+calciumClInMmolPerL*calciumClFlowRateInLPerHr)/((_currentOrders.BFR*60/1000)+calciumClFlowRateInLPerHr))*8+caCitFinalPostFilter*4;
+    results["bicarbonate"] = bicarbonateWithCitrateFinal;
+    results["calcium"] = calciumTotal;
+    results["ionizedCalcium"] = ionizedCalciumFinal;
+    results["calciumFinalPostFilter"] = caFinalPostFilter;
+
+    return results;
+  }
+
+  function getOrders() {
     var orders = {
       fluid : $('input[name=fluid]:checked').val(),
       fluidDialysateValues : {
@@ -509,111 +613,20 @@ var CRRTApp = (function() {
       Qr : parseInt($('#fluidFlowRate').val()),
       Qd : parseInt($('#fluidFlowRate').val()),
       grossUF : parseInt($('#grossHourlyFluidRemoval').val()),
-      timeToNextLabs : calculateTimeToNextSetOfLabs()
+      timeToNextLabs : calculateTimeToNextSetOfLabs(),
+      otherfluidsSaline : $('input[name=otherFluidsSaline]:checked').val(),
+      otherfluidsD5W : $('input[name=otherFluidsD5W]:checked').val(),
+      otherfluidsSodiumPhosphate : $('input[name=otherFluidsSodiumPhosphate]:checked').val(),
+      otherFluidsBolusValue :  $('input[name=otheFluidsBolusValue]').val(),
+      otherFluidsInfusionValue : $('input[name=otherFluidsInfusionValue]').val()
     }
-
-    // TODO: Remove occurences of orders and change to _currentOrders. This will eliminate the need
-    // to ping-pong this variable around the program.
-    _currentOrders = orders;
-
-    var startingWeight = _historicalVitals["weight"][_historicalVitals["weight"].length-1];
-
-    var effluentFlowRate = calculateEffluentFlowRate(orders);
-    var volumeOfDistribution = calculateVolumeOfDistribution(orders);
-
-
-    //for(var i = 0; i < _labs.length; i++) {
-    //  newLabs[_labs[i]] = calculateLab(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-1], orders.fluidDialysateValues[_labs[i]], effluentFlowRate, orders["timeToNextLabs"], startingWeight, volumeOfDistribution, _currentCaseStudy.startingData[_labs[i]+"ProductionRate"]);
-    //}
-    
-    //for(var i = 0; i < _dynamicComponents.length; i++) {
-    var productionRates = window._currentCaseStudySheet.productionRates.elements;
-
-    preLabChecks();
-    // Note: Params for calculateLab(): initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate
-    for(var i = 0; i < productionRates.length; i++) {
-
-      console.log("calculateLab(): component: ", productionRates[i].component);
-      console.log("calculateLab(): initialValue: ", _historicalLabs[productionRates[i].component][_historicalLabs[productionRates[i].component].length-1]);
-      console.log("calculateLab(): dialysate: ", orders.fluidDialysateValues[productionRates[i].component]);
-      console.log("calculateLab(): effluentFlowRate: ", effluentFlowRate);
-      console.log("calculateLab(): time: ", orders["timeToNextLabs"]);
-      console.log("calculateLab(): weight: ", startingWeight);
-      console.log("calculateLab(): volumeOfDistribution: ", volumeOfDistribution);
-      console.log("calculateLab(): productionRate: ", productionRates[i].productionRate);
-
-      newLabs[productionRates[i].component] = calculateLab(
-          parseFloat(_historicalLabs[productionRates[i].component][_historicalLabs[productionRates[i].component].length-1]),
-          parseFloat(orders.fluidDialysateValues[productionRates[i].component]),
-          parseFloat(effluentFlowRate),
-          parseFloat(orders["timeToNextLabs"]),
-          parseFloat(startingWeight),
-          parseFloat(volumeOfDistribution),
-          parseFloat(productionRates[i].productionRate));
-
-      console.log("newLabs : ", newLabs);
-
-      //newLabs[_dynamicComponents[i]] = calculateLab(_historicalLabs[_dynamicComponents[i]][_historicalLabs[_dynamicComponents[i]].length-1], orders.fluidDialysateValues[_labs[i]], effluentFlowRate, orders["timeToNextLabs"], startingWeight, volumeOfDistribution, _currentCaseStudySheet.productionRates[_dynamicLabs[i]+"ProductionRate"]);
-    }
-
-    newLabs["ionizedCalcium"] = _historicalLabs['calcium'][_historicalLabs['calcium'].length-1]/8;
-    newLabs["filtrationFraction"] = calculateFiltrationFraction(orders);
-
-    // If using citrate, re-calculate bicarbonate and calcium values. Also, add ionized calcium and final post filter calcium to results
-    if(orders.anticoagulation === 'citrate') {
-      var citrateFlowRateInMlPerHr = $('#citrateFlowRate').val();
-      var citrateFlowRateInLPerHr = citrateFlowRateInMlPerHr/1000;
-      var citrateBloodConcentrationConstant = 112.9;
-      var citrateBloodConcentration = citrateFlowRateInLPerHr*citrateBloodConcentrationConstant/((orders["BFR"]*60/1000)+citrateFlowRateInLPerHr);
-      var dialysateCalcium = orders["fluidDialysateValues"]["calcium"];
-      var ionizedCalciumInitial = newLabs["ionizedCalcium"];
-      var previousIonizedCalcium = _historicalLabs['ionizedCalcium'][_historicalLabs['ionizedCalcium'].length-1];
-      var citrateInitial = citrateBloodConcentration;
-      // Note: For now,  caCitInitial will be hard-coded.
-      var caCitInitial = 0;
-      var kForCaCit = 1;
-      var caCitFinalPreFilter = (-1*(-ionizedCalciumInitial-citrateInitial-kForCaCit)-Math.sqrt(Math.pow(-ionizedCalciumInitial-citrateInitial-kForCaCit, 2)-4*(1)*(ionizedCalciumInitial*citrateInitial)))/(2*(1))
-      var caFinalPreFilter = ionizedCalciumInitial - caCitFinalPreFilter;
-      var citratFinalPreFilter = citrateInitial - caCitFinalPreFilter;
-      var bicarbonateWithCitrateInitial = 24;
-      var caFinalPostFilter = caFinalPreFilter*(1-(effluentFlowRate/(orders.BFR*60/1000))*((caFinalPreFilter-(dialysateCalcium/2))/caFinalPreFilter));
-      var citratFinalPostFilter = citratFinalPreFilter*(1-(effluentFlowRate/(orders.BFR*60/1000)));
-      var caCitFinalPostFilter = caCitFinalPreFilter*(1-(effluentFlowRate/(orders.BFR*60/1000)));
-
-      // Note: In case 2 This number will change based on the case time
-      // TODO: Add ability to change this number with time
-      var citrateMetabolismFactor = 1;
-      var calciumClInMmolPerL = 54;
-      var calciumClFlowRateInMlPerHr = $('#caclInfusionRate').val();
-      var calciumClFlowRateInLPerHr = calciumClFlowRateInMlPerHr/1000;
-      var ionizedCalciumTotal = (caFinalPostFilter*(orders.BFR*60/1000)+calciumClInMmolPerL*calciumClFlowRateInLPerHr)/((orders.BFR*60/1000)+calciumClFlowRateInLPerHr)+caCitFinalPostFilter/2*citrateMetabolismFactor;
-
-      var ionizedCalciumFinal = calculateLab(ionizedCalciumInitial, ionizedCalciumTotal, effluentFlowRate, orders["timeToNextLabs"], startingWeight, startingWeight*0.6, 0);
-      var bicarbonateWithCitrateDialysate = 25+(((citratFinalPostFilter+caCitFinalPostFilter)*3)*citrateMetabolismFactor);
-      var bicarbonateWithCitrateFinal = calculateLab(bicarbonateWithCitrateInitial, bicarbonateWithCitrateDialysate, effluentFlowRate, orders["timeToNextLabs"], startingWeight, startingWeight*0.6, -10);
-      var calciumTotal = ((caFinalPostFilter*(orders.BFR*60/1000)+calciumClInMmolPerL*calciumClFlowRateInLPerHr)/((orders.BFR*60/1000)+calciumClFlowRateInLPerHr))*8+caCitFinalPostFilter*4;
-      newLabs["bicarbonate"] = bicarbonateWithCitrateFinal;
-      newLabs["calcium"] = calciumTotal;
-      newLabs["ionizedCalcium"] = ionizedCalciumFinal;
-      newLabs["calciumFinalPostFilter"] = caFinalPostFilter;
-    }
-    newLabs["pH"] = calculatePH(newLabs["bicarbonate"]);
-
-    for(var i=0;i<_dynamicLabs.length;i++) {
-      _historicalLabs[_dynamicLabs[i]].push(newLabs[_dynamicLabs[i]]);
-    }
-    
-    incrementTime(orders["timeToNextLabs"]);
-
-    var newWeight = calculateNewWeight(orders);
-    _historicalVitals["weight"].push(newWeight);
-
-    setPageVariables();
-    postLabChecks();
+    var ff = calculateFiltrationFraction(orders);
+    orders.filtrationFraction = ff;
+    return orders;
   }
 
-  function incrementTime(time) {
-    window._currentTime = window._currentTime + time;
+  function incrementTime() {
+    window._currentTime = window._currentTime + _currentOrders["timeToNextLabs"];
   }
 
   function calculateNewWeight(orders) {
@@ -623,12 +636,30 @@ var CRRTApp = (function() {
     // output = ultrafiltration rate = Gross fluid removal = Gross ultrafiltration 
     // TODO: Not currently factoring in citrate, D5W, or 3%NS
     var fluidInPastSixHoursInLiters = (parseFloat(window._currentCaseStudySheet.inputOutput.elements[window._currentTime+1]["previousSixHourTotal"]))/1000;
+    var currentFiltrationFraction = orders.filtrationFraction;
 
     var totalHoursOfFiltration = 6;
     // Note: If BFR is <= 150, grossUF for two hours is 0, therefore, we only have 4 hours of filtration. (This *might* only be for case study #1)
     if (orders["BFR"] <= 150) {
       totalHoursOfFiltration = 4;
     }
+    // NOTE: these adjustments to the ultrafiltration rate based on BFR and filtration fraction
+    // might only be applicable to case #1
+    //
+    // Note: If FF is >25% AND not on heparin/citrate, grossUF for two hours is 0, therefore, we only have 4 hours of filtration
+    if ((orders["BFR"] <= 150 ) || (currentFiltrationFraction > 25 && currentFiltrationFraction <= 30 && _currentOrders.anticoagulation === 'none')) {
+      totalHoursOfFiltration = 4;
+    }
+    
+    // Note: If FF is >30% AND not on heparin/citrate, grossUF for four hours is 0, therefore, we only have 2 hours of filtration
+    if (currentFiltrationFraction > 30 && _currentOrders.anticoagulation === 'none') {
+      totalHoursOfFiltration = 2;
+    }
+    
+    // TODO: Need to add case where citrate is in use and filter clots. However, not sure how to calculate post-filter ionized calcium
+    // as it requires effluent flow rate, which is affected by the outcome.
+    
+    console.log("calculateNewWeight() totalHoursOfFiltration : ", totalHoursOfFiltration);
 
     var grossFiltrationPastSixHoursInLiters = (orders["grossUF"]/1000)*totalHoursOfFiltration;
     var previousWeightInKilos = parseFloat(_historicalVitals['weight'][_historicalVitals['weight'].length-1]);
@@ -658,6 +689,10 @@ var CRRTApp = (function() {
 
   function calculateEffluentFlowRate(orders) {
     var efr;
+    var currentFiltrationFraction = orders.filtrationFraction;
+    // NOTE: Default to no adjustment to the EFR
+    var efrAdjustment = 1;
+
     switch(orders["modality"]) {
       case "pre-filter-cvvh":
         efr = (orders["BFR"]*60/1000) / ((orders["BFR"]*60/1000)+orders["Qr"]) * (orders["Qr"] + orders["grossUF"]/1000);
@@ -670,10 +705,18 @@ var CRRTApp = (function() {
         break;
     }
 
-    // NOTE: this might only be for case study #1
-    if (orders["BFR"] <= 150 ) {
-      efr = efr/1.5;
+    // NOTE: these adjustments to the effluent flow rate based on BFR and filtration fraction
+    // might only be applicable to case #1
+    if ((orders["BFR"] <= 150 ) || (currentFiltrationFraction > 25 && currentFiltrationFraction <= 30 && _currentOrders.anticoagulation === 'none')) {
+      efrAdjustment = 1.5
     }
+
+    if (currentFiltrationFraction > 30 && _currentOrders.anticoagulation === 'none') {
+      efrAdjustment = 3;
+    }
+
+    efr = efr/efrAdjustment;
+
     return efr;
   }
 
@@ -720,6 +763,7 @@ var CRRTApp = (function() {
 
   function preLabChecks() {
     checkBloodFlowRate();
+    checkFilterClotting();
   }
 
   function postLabChecks() {
@@ -751,7 +795,6 @@ var CRRTApp = (function() {
     checkMagnesium();
     checkPhosphorous();
     checkGrossUltrafiltration();
-    checkFilterClotting();
     checkDose();
   }
 
@@ -809,7 +852,7 @@ var CRRTApp = (function() {
   function checkPotassium() {
     var totalPoints = 0;
     var currentPotassium = _historicalLabs["potassium"][_historicalLabs["potassium"].length-1];
-      
+
     if (currentPotassium > 3.3) {
       console.log("checkPotassium() : within bounds ", currentPotassium);
       totalPoints = totalPoints + 5;
@@ -878,6 +921,7 @@ var CRRTApp = (function() {
 
   function checkCalcium() {
     // TODO: Doc from Ben says "NOT when using citrate" -- do we not run these checks if we are using citrate?
+    // if using citrate - divide by 8
     var totalPoints = 0;
     var currentCalcium = _historicalLabs["calcium"][_historicalLabs["calcium"].length-1];
 
@@ -914,7 +958,7 @@ var CRRTApp = (function() {
   function checkMagnesium() {
     var totalPoints = 0;
     var currentMagnesium = _historicalLabs["magnesium"][_historicalLabs["magnesium"].length-1];
-      
+
     if (currentMagnesium > 1.4) {
       console.log("checkMagnesium() : within bounds ", currentMagnesium);
       totalPoints = totalPoints + 5;
@@ -981,6 +1025,38 @@ var CRRTApp = (function() {
   }
 
   function checkFilterClotting() {
+    var totalPoints = 0;
+    var currentFiltrationFraction = _currentOrders.filtrationFraction;
+      
+    if (currentFiltrationFraction < 25) {
+      console.log("checkFiltrationFraction() : within bounds ", currentFiltrationFraction);
+      totalPoints = totalPoints + 5;
+    }
+
+    if (currentFiltrationFraction > 25 && currentFiltrationFraction <= 30 && _currentOrders.anticoagulation === 'none') {
+      var msg = "The patient’s filter clotted once, and was replaced.";
+      _numClottedFilters = _numClottedFilters + 1;
+      _messages.push(msg);
+      showMessage(msg);
+      totalPoints = totalPoints - 50;
+    }
+
+    if (currentFiltrationFraction > 30 && _currentOrders.anticoagulation === 'none') {
+      // TODO: effluent is divided by 3, gross UF for 4 hours will be 0 (Not sure what to do if BFR is also modifying effluent rate and UF time)
+      var msg = "The patient’s filter clotted twice, and was replaced.";
+      _numClottedFilters = _numClottedFilters + 2;
+      _messages.push(msg);
+      showMessage(msg);
+      totalPoints = totalPoints - 100;
+    }
+
+    // TODO: Need to add case wherein citrate is in use. However, in order to calculate
+    // post-filter ionized calcium, we need the effluent flow rate - which is itself
+    // affected by the outcome of this calculation. Seems like a chicken-or-the-egg situation -- need to
+    // talk to Ben about how to overcome this situation.
+
+    _points.filtrationFractionInRange.push(totalPoints);
+    return;
 
   }
 
