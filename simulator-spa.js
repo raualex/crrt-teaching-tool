@@ -154,7 +154,6 @@ var CRRTApp = (function() {
     $.when(d1).done(function() {
       initializeCaseStudy();
       setPageVariables();
-      handleClicks();
       initializeOrderForm();
     })
   }
@@ -250,8 +249,6 @@ var CRRTApp = (function() {
   function setPageVariables() {
     setPageTime();
     setPageCaseStudyId();
-    //setPageLabs();
-    setPageVitals();
     setPageHistoryOfPresentIllness();
     setPageImaging();
     setPagePhysicalExam();
@@ -303,13 +300,6 @@ var CRRTApp = (function() {
       table.append(row);
     }
     $("#inputOutput").append(table);
-  }
-
-  function setPageLabs(){
-    for(var i = 0; i < _allLabs.length; i++) {
-      $("#previous"+_allLabs[i].capitalize()).text(_historicalLabs[_allLabs[i]][_historicalLabs[_allLabs[i]].length-2]);
-      $("#current" +_allLabs[i].capitalize()).text(_historicalLabs[_allLabs[i]][_historicalLabs[_allLabs[i]].length-1]);
-    }
   }
 
   function setVitalsTable() {
@@ -373,10 +363,6 @@ var CRRTApp = (function() {
     var currentLabSet;
     var previousLabSet;
 
-    // Note:
-    // Start here. Need to fix labs calculation when running orders -- dynamic labs are not
-    // returning correct values to the table (showing N/A for most cells)
-
     if (window._currentTime === 0) {
       currentLabSet = 1;
       previousLabSet = 0;
@@ -417,13 +403,6 @@ var CRRTApp = (function() {
 
   function setPageCaseStudyId() {
     $("#currentCaseStudyId").text(_currentCaseStudyId);
-  }
-
-  function setPageVitals() {
-    for(var i = 0; i < _vitals.length; i++) {
-      $("#previous"+_vitals[i].capitalize()).text(_historicalVitals[_vitals[i]][_historicalVitals[_vitals[i]].length-2]);
-      $("#current" +_vitals[i].capitalize()).text(_historicalVitals[_vitals[i]][_historicalVitals[_vitals[i]].length-1]);
-    }
   }
 
   function setPageHistoryOfPresentIllness() {
@@ -738,11 +717,6 @@ var CRRTApp = (function() {
 
   }
 
-  function handleClicks() {
-    //$("#runLabs").click(function() {
-    //  runLabs();
-    //})
-  }
 
   function preLabChecks() {
     checkBloodFlowRate();
@@ -760,12 +734,11 @@ var CRRTApp = (function() {
 
   function runCase1Checks() {
     // NOTE: Start here. Next steps:
-    // * Determine when each of these checks needs to be run and run at the appropriate time.
-    //   (Should probably have two functions: "preLabChecks()" and "postLabChecks()")
-    // * Add scoring page
+    // * Finish if/thens (filter clogging and dose)
     // * Add results page
     // * Add Q&A section
-    // * Add writtin material
+    // * Add written material
+    // * Add scoring page
     // * Add calculations for hypotonic saline
     // * Add calculater section
     // * Add Case #2
@@ -1008,10 +981,6 @@ var CRRTApp = (function() {
   }
 
   function checkFilterClotting() {
-
-  }
-
-  function checkGrossUltrafiltration() {
 
   }
 
