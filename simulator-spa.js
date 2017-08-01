@@ -18,7 +18,7 @@ var CRRTApp = (function() {
   };
 
   var _numClottedFilters = 0;
-  var _currentMessages = [];
+  var _messages = [];
 
   var _caseStudies;
   var _currentOrders;
@@ -169,7 +169,75 @@ var CRRTApp = (function() {
     if ($("#other-fluids-saline").is(":checked") === false && $("#other-fluids-D5W").is(":checked") === false) {
       $("#other-fluids-values").hide();
     }
+
+    setOrderFormValidation();
   }
+
+  function setOrderFormValidation() {
+    $("form[name='orderForm']").validate({
+      // Specify validation rules
+      rules: {
+        // The key name on the left side is the name attribute
+        // of an input field. Validation rules are defined
+        // on the right side
+        "replacement-fluid-sodium-value": {
+          min: 130,
+          max: 150
+        },
+        "replacement-fluid-potassium-value": {
+          max: 4
+        },
+        "replacement-fluid-chloride-value": {
+          min: 95,
+          max: 110
+        },
+        "replacement-fluid-bicarbonate-value": {
+          min: 20,
+          max: 40
+        },
+        "replacement-fluid-calcium-value": {
+          min: 0,
+          max: 3
+        },
+        "replacement-fluid-magnesium-value": {
+          min: 0,
+          max: 2
+        },
+        "replacement-fluid-phosphorous-value": {
+          min: 0,
+          max: 1
+        },
+        "fluidFlowRate": {
+          min: 0,
+          max: 8
+        },
+        "gross-hourly-fluid-removal": {
+          min: 0,
+          max: 1000
+        }
+      },
+      messages: {
+        "replacement-fluid-sodium-value": "The hospital pharmacy can only compound sodium between 130 and 150.  Use D5W or 3% normal saline if needed",
+        "replacement-fluid-potassium-value": "The hospital pharmacy will not compound fluid with a potassium above 4 mg/dL",
+        "replacement-fluid-chloride-value": "The hospital pharmacy can only compound chloride between 95 and 110",
+        "replacement-fluid-bicarbonate-value": "The hospital pharmacy can only compound bicarbonate between 20 and 40",
+        "replacement-fluid-calcium-value": "The hospital pharmacy can only compound calcium between 0 and 3 mEq/L",
+        "replacement-fluid-magnesium-value": "The hospital pharmacy can only compound magnesium between 0 and 2 mgd/L",
+        "replacement-fluid-phosphorous-value": "The hospital pharmacy cannot compound fluid with > 1mg/dL of phosphorous, due to precipitation of calcium phosphate.",
+        "fluidFlowRate": "The CRRT machine cannot deliver fluid above 8 L/hr",
+        "gross-hourly-fluid-removal": "The CRRT machine will not accept ultrafiltration rates above 1,000 mL/hour"
+      },
+      // Make sure the form is submitted to the destination defined
+      // in the "action" attribute of the form when valid
+      submitHandler: function(form) {
+        debugger;
+        runLabs();
+      }
+    });
+
+  }
+
+
 
   function setAnticoagulationFormElements(anticoagulationValue) {
     switch(anticoagulationValue) {
@@ -489,6 +557,7 @@ var CRRTApp = (function() {
     //for(var i = 0; i < _dynamicComponents.length; i++) {
     var productionRates = window._currentCaseStudySheet.productionRates.elements;
 
+    preLabChecks();
     // Note: Params for calculateLab(): initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate
     for(var i = 0; i < productionRates.length; i++) {
 
@@ -546,14 +615,7 @@ var CRRTApp = (function() {
       var calciumClFlowRateInMlPerHr = $('#caclInfusionRate').val();
       var calciumClFlowRateInLPerHr = calciumClFlowRateInMlPerHr/1000;
       var ionizedCalciumTotal = (caFinalPostFilter*(orders.BFR*60/1000)+calciumClInMmolPerL*calciumClFlowRateInLPerHr)/((orders.BFR*60/1000)+calciumClFlowRateInLPerHr)+caCitFinalPostFilter/2*citrateMetabolismFactor;
-      // Note: Params for calculateLab(): initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate
 
-      // NOTE: Pick up here. Next step is to make sure we're calculating everything we need, saving the data, and displaying it on our labs screen. After that, need to calculate filtration fraction and pH. Then, calculate hyptonic saline. After that, test to make sure we're running all the necessary calculations. After that (not necessarily in order):
-      // 1) Add tables of (relatively) static lab data
-      // 2) Add logic to conditionally display correct lab data based on certain conditions (weight/time/etc)
-      // 3) Add messaging sub-system
-      // 4) Start working on IF/THEN statements to implement the actual case
-      // 5) Make sure all the data we are pulling is dynamic
       var ionizedCalciumFinal = calculateLab(ionizedCalciumInitial, ionizedCalciumTotal, effluentFlowRate, orders["timeToNextLabs"], startingWeight, startingWeight*0.6, 0);
       var bicarbonateWithCitrateDialysate = 25+(((citratFinalPostFilter+caCitFinalPostFilter)*3)*citrateMetabolismFactor);
       var bicarbonateWithCitrateFinal = calculateLab(bicarbonateWithCitrateInitial, bicarbonateWithCitrateDialysate, effluentFlowRate, orders["timeToNextLabs"], startingWeight, startingWeight*0.6, -10);
@@ -575,7 +637,7 @@ var CRRTApp = (function() {
     _historicalVitals["weight"].push(newWeight);
 
     setPageVariables();
-    runCase1Checks(orders);
+    postLabChecks();
   }
 
   function incrementTime(time) {
@@ -589,7 +651,14 @@ var CRRTApp = (function() {
     // output = ultrafiltration rate = Gross fluid removal = Gross ultrafiltration 
     // TODO: Not currently factoring in citrate, D5W, or 3%NS
     var fluidInPastSixHoursInLiters = (parseFloat(window._currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
-    var grossFiltrationPastSixHoursInLiters = (orders["grossUF"]/1000)*6;
+
+    var totalHoursOfFiltration = 6;
+    // Note: If BFR is <= 150, grossUF for two hours is 0, therefore, we only have 4 hours of filtration. (This *might* only be for case study #1)
+    if (orders["BFR"] <= 150) {
+      totalHoursOfFiltration = 4;
+    }
+
+    var grossFiltrationPastSixHoursInLiters = (orders["grossUF"]/1000)*totalHoursOfFiltration;
     var previousWeightInKilos = _historicalVitals['weight'][_historicalVitals['weight'].length-1];
     var currentWeightInKilos = previousWeightInKilos + (fluidInPastSixHoursInLiters - grossFiltrationPastSixHoursInLiters);
     return currentWeightInKilos;
@@ -597,7 +666,7 @@ var CRRTApp = (function() {
 
   function calculateFiltrationFraction(orders) {
     var ff;
-    // TODO: Is hct hard-coded?
+    // TODO: Is hct hard-coded? No.
     // hct is a percent-value. Take this value from labs (divide by 100)
     var hct = 0.3;
 
@@ -627,6 +696,11 @@ var CRRTApp = (function() {
       case "cvvhd":
         efr = orders["Qd"] + orders["grossUF"]/1000;
         break;
+    }
+
+    // NOTE: this might only be for case study #1
+    if (orders["BFR"] <= 150 ) {
+      efr = efr/1.5;
     }
     return efr;
   }
@@ -672,9 +746,17 @@ var CRRTApp = (function() {
   }
 
   function handleClicks() {
-    $("#runLabs").click(function() {
-      runLabs();
-    })
+    //$("#runLabs").click(function() {
+    //  runLabs();
+    //})
+  }
+
+  function preLabChecks() {
+    checkBloodFlowRate();
+  }
+
+  function postLabChecks() {
+
   }
 
   function runCase1Checks() {
@@ -689,7 +771,6 @@ var CRRTApp = (function() {
     // * Add calculater section
     // * Add Case #2
     // * Configure google sheets proxy
-    checkBloodFlowRate();
     checkSodium();
     checkPotassium();
     checkChloride();
@@ -703,7 +784,6 @@ var CRRTApp = (function() {
   }
 
   function checkBloodFlowRate() {
-    // TODO: Need to run these checks before calculating lab values
     var totalPoints = 0;
     if (_currentOrders["BFR"] >= 200 && _currentOrders["BFR"] <= 300) {
       console.log("checkBloodFlowRate() : within bounds ", _currentOrders["BFR"]);
@@ -712,13 +792,17 @@ var CRRTApp = (function() {
     }
 
     if (_currentOrders["BFR"] <= 150) {
-      // TODO: divide effluent flow rate by 1.5 and set GrossUF to 0 for two hours
-      _currentMessages.push("The patient's nurse called.  She's been having many \"Low Return Pressure Alarms\" over the past 4 hours, and the machine is not running well.");
+      var msg = "The patient's nurse called.  She's been having many \"Low Return Pressure Alarms\" over the past 4 hours, and the machine is not running well.";
+      _messages.push(msg);
+      showMessage(msg);
       totalPoints = totalPoints - 100;
     }
 
     if (_currentOrders["BFR"] > 350 ) {
-      _currentMessages.push("The patient's nurse called to inform you of frequent \"Access Pressure Extremely Low\ alarms, and had to decrease BFR to 300.");
+      var msg = "The patient's nurse called to inform you of frequent \"Access Pressure Extremely Low\" alarms, and had to decrease BFR to 300.";
+      _messages.push(msg);
+      showMessage(msg);
+      _currentOrders["BFR"] = 300;
       totalPoints = totalPoints - 50;
     }
     _points.bloodFlowRateInRange.push(totalPoints);
@@ -853,6 +937,14 @@ var CRRTApp = (function() {
   function showNoAnticoagulationFormOptions() {
     $(".heparin").hide();
     $(".citrate").hide();
+  }
+
+  function showMessage(msg) {
+    var messageContainer = $('<p></p>').addClass('card-text');
+    var message = $('<samp></samp>').text(msg);
+    messageContainer.append(message);
+    $("#message-box").prepend("<hr>");
+    $("#message-box").prepend(messageContainer);
   }
 
 

@@ -9,6 +9,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.1/tabletop.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/jquery.validation/1.15.1/jquery.validate.min.js'></script>
     <script src="simulator-spa.js"></script>
   </head>
   <body>
@@ -34,7 +35,7 @@
                 </button>
               </div>
               <div id="orders"class="modal-body">
-                <form id="orderForm" class="mt-3">
+                <form id="orderForm" name="orderForm" class="mt-3">
                   <div class="row">
                     <div class="col-md-6">
                       <fieldset class="form-group">
@@ -64,34 +65,34 @@
 
                         <div id="replacement-fluid-values">
                           <legend>Sodium</legend>
-                          <input class="form-control" id="replacement-fluid-sodium-value" value="146">
+                          <input name="replacement-fluid-sodium-value" class="form-control" id="replacement-fluid-sodium-value" value="146">
                           <legend>Potassium</legend>
-                          <input class="form-control" id="replacement-fluid-potassium-value" value="3.6">
+                          <input name="replacement-fluid-potassium-value" class="form-control" id="replacement-fluid-potassium-value" value="3.6">
                           <legend>Chloride</legend>
-                          <input class="form-control" id="replacement-fluid-chloride-value" value="114">
+                          <input name="replacement-fluid-chloride-value" class="form-control" id="replacement-fluid-chloride-value" value="114">
                           <legend>Bicarbonate</legend>
-                          <input class="form-control" id="replacement-fluid-bicarbonate-value" value="24">
+                          <input name="replacement-fluid-bicarbonate-value" class="form-control" id="replacement-fluid-bicarbonate-value" value="24">
                           <legend>Calcium</legend>
-                          <input class="form-control" id="replacement-fluid-calcium-value" value="42">
+                          <input name="replacement-fluid-calcium-value" class="form-control" id="replacement-fluid-calcium-value" value="42">
                           <legend>Magnesium</legend>
-                          <input class="form-control" id="replacement-fluid-magnesium-value" value="1.7">
+                          <input name="replacement-fluid-magnesium-value" class="form-control" id="replacement-fluid-magnesium-value" value="1.7">
                           <legend>Phosphorous</legend>
-                          <input class="form-control" id="replacement-fluid-phosphorous-value" value="4.4">
+                          <input name="replacement-fluid-phosphorous-value" class="form-control" id="replacement-fluid-phosphorous-value" value="4.4">
                         </div>
                       </fieldset>
                     </div>
                     <div class="col-md-6">
                       <div class="form-group">
-                        <legend>Gross Fluid Removal (ml/Hr)</legend>
-                        <input type="grossHourlyFluidRemoval" class="form-control" id="grossHourlyFluidRemoval" value="200">
+                        <legend>Gross Ultrafiltration (ml/Hr)</legend>
+                        <input name="gross-hourly-fluid-removal" class="form-control" id="grossHourlyFluidRemoval" value="200">
                       </div>
                       <div class="form-group">
                         <legend>Blood Flow Rate (mL/min)</legend>
-                      <input type="bloodFlowRate" class="form-control" id="bloodFlowRate" value="200">
+                      <input class="form-control" id="bloodFlowRate" value="200">
                       </div>
                       <div class="form-group">
                         <legend id="fluidFlowLegend">Replacement Fluid Flow Rate (L/hr)</legend>
-                        <input type="fluidFlowRate" class="form-control" id="fluidFlowRate" value="2">
+                        <input name="fluidFlowRate" class="form-control" id="fluidFlowRate" value="2">
                       </div>
                       <fieldset class="form-group">
                         <legend>Other Fluids/Medications</legend>
@@ -502,13 +503,11 @@
       <div class="row">
         <div class="col-md-12">
           <div class="card mt-3">
-            <div class="card-block">
+            <div id="message-box" class="card-block">
               <p class="card-text">
-                <span>
-                  <samp>
-                    Welcome to the CRRT education application simulator! Important information about the current case will appear in this box.
-                  </samp>
-                </span>
+                <samp>
+                  Welcome to the CRRT education application simulator! Important information about the current case will appear in this box.
+                </samp>
               </p>
             </div>
           </div>
