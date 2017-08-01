@@ -1,3 +1,5 @@
+// TODO:
+// Start here:
 $( document ).ready(function() {
   CRRTApp.run();
 });
@@ -19,7 +21,6 @@ var CRRTApp = (function() {
 
   var _numClottedFilters = 0;
   var _messages = [];
-
   var _caseStudies;
   var _currentOrders;
   var _currentCaseStudyId;
@@ -27,9 +28,7 @@ var CRRTApp = (function() {
   var _currentCaseStudySheet;
   var _dynamicLabs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "pH"];
   var _staticLabs = ["lactate", "albumin", "WBC", "hemoglobin", "hematocrit", "plateletCount", "PC02", "granularCasts", "renalEpithelialCasts", "bloodCulture", "urineCulture"];
-
   var _allLabs = _dynamicLabs.concat(_staticLabs);
-
   var _labs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "calciumFinalPostFilter", "filtrationFraction", "PH"];
   var _vitals = ["bloodPressure", "respiratoryRate", "temperature", "heartRate", "weight"];
   var _physicalExam = ["general", "ENT", "heart", "lungs", "abdomen", "extremities", "psych"];
@@ -65,11 +64,9 @@ var CRRTApp = (function() {
     bloodCulture: [],
     urineCulture: []
   }
-
   var _dynamicLabs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "pH"];
   var _dynamicComponents = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "phosphorous", "magnesium"];
   var _staticLabs = ["lactate", "albumin", "WBC", "hemoglobin", "hematocrit", "plateletCount", "PC02", "granularCasts", "renalEpithelialCasts", "bloodCulture", "urineCulture"];
-
   var _historicalVitals = {
     bloodPressure: [],
     respiratoryRate: [],
@@ -162,11 +159,9 @@ var CRRTApp = (function() {
     handleOrderFormChanges();
     var startingAnticoagulationValue = $('input[name=anticoagulation]:checked').val();
     setAnticoagulationFormElements(startingAnticoagulationValue);
-
     if ($("#other-fluids-saline").is(":checked") === false && $("#other-fluids-D5W").is(":checked") === false) {
       $("#other-fluids-values").hide();
     }
-
     setOrderFormValidation();
   }
 
@@ -255,19 +250,19 @@ var CRRTApp = (function() {
     setPageHistoryOfPresentIllness();
     setPageImaging();
     setPagePhysicalExam();
-    setInputOutputTable();
-    setVitalsTable();
-    setLabsTable();
+    createInputOutputTable();
+    createVitalsTabls();
+    createLabsTabel();
   }
 
-  function setInputOutputTable() {
+  function createInputOutputTable() {
     // If table already exists, remove, so we can rebuid it.
     if ($(".inputOutputTable")) {
       $(".inputOutputTable").remove();
     }
 
     var table = $('<table></table>').addClass('inputOutputTable table table-hover');
-    var numFluidInputs = window._currentCaseStudySheet.inputOutput.elements[0]["numInputs"];
+    var numFluidInputs = _currentCaseStudySheet.inputOutput.elements[0]["numInputs"];
     // Note: This number reflects the number of rows of initial data.
     var initialValuesOffset = 2;
     // Note: These data are being pulled from a Google spreadsheet. This number represents the number of 
@@ -275,7 +270,7 @@ var CRRTApp = (function() {
     // if the spreadsheet is modified and additional columns are added before the columns storing our data.
     var columnOffset = 3;
     var numColumns;
-    if (window._currentTime === 0) {
+    if (_currentTime === 0) {
       numColumns = 2;
     } else {
       numColumns = 6;
@@ -286,18 +281,18 @@ var CRRTApp = (function() {
     head.append(row);
 
     row.append($("<th></th>"));
-    for(i=window._currentTime-numColumns; i<window._currentTime; i++) {
-      var th = $('<th></th>').text(window._currentCaseStudySheet.inputOutput.elements[i+initialValuesOffset].time);
+    for(i=_currentTime-numColumns; i<_currentTime; i++) {
+      var th = $('<th></th>').text(_currentCaseStudySheet.inputOutput.elements[i+initialValuesOffset].time);
       row.append(th);
     }
     table.append(head);
 
     for(i=0; i<numFluidInputs; i++) {
       var row = $('<tr></tr>');
-      var data = $('<td></td').text(window._currentCaseStudySheet.inputOutput.columnNames[i+columnOffset]);
+      var data = $('<td></td').text(_currentCaseStudySheet.inputOutput.columnNames[i+columnOffset]);
       row.append(data);
-      for(j=window._currentTime-numColumns; j<window._currentTime; j++) {
-        var data = $('<td></td>').text(window._currentCaseStudySheet.inputOutput.elements[j+initialValuesOffset][window._currentCaseStudySheet.inputOutput.columnNames[i+columnOffset]]);
+      for(j=_currentTime-numColumns; j<_currentTime; j++) {
+        var data = $('<td></td>').text(_currentCaseStudySheet.inputOutput.elements[j+initialValuesOffset][_currentCaseStudySheet.inputOutput.columnNames[i+columnOffset]]);
         row.append(data);
       }
       table.append(row);
@@ -305,7 +300,7 @@ var CRRTApp = (function() {
     $("#inputOutput").append(table);
   }
 
-  function setVitalsTable() {
+  function createVitalsTabls() {
     // If table already exists, remove, so we can rebuid it.
     if ($(".vitalsTable")) {
       $(".vitalsTable").remove();
@@ -321,7 +316,7 @@ var CRRTApp = (function() {
     var columnOffset = 3;
     var numVitals = _currentCaseStudySheet.vitals.elements[0]["numInputs"];
     var numColumns;
-    if (window._currentTime === 0) {
+    if (_currentTime === 0) {
       numColumns = 1;
     } else {
       numColumns = 6;
@@ -332,7 +327,7 @@ var CRRTApp = (function() {
     head.append(row);
 
     row.append($("<th></th>"));
-    for(i=window._currentTime-numColumns; i<window._currentTime; i++) {
+    for(i=_currentTime-numColumns; i<_currentTime; i++) {
       var th = $('<th></th>').text(_currentCaseStudySheet.vitals.elements[i+initialValuesOffset].time);
       row.append(th);
     }
@@ -342,7 +337,7 @@ var CRRTApp = (function() {
       var row = $('<tr></tr>');
       var data = $('<td></td').text(_currentCaseStudySheet.vitals.columnNames[i+columnOffset]);
       row.append(data);
-      for(j=window._currentTime-numColumns; j<window._currentTime; j++) {
+      for(j=_currentTime-numColumns; j<_currentTime; j++) {
         var data = $('<td></td>').text(_currentCaseStudySheet.vitals.elements[j+initialValuesOffset][_currentCaseStudySheet.vitals.columnNames[i+columnOffset]]);
         row.append(data);
       }
@@ -351,7 +346,7 @@ var CRRTApp = (function() {
     $("#vitals").append(table);
   }
 
-  function setLabsTable() {
+  function createLabsTabel() {
     // If table already exists, remove, so we can rebuid it.
     if ($(".labsTable")) {
       $(".labsTable").remove();
@@ -366,11 +361,11 @@ var CRRTApp = (function() {
     var currentLabSet;
     var previousLabSet;
 
-    if (window._currentTime === 0) {
+    if (_currentTime === 0) {
       currentLabSet = 1;
       previousLabSet = 0;
     } else {
-      currentLabSet = (window._currentTime/6) + 1;
+      currentLabSet = (_currentTime/6) + 1;
       previousLabSet = currentLabSet - 1;
     }
 
@@ -380,7 +375,6 @@ var CRRTApp = (function() {
 
     row.append($("<th></th>"));
     for(i=currentLabSet-numColumns; i<currentLabSet; i++) {
-      //var th = $('<th></th>').text(_currentCaseStudySheet.labs.elements[i+initialValuesOffset].time);
       var th = $('<th></th>').text(i-1);
       row.append(th);
     }
@@ -401,7 +395,7 @@ var CRRTApp = (function() {
   }
 
   function setPageTime() {
-    $("#currentTime").text(window._currentTime);
+    $("#currentTime").text(_currentTime);
   }
 
   function setPageCaseStudyId() {
@@ -409,20 +403,20 @@ var CRRTApp = (function() {
   }
 
   function setPageHistoryOfPresentIllness() {
-    $("#historyOfPresentIllness #overview").html(arrayToHTMLList(window._currentCaseStudy.startingData["historyOfPresentIllness"]["overview"]));
-    $("#historyOfPresentIllness #pastMedicalHistory").html(arrayToHTMLList(window._currentCaseStudy.startingData["historyOfPresentIllness"]["pastMedicalHistory"]));
-    $("#historyOfPresentIllness #pastSurgicalHistory").html(arrayToHTMLList(window._currentCaseStudy.startingData["historyOfPresentIllness"]["pastSurgicalHistory"]));
-    $("#historyOfPresentIllness #socialHistory").html(arrayToHTMLList(window._currentCaseStudy.startingData["historyOfPresentIllness"]["socialHistory"]));
-    $("#historyOfPresentIllness #familyHistory").html(arrayToHTMLList(window._currentCaseStudy.startingData["historyOfPresentIllness"]["familyHistory"]));
+    $("#historyOfPresentIllness #overview").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["overview"]));
+    $("#historyOfPresentIllness #pastMedicalHistory").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["pastMedicalHistory"]));
+    $("#historyOfPresentIllness #pastSurgicalHistory").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["pastSurgicalHistory"]));
+    $("#historyOfPresentIllness #socialHistory").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["socialHistory"]));
+    $("#historyOfPresentIllness #familyHistory").html(arrayToHTMLList(_currentCaseStudy.startingData["historyOfPresentIllness"]["familyHistory"]));
   }
 
   function setPageImaging() {
-    $("#imaging").html(arrayToHTMLList(window._currentCaseStudy.startingData["imaging"]));
+    $("#imaging").html(arrayToHTMLList(_currentCaseStudy.startingData["imaging"]));
   }
 
   function setPagePhysicalExam() {
     for(var i = 0; i < _physicalExam.length; i++) {
-      $("#physicalExam #" + _physicalExam[i]).html(window._currentCaseStudy.startingData["physicalExam"][_physicalExam[i]]);
+      $("#physicalExam #" + _physicalExam[i]).html(_currentCaseStudy.startingData["physicalExam"][_physicalExam[i]]);
     }
   }
 
@@ -430,18 +424,13 @@ var CRRTApp = (function() {
     console.log("CRRTApp : initializeCaseStudy()");
     _currentCaseStudyId = getParameterByName("caseId");
     _currentCaseStudy = _caseStudies[_currentCaseStudyId];
-    window._currentCaseStudy = _currentCaseStudy;
-    window._currentTime = 0;
+    _currentCaseStudy = _currentCaseStudy;
+    _currentTime = 0;
     for(var i = 0; i < _allLabs.length; i++) {
-      //_historicalLabs[_labs[i]].push(_currentCaseStudy.startingData[_labs[i]+"Starting"]);
-      if (!_historicalLabs[_allLabs[i]]) {
-        debugger;
-      }
       _historicalLabs[_allLabs[i]].push(_currentCaseStudySheet.labs.elements[0][_allLabs[i]]);
       _historicalLabs[_allLabs[i]].push(_currentCaseStudySheet.labs.elements[1][_allLabs[i]]);
     }
     for(var i = 0; i < _vitals.length; i++) {
-      //_historicalVitals[_vitals[i]].push(_currentCaseStudy.startingData.vitalSigns[_vitals[i]+"Starting"]);
       _historicalVitals[_vitals[i]].push(_currentCaseStudySheet.vitals.elements[0][_vitals[i]]);
     }
     // Set initial pH
@@ -454,50 +443,35 @@ var CRRTApp = (function() {
 
   function initializeSpreadsheet(promise) {
     var publicSpreadsheetUrl = 'https://docs.google.com/spreadsheets/d/1KAn-DDLp-R1Msdju4w8fqhgPSd9n5ShfCIzJ7DFtkJQ/pubhtml';
-
-    // Check and see if case study is in local storage. If it is, no need to hit the Google API
-   // if (localStorage.getItem(publicSpreadsheetUrl)) {
-   //   _currentCaseStudySheet = localStorage.getItem(publicSpreadsheetUrl);
-   //   promise.resolve();
-   //   return;
-   // }
-
     Tabletop.init( { key: publicSpreadsheetUrl, callback: showInfo, simpleSheet: false } );
     function showInfo(data, tabletop) {
       _currentCaseStudySheet = data;
-      window._currentCaseStudySheet = data;
-      window._currentCaseStudySheet.inputOutput = _currentCaseStudySheet.inputOutputCase1;
-      window._currentCaseStudySheet.vitals = _currentCaseStudySheet.vitalsCase1;
-      window._currentCaseStudySheet.labs = _currentCaseStudySheet.labsCase1;
-      window._currentCaseStudySheet.productionRates = _currentCaseStudySheet.productionRatesCase1;
-      window._currentCaseStudySheet.accessPressures = _currentCaseStudySheet.accessPressuresCase1;
+      _currentCaseStudySheet.inputOutput = _currentCaseStudySheet.inputOutputCase1;
+      _currentCaseStudySheet.vitals = _currentCaseStudySheet.vitalsCase1;
+      _currentCaseStudySheet.labs = _currentCaseStudySheet.labsCase1;
+      _currentCaseStudySheet.productionRates = _currentCaseStudySheet.productionRatesCase1;
+      _currentCaseStudySheet.accessPressures = _currentCaseStudySheet.accessPressuresCase1;
       promise.resolve();
       console.log(data);
     }
   }
 
   function calculatePH(bicarbonate) {
-    // TODO: >>>
-    // Use pCO2 values from lab tab
+    // TODO: Use pCO2 values from lab tab
     var pCO2 = 30.5;
     var pH = 6.1 + Math.log(bicarbonate/(0.03*pCO2)) / Math.log(10);
     return pH;
   }
 
   function runLabs() {
-    // Note: For some reason we need to reset the _currentCaseStudy -- not sure why this is. Apparently there // is a weird quirck of JavaScript I don't fully understand.
-    _currentCaseStudyId = getParameterByName("caseId");
-    _currentCaseStudy = _caseStudies[_currentCaseStudyId];
     var newLabs = {};
     var dialysate = {}; 
     var orders = getOrders();
-    // TODO: Remove occurences of orders and change to _currentOrders. This will eliminate the need
-    // to ping-pong this variable around the program.
     _currentOrders = orders;
     var startingWeight = _historicalVitals["weight"][_historicalVitals["weight"].length-1];
     var effluentFlowRate = calculateEffluentFlowRate(orders);
     var volumeOfDistribution = calculateVolumeOfDistribution(orders);
-    var productionRates = window._currentCaseStudySheet.productionRates.elements;
+    var productionRates = _currentCaseStudySheet.productionRates.elements;
 
     newLabs["filtrationFraction"] = orders.filtrationFraction;
     preLabChecks();
@@ -555,6 +529,7 @@ var CRRTApp = (function() {
 
   function runCitrateCalculations(startingWeight, effluentFlowRate, ionizedCalciumInitial) {
     var results = {}
+
     var citrateFlowRateInMlPerHr = $('#citrateFlowRate').val();
     var citrateFlowRateInLPerHr = citrateFlowRateInMlPerHr/1000;
     var citrateBloodConcentrationConstant = 112.9;
@@ -585,6 +560,7 @@ var CRRTApp = (function() {
     var bicarbonateWithCitrateDialysate = 25+(((citratFinalPostFilter+caCitFinalPostFilter)*3)*citrateMetabolismFactor);
     var bicarbonateWithCitrateFinal = calculateLab(bicarbonateWithCitrateInitial, bicarbonateWithCitrateDialysate, effluentFlowRate, _currentOrders["timeToNextLabs"], startingWeight, startingWeight*0.6, -10);
     var calciumTotal = ((caFinalPostFilter*(_currentOrders.BFR*60/1000)+calciumClInMmolPerL*calciumClFlowRateInLPerHr)/((_currentOrders.BFR*60/1000)+calciumClFlowRateInLPerHr))*8+caCitFinalPostFilter*4;
+
     results["bicarbonate"] = bicarbonateWithCitrateFinal;
     results["calcium"] = calciumTotal;
     results["ionizedCalcium"] = ionizedCalciumFinal;
@@ -626,7 +602,7 @@ var CRRTApp = (function() {
   }
 
   function incrementTime() {
-    window._currentTime = window._currentTime + _currentOrders["timeToNextLabs"];
+    _currentTime = _currentTime + _currentOrders["timeToNextLabs"];
   }
 
   function calculateNewWeight(orders) {
@@ -635,7 +611,7 @@ var CRRTApp = (function() {
     // 1L = 1Kg
     // output = ultrafiltration rate = Gross fluid removal = Gross ultrafiltration 
     // TODO: Not currently factoring in citrate, D5W, or 3%NS
-    var fluidInPastSixHoursInLiters = (parseFloat(window._currentCaseStudySheet.inputOutput.elements[window._currentTime+1]["previousSixHourTotal"]))/1000;
+    var fluidInPastSixHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
     var currentFiltrationFraction = orders.filtrationFraction;
 
     var totalHoursOfFiltration = 6;
@@ -738,7 +714,7 @@ var CRRTApp = (function() {
   }
 
   function calculateTimeToNextSetOfLabs() {
-    // Note: Certain things, like clotting, could alter
+    // NOTE: Certain things, like clotting, could alter
     // this value. For now, we're just setting it to 6 hours.
     return 6;
   }
@@ -767,26 +743,6 @@ var CRRTApp = (function() {
   }
 
   function postLabChecks() {
-    checkSodium();
-    checkPotassium();
-    checkChloride();
-    checkBicarbonate();
-    checkCalcium();
-    checkMagnesium();
-
-  }
-
-  function runCase1Checks() {
-    // NOTE: Start here. Next steps:
-    // * Finish if/thens (filter clogging and dose)
-    // * Add results page
-    // * Add Q&A section
-    // * Add written material
-    // * Add scoring page
-    // * Add calculations for hypotonic saline
-    // * Add calculater section
-    // * Add Case #2
-    // * Configure google sheets proxy
     checkSodium();
     checkPotassium();
     checkChloride();
@@ -867,7 +823,6 @@ var CRRTApp = (function() {
 
     _points.potassiumInRange.push(totalPoints);
     return;
-
   }
 
   function checkChloride() {
@@ -973,9 +928,8 @@ var CRRTApp = (function() {
 
     _points.magnesiumInRange.push(totalPoints);
     return;
-
   }
-  
+
   function checkPhosphorous() {
     // TODO: There will be a scheduled sodium phosphorous replacement option for when the sodium goes low, TBD
     //  - Adding sodium phosphate (15 mmol/dL) will modify the phosphate “[X] Dialysate” as follows:
@@ -983,7 +937,7 @@ var CRRTApp = (function() {
     //      - This should reset after each cycle, so it’s not automatically given every 6 hours
     var totalPoints = 0;
     var currentPhosphorous = _historicalLabs["phosphorous"][_historicalLabs["phosphorous"].length-1];
-      
+
     if (currentPhosphorous > 2.0) {
       console.log("checkPhosphorous() : within bounds (> 2.0)", currentPhosphorous);
       totalPoints = totalPoints + 10;
@@ -999,18 +953,17 @@ var CRRTApp = (function() {
 
     _points.phosphorousInRange.push(totalPoints);
     return;
-
   }
 
   function checkGrossUltrafiltration() {
     var totalPoints = 0;
-    var fluidInPastSixHoursInLiters = (parseFloat(window._currentCaseStudySheet.inputOutput.elements[window._currentTime+1]["previousSixHourTotal"]))/1000;
+    var fluidInPastSixHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
     var totalHoursOfFiltration = 6;
     // Note: If BFR is <= 150, grossUF for two hours is 0, therefore, we only have 4 hours of filtration. (This *might* only be for case study #1)
     if (_currentOrders["BFR"] <= 150) {
       totalHoursOfFiltration = 4;
     }
-    var grossFiltrationPastSixHoursInLiters = (orders["grossUF"]/1000)*totalHoursOfFiltration;
+    var grossFiltrationPastSixHoursInLiters = (_currentOrders["grossUF"]/1000)*totalHoursOfFiltration;
     var filtrationRate = (grossFiltrationPastSixHoursInLiters - fluidInPastSixHoursInLiters)*1000;
 
     if (filtrationRate > 200) {
@@ -1027,7 +980,7 @@ var CRRTApp = (function() {
   function checkFilterClotting() {
     var totalPoints = 0;
     var currentFiltrationFraction = _currentOrders.filtrationFraction;
-      
+
     if (currentFiltrationFraction < 25) {
       console.log("checkFiltrationFraction() : within bounds ", currentFiltrationFraction);
       totalPoints = totalPoints + 5;
@@ -1057,7 +1010,6 @@ var CRRTApp = (function() {
 
     _points.filtrationFractionInRange.push(totalPoints);
     return;
-
   }
 
   function checkDose() {
@@ -1125,7 +1077,6 @@ var CRRTApp = (function() {
   function showCVVHFormOptions() {
     $("#fluidLegend").text("Replacement Fluid");
     $("#fluidFlowLegend").text("Replacement Fluid Flow Rate (L/hr)");
-
   }
 
   function showCitrateFormOptions() {
@@ -1147,13 +1098,12 @@ var CRRTApp = (function() {
   function showMessage(msg) {
     var messageContainer = $('<p></p>').addClass('card-text');
     var message = $('<samp></samp>').text(msg);
-    var time = $('<p></p>').addClass('case-time').text("Case time: " + window._currentTime);
+    var time = $('<p></p>').addClass('case-time').text("Case time: " + _currentTime);
     messageContainer.append(time)
     messageContainer.append(message);
     $("#message-box").prepend("<hr>");
     $("#message-box").prepend(messageContainer);
   }
-
 
   function getParameterByName(name, url) {
     if (!url) url = window.location.href;
