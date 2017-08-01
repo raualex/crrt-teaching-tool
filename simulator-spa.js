@@ -34,52 +34,6 @@ var CRRTApp = (function() {
   var _labs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "calciumFinalPostFilter", "filtrationFraction", "PH"];
   var _vitals = ["bloodPressure", "respiratoryRate", "temperature", "heartRate", "weight"];
   var _physicalExam = ["general", "ENT", "heart", "lungs", "abdomen", "extremities", "psych"];
-  var _dialysateValues = {
-    "0K/3Ca": {
-      "lactate": 0,
-      "bicarbonate": 35,
-      "potassium": 0,
-      "sodium": 140,
-      "calcium": 3,
-      "magnesium": 1,
-      "chloride": 109,
-      "BUN": 0,
-      "creatinine": 0
-    },
-    "2K/0Ca": {
-      "lactate": 0,
-      "bicarbonate": 35,
-      "potassium": 2,
-      "sodium": 140,
-      "calcium": 0,
-      "magnesium": 1.5,
-      "chloride": 108.5,
-      "BUN": 0,
-      "creatinine": 0
-    },
-    "4K/2.5Ca": {
-      "lactate": 0,
-      "bicarbonate": 35,
-      "potassium": 4,
-      "sodium": 140,
-      "calcium": 2.5,
-      "magnesium": 1.5,
-      "chloride": 113,
-      "BUN": 0,
-      "creatinine": 0
-    },
-    "2K/0Ca/lb": {
-      "lactate": 0,
-      "bicarbonate": 25,
-      "potassium": 2,
-      "sodium": 130,
-      "calcium": 0,
-      "magnesium": 1.5,
-      "chloride": 108.5,
-      "BUN": 0,
-      "creatinine": 0
-    }
-  }
 
   // Note:
   // We are storing each of our lab values in an array. This allows
@@ -273,17 +227,17 @@ var CRRTApp = (function() {
 
     row.append($("<th></th>"));
     for(i=_currentTime-numColumns; i<_currentTime; i++) {
-      var th = $('<th></th>').text(_currentCaseStudySheet.inputOutput.elements[i+initialValuesOffset].time);
+      var th = $('<th></th>').text(window._currentCaseStudySheet.inputOutput.elements[i+initialValuesOffset].time);
       row.append(th);
     }
     table.append(head);
 
     for(i=0; i<numFluidInputs; i++) {
       var row = $('<tr></tr>');
-      var data = $('<td></td').text(_currentCaseStudySheet.inputOutput.columnNames[i+columnOffset]);
+      var data = $('<td></td').text(window._currentCaseStudySheet.inputOutput.columnNames[i+columnOffset]);
       row.append(data);
       for(j=_currentTime-numColumns; j<_currentTime; j++) {
-        var data = $('<td></td>').text(_currentCaseStudySheet.inputOutput.elements[j+initialValuesOffset][_currentCaseStudySheet.inputOutput.columnNames[i+columnOffset]]);
+        var data = $('<td></td>').text(window._currentCaseStudySheet.inputOutput.elements[j+initialValuesOffset][window._currentCaseStudySheet.inputOutput.columnNames[i+columnOffset]]);
         row.append(data);
       }
       table.append(row);
@@ -498,7 +452,6 @@ var CRRTApp = (function() {
 
     var orders = {
       fluid : $('input[name=fluid]:checked').val(),
-      //fluidDialysateValues : _dialysateValues[$('input[name=fluid]:checked').val()],
       fluidDialysateValues : {
         "sodium": parseInt($("#replacement-fluid-sodium-value").val()),
         "potassium": parseInt($("#replacement-fluid-potassium-value").val()),
@@ -635,7 +588,7 @@ var CRRTApp = (function() {
     // 1L = 1Kg
     // output = ultrafiltration rate = Gross fluid removal = Gross ultrafiltration 
     // TODO: Not currently factoring in citrate, D5W, or 3%NS
-    var fluidInPastSixHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
+    var fluidInPastSixHoursInLiters = (parseFloat(window._currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
     var grossFiltrationPastSixHoursInLiters = (orders["grossUF"]/1000)*6;
     var previousWeightInKilos = _historicalVitals['weight'][_historicalVitals['weight'].length-1];
     var currentWeightInKilos = previousWeightInKilos + (fluidInPastSixHoursInLiters - grossFiltrationPastSixHoursInLiters);
@@ -725,6 +678,17 @@ var CRRTApp = (function() {
   }
 
   function runCase1Checks() {
+    // NOTE: Start here. Next steps:
+    // * Determine when each of these checks needs to be run and run at the appropriate time.
+    //   (Should probably have two functions: "preLabChecks()" and "postLabChecks()")
+    // * Add scoring page
+    // * Add results page
+    // * Add Q&A section
+    // * Add writtin material
+    // * Add calculations for hypotonic saline
+    // * Add calculater section
+    // * Add Case #2
+    // * Configure google sheets proxy
     checkBloodFlowRate();
     checkSodium();
     checkPotassium();
@@ -758,7 +722,6 @@ var CRRTApp = (function() {
       totalPoints = totalPoints - 50;
     }
     _points.bloodFlowRateInRange.push(totalPoints);
-    debugger;
     return;
   }
 
