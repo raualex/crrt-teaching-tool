@@ -4,7 +4,24 @@ $( document ).ready(function() {
 
 var CRRTApp = (function() {
 
+  var _points = {
+    bloodFlowRateInRange: [],
+    sodiumInRange: [],
+    potassiumInRange: [],
+    pHInRange: [],
+    calciumInRange: [],
+    magnesiumInRange: [],
+    phosphourousInRange: [],
+    grossUltrafiltrationInRange: [],
+    filterFractionInRange: [],
+    doseInRange: []
+  };
+
+  var _numClottedFilters = 0;
+  var _currentMessages = [];
+
   var _caseStudies;
+  var _currentOrders;
   var _currentCaseStudyId;
   var _currentCaseStudy;
   var _currentCaseStudySheet;
@@ -97,6 +114,7 @@ var CRRTApp = (function() {
   }
 
   var _dynamicLabs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "pH"];
+  var _dynamicComponents = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "phosphorous", "magnesium"];
   var _staticLabs = ["lactate", "albumin", "WBC", "hemoglobin", "hematocrit", "plateletCount", "PC02", "granularCasts", "renalEpithelialCasts", "bloodCulture", "urineCulture"];
 
   var _historicalVitals = {
@@ -235,7 +253,7 @@ var CRRTApp = (function() {
     }
 
     var table = $('<table></table>').addClass('inputOutputTable table table-hover');
-    var numFluidInputs = _currentCaseStudySheet.inputOutput.elements[0]["numInputs"];
+    var numFluidInputs = window._currentCaseStudySheet.inputOutput.elements[0]["numInputs"];
     // Note: This number reflects the number of rows of initial data.
     var initialValuesOffset = 2;
     // Note: These data are being pulled from a Google spreadsheet. This number represents the number of 
@@ -343,13 +361,12 @@ var CRRTApp = (function() {
 
     // Note:
     // Start here. Need to fix labs calculation when running orders -- dynamic labs are not
-    // returning corrent values to the table (showing N/A for most cells)
+    // returning correct values to the table (showing N/A for most cells)
 
     if (_currentTime === 0) {
       currentLabSet = 1;
       previousLabSet = 0;
     } else {
-      debugger;
       currentLabSet = (_currentTime/6) + 1;
       previousLabSet = currentLabSet - 1;
     }
@@ -451,6 +468,12 @@ var CRRTApp = (function() {
     Tabletop.init( { key: publicSpreadsheetUrl, callback: showInfo, simpleSheet: false } );
     function showInfo(data, tabletop) {
       _currentCaseStudySheet = data;
+      window._currentCaseStudySheet = data;
+      window._currentCaseStudySheet.inputOutput = _currentCaseStudySheet.inputOutputCase1;
+      window._currentCaseStudySheet.vitals = _currentCaseStudySheet.vitalsCase1;
+      window._currentCaseStudySheet.labs = _currentCaseStudySheet.labsCase1;
+      window._currentCaseStudySheet.productionRates = _currentCaseStudySheet.productionRatesCase1;
+      window._currentCaseStudySheet.accessPressures = _currentCaseStudySheet.accessPressuresCase1;
       promise.resolve();
       console.log(data);
     }
@@ -496,22 +519,47 @@ var CRRTApp = (function() {
       timeToNextLabs : calculateTimeToNextSetOfLabs()
     }
 
+    // TODO: Remove occurences of orders and change to _currentOrders. This will eliminate the need
+    // to ping-pong this variable around the program.
+    _currentOrders = orders;
+
     var startingWeight = _historicalVitals["weight"][_historicalVitals["weight"].length-1];
 
     var effluentFlowRate = calculateEffluentFlowRate(orders);
     var volumeOfDistribution = calculateVolumeOfDistribution(orders);
 
-    // Note: Params for calculateLab(): initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate
-    var sodiumInitial = _historicalLabs["sodium"][_historicalLabs["sodium"].length-1];
-    var sodiumDialysate = orders.fluidDialysateValues["sodium"];
-    var sodiumProductionRate = _currentCaseStudy.startingData["sodium"+"ProductionRate"];
 
     //for(var i = 0; i < _labs.length; i++) {
     //  newLabs[_labs[i]] = calculateLab(_historicalLabs[_labs[i]][_historicalLabs[_labs[i]].length-1], orders.fluidDialysateValues[_labs[i]], effluentFlowRate, orders["timeToNextLabs"], startingWeight, volumeOfDistribution, _currentCaseStudy.startingData[_labs[i]+"ProductionRate"]);
     //}
     
-    for(var i = 0; i < _dynamicLabs.length; i++) {
-      newLabs[_dynamicLabs[i]] = calculateLab(_historicalLabs[_dynamicLabs[i]][_historicalLabs[_dynamicLabs[i]].length-1], orders.fluidDialysateValues[_labs[i]], effluentFlowRate, orders["timeToNextLabs"], startingWeight, volumeOfDistribution, _currentCaseStudy.startingData[_labs[i]+"ProductionRate"]);
+    //for(var i = 0; i < _dynamicComponents.length; i++) {
+    var productionRates = window._currentCaseStudySheet.productionRates.elements;
+
+    // Note: Params for calculateLab(): initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate
+    for(var i = 0; i < productionRates.length; i++) {
+
+      console.log("calculateLab(): component: ", productionRates[i].component);
+      console.log("calculateLab(): initialValue: ", _historicalLabs[productionRates[i].component][_historicalLabs[productionRates[i].component].length-1]);
+      console.log("calculateLab(): dialysate: ", orders.fluidDialysateValues[productionRates[i].component]);
+      console.log("calculateLab(): effluentFlowRate: ", effluentFlowRate);
+      console.log("calculateLab(): time: ", orders["timeToNextLabs"]);
+      console.log("calculateLab(): weight: ", startingWeight);
+      console.log("calculateLab(): volumeOfDistribution: ", volumeOfDistribution);
+      console.log("calculateLab(): productionRate: ", productionRates[i].productionRate);
+
+      newLabs[productionRates[i].component] = calculateLab(
+          parseFloat(_historicalLabs[productionRates[i].component][_historicalLabs[productionRates[i].component].length-1]),
+          parseFloat(orders.fluidDialysateValues[productionRates[i].component]),
+          parseFloat(effluentFlowRate),
+          parseFloat(orders["timeToNextLabs"]),
+          parseFloat(startingWeight),
+          parseFloat(volumeOfDistribution),
+          parseFloat(productionRates[i].productionRate));
+
+      console.log("newLabs : ", newLabs);
+
+      //newLabs[_dynamicComponents[i]] = calculateLab(_historicalLabs[_dynamicComponents[i]][_historicalLabs[_dynamicComponents[i]].length-1], orders.fluidDialysateValues[_labs[i]], effluentFlowRate, orders["timeToNextLabs"], startingWeight, volumeOfDistribution, _currentCaseStudySheet.productionRates[_dynamicLabs[i]+"ProductionRate"]);
     }
 
     newLabs["ionizedCalcium"] = _historicalLabs['calcium'][_historicalLabs['calcium'].length-1]/8;
@@ -574,6 +622,7 @@ var CRRTApp = (function() {
     _historicalVitals["weight"].push(newWeight);
 
     setPageVariables();
+    runCase1Checks(orders);
   }
 
   function incrementTime(time) {
@@ -673,6 +722,88 @@ var CRRTApp = (function() {
     $("#runLabs").click(function() {
       runLabs();
     })
+  }
+
+  function runCase1Checks() {
+    checkBloodFlowRate();
+    checkSodium();
+    checkPotassium();
+    checkChloride();
+    checkBicarbonate();
+    checkCalcium();
+    checkMagnesium();
+    checkPhosphorous();
+    checkGrossUltrafiltration();
+    checkFilterClotting();
+    checkDose();
+  }
+
+  function checkBloodFlowRate() {
+    // TODO: Need to run these checks before calculating lab values
+    var totalPoints = 0;
+    if (_currentOrders["BFR"] >= 200 && _currentOrders["BFR"] <= 300) {
+      console.log("checkBloodFlowRate() : within bounds ", _currentOrders["BFR"]);
+      totalPoints = totalPoints + 5;
+      _points.bloodFlowRateInRange.push(5);
+    }
+
+    if (_currentOrders["BFR"] <= 150) {
+      // TODO: divide effluent flow rate by 1.5 and set GrossUF to 0 for two hours
+      _currentMessages.push("The patient's nurse called.  She's been having many \"Low Return Pressure Alarms\" over the past 4 hours, and the machine is not running well.");
+      totalPoints = totalPoints - 100;
+    }
+
+    if (_currentOrders["BFR"] > 350 ) {
+      _currentMessages.push("The patient's nurse called to inform you of frequent \"Access Pressure Extremely Low\ alarms, and had to decrease BFR to 300.");
+      totalPoints = totalPoints - 50;
+    }
+    _points.bloodFlowRateInRange.push(totalPoints);
+    debugger;
+    return;
+  }
+
+  function checkSodium() {
+
+  }
+
+  function checkPotassium() {
+
+  }
+
+  function checkChloride() {
+
+  }
+
+  function checkBicarbonate() {
+
+  }
+
+  function checkCalcium() {
+
+  }
+
+  function checkMagnesium() {
+
+  }
+  
+  function checkPhosphorous() {
+
+  }
+
+  function checkGrossUltrafiltration() {
+
+  }
+
+  function checkFilterClotting() {
+
+  }
+
+  function checkGrossUltrafiltration() {
+
+  }
+
+  function checkDose() {
+
   }
 
   function handleOrderFormChanges() {
