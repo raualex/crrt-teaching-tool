@@ -13,13 +13,14 @@ var CRRTApp = (function() {
     pHInRange: [],
     calciumInRange: [],
     magnesiumInRange: [],
-    phosphourousInRange: [],
+    phosphorousInRange: [],
     grossUltrafiltrationInRange: [],
     filtrationFractionInRange: [],
     doseInRange: []
   };
 
   var _numClottedFilters = 0;
+  var _currentCycleClotNumber = 0;
   var _messages = [];
   var _caseStudies;
   var _currentOrders;
@@ -469,11 +470,19 @@ var CRRTApp = (function() {
     var orders = getOrders();
     _currentOrders = orders;
     var startingWeight = _historicalVitals["weight"][_historicalVitals["weight"].length-1];
-    var effluentFlowRate = calculateEffluentFlowRate(orders);
+    newLabs["ionizedCalcium"] = _historicalLabs['calcium'][_historicalLabs['calcium'].length-1]/8;
+    newLabs["filtrationFraction"] = orders.filtrationFraction;
+
+    var initialEffluentFlowRate = calculateEffluentFlowRate(orders);
+    console.log("initialEffluentFlowRate :", initialEffluentFlowRate);
+    var adjustedEffluentFlowRate = calculateAdjustedEffluentFlowRate(initialEffluentFlowRate, newLabs["filtrationFraction"], startingWeight, newLabs["ionizedCalcium"]);
+    var totalHoursOfFiltration = calculateTotalHoursOfFiltration(initialEffluentFlowRate, newLabs["filtrationFraction"], startingWeight, newLabs["ionizedCalcium"]);
+    console.log("adjustedEffluentFlowRate :", adjustedEffluentFlowRate);
+    var effluentFlowRate = adjustedEffluentFlowRate;
+
     var volumeOfDistribution = calculateVolumeOfDistribution(orders);
     var productionRates = _currentCaseStudySheet.productionRates.elements;
 
-    newLabs["filtrationFraction"] = orders.filtrationFraction;
     preLabChecks();
     for(var i = 0; i < productionRates.length; i++) {
 
@@ -498,7 +507,6 @@ var CRRTApp = (function() {
       console.log("newLabs : ", newLabs);
     }
 
-    newLabs["ionizedCalcium"] = _historicalLabs['calcium'][_historicalLabs['calcium'].length-1]/8;
 
     if(orders.anticoagulation === 'citrate') {
       var citrateResults = runCitrateCalculations(startingWeight, effluentFlowRate, newLabs["ionizedCalcium"])
@@ -511,9 +519,58 @@ var CRRTApp = (function() {
 
     saveLabValues(newLabs);
     incrementTime();
-    setNewWeight();
+    setNewWeight(totalHoursOfFiltration);
     setPageVariables();
     postLabChecks();
+  }
+
+  function calculateTotalHoursOfFiltration(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium) {
+    var initialEFR = effluentFlowRate;
+    var defaultHoursOfFiltration = 6;
+    var hoursOfFiltration = defaultHoursOfFiltration;
+    // NOTE: these adjustments to the total hours of filtration
+    // might only be applicable to case #1
+    if ((_currentOrders["BFR"] <= 150 ) || (currentFiltrationFraction > 25 && currentFiltrationFraction <= 30 && _currentOrders.anticoagulation === 'none')) {
+      hoursOfFiltration = 4;
+    }
+
+    if (currentFiltrationFraction > 30 && _currentOrders.anticoagulation === 'none') {
+      efrAdjustment = 2;
+    }
+    if (_currentOrders.anticoagulation === 'citrate') {
+      var initialCitrateResults = runCitrateCalculations(startingWeight, effluentFlowRate, ionizedCalcium);
+      var initialPostFilterIonizedCalcium = initialCitrateResults["calciumFinalPostFilter"];
+      console.log("calculateAdjustedEffluentFlowRate() : initialPostFilterIonizedCalcium : ", initialPostFilterIonizedCalcium);
+      if (initialPostFilterIonizedCalcium > 0.45) {
+        hoursOfFiltration = 4;
+      }
+    }
+    return hoursOfFiltration;
+  }
+
+  function calculateAdjustedEffluentFlowRate(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium) {
+    var initialEFR = effluentFlowRate;
+    var adjustedEFR;
+    var efrAdjustment = 1;
+    // NOTE: these adjustments to the effluent flow rate based on BFR and filtration fraction
+    // might only be applicable to case #1
+    if ((_currentOrders["BFR"] <= 150 ) || (currentFiltrationFraction > 25 && currentFiltrationFraction <= 30 && _currentOrders.anticoagulation === 'none')) {
+      efrAdjustment = 1.5;
+    }
+
+    if (currentFiltrationFraction > 30 && _currentOrders.anticoagulation === 'none') {
+      efrAdjustment = 3;
+    }
+    if (_currentOrders.anticoagulation === 'citrate') {
+      var initialCitrateResults = runCitrateCalculations(startingWeight, effluentFlowRate, ionizedCalcium);
+      var initialPostFilterIonizedCalcium = initialCitrateResults["calciumFinalPostFilter"];
+      console.log("calculateAdjustedEffluentFlowRate() : initialPostFilterIonizedCalcium : ", initialPostFilterIonizedCalcium);
+      if (initialPostFilterIonizedCalcium > 0.45) {
+        efrAdjustment = 1.5;
+      }
+    }
+    adjustedEFR = initialEFR/efrAdjustment;
+    return adjustedEFR;
   }
 
   function saveLabValues(newLabs) {
@@ -522,8 +579,9 @@ var CRRTApp = (function() {
     }
   }
 
-  function setNewWeight() {
-    var newWeight = calculateNewWeight(_currentOrders);
+  function setNewWeight(totalHoursOfFiltration) {
+    var newWeight = calculateNewWeight(_currentOrders, totalHoursOfFiltration);
+    console.log("newWeight : ", newWeight);
     _historicalVitals["weight"].push(newWeight);
   }
 
@@ -605,38 +663,14 @@ var CRRTApp = (function() {
     _currentTime = _currentTime + _currentOrders["timeToNextLabs"];
   }
 
-  function calculateNewWeight(orders) {
+  function calculateNewWeight(orders, totalHoursOfFiltration) {
     // Note:
     // new weight = old weight + difference between input and output
     // 1L = 1Kg
     // output = ultrafiltration rate = Gross fluid removal = Gross ultrafiltration 
     // TODO: Not currently factoring in citrate, D5W, or 3%NS
+    console.log("calculateNewWeight() : totalHoursOfFiltration : ", totalHoursOfFiltration);
     var fluidInPastSixHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
-    var currentFiltrationFraction = orders.filtrationFraction;
-
-    var totalHoursOfFiltration = 6;
-    // Note: If BFR is <= 150, grossUF for two hours is 0, therefore, we only have 4 hours of filtration. (This *might* only be for case study #1)
-    if (orders["BFR"] <= 150) {
-      totalHoursOfFiltration = 4;
-    }
-    // NOTE: these adjustments to the ultrafiltration rate based on BFR and filtration fraction
-    // might only be applicable to case #1
-    //
-    // Note: If FF is >25% AND not on heparin/citrate, grossUF for two hours is 0, therefore, we only have 4 hours of filtration
-    if ((orders["BFR"] <= 150 ) || (currentFiltrationFraction > 25 && currentFiltrationFraction <= 30 && _currentOrders.anticoagulation === 'none')) {
-      totalHoursOfFiltration = 4;
-    }
-    
-    // Note: If FF is >30% AND not on heparin/citrate, grossUF for four hours is 0, therefore, we only have 2 hours of filtration
-    if (currentFiltrationFraction > 30 && _currentOrders.anticoagulation === 'none') {
-      totalHoursOfFiltration = 2;
-    }
-    
-    // TODO: Need to add case where citrate is in use and filter clots. However, not sure how to calculate post-filter ionized calcium
-    // as it requires effluent flow rate, which is affected by the outcome.
-    
-    console.log("calculateNewWeight() totalHoursOfFiltration : ", totalHoursOfFiltration);
-
     var grossFiltrationPastSixHoursInLiters = (orders["grossUF"]/1000)*totalHoursOfFiltration;
     var previousWeightInKilos = parseFloat(_historicalVitals['weight'][_historicalVitals['weight'].length-1]);
     var currentWeightInKilos = previousWeightInKilos + (fluidInPastSixHoursInLiters - grossFiltrationPastSixHoursInLiters);
@@ -666,8 +700,6 @@ var CRRTApp = (function() {
   function calculateEffluentFlowRate(orders) {
     var efr;
     var currentFiltrationFraction = orders.filtrationFraction;
-    // NOTE: Default to no adjustment to the EFR
-    var efrAdjustment = 1;
 
     switch(orders["modality"]) {
       case "pre-filter-cvvh":
@@ -680,18 +712,6 @@ var CRRTApp = (function() {
         efr = orders["Qd"] + orders["grossUF"]/1000;
         break;
     }
-
-    // NOTE: these adjustments to the effluent flow rate based on BFR and filtration fraction
-    // might only be applicable to case #1
-    if ((orders["BFR"] <= 150 ) || (currentFiltrationFraction > 25 && currentFiltrationFraction <= 30 && _currentOrders.anticoagulation === 'none')) {
-      efrAdjustment = 1.5
-    }
-
-    if (currentFiltrationFraction > 30 && _currentOrders.anticoagulation === 'none') {
-      efrAdjustment = 3;
-    }
-
-    efr = efr/efrAdjustment;
 
     return efr;
   }
