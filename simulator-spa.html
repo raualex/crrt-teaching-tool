@@ -10,6 +10,7 @@
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.1/tabletop.min.js'></script>
     <script src='https://cdn.jsdelivr.net/jquery.validation/1.15.1/jquery.validate.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js'></script>
     <script src="simulator-spa.js"></script>
   </head>
   <body>
@@ -20,7 +21,7 @@
     </nav>
     <div class="container">
       <h1>Case: <span id="currentCaseStudyId"></span></h1>
-      <h2>Time: <span id="currentTime"></span></h2>
+      <h2><span class="currentTime"></span></h2>
 
       <div class="btn-group mt-3" role="group" aria-label="Basic example">
         <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#ordersModal">Orders</button>
@@ -504,8 +505,7 @@
         <div class="col-md-12">
           <div class="card mt-3">
             <div id="message-box" class="card-block">
-              <p class="case-time">
-                Case time: 0
+              <p class="case-time currentTime">
               </p>
               <p class="card-text">
                 <samp>

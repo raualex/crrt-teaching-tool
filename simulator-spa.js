@@ -31,6 +31,8 @@ var CRRTApp = (function() {
   var _labs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "calciumFinalPostFilter", "filtrationFraction", "PH"];
   var _vitals = ["bloodPressure", "respiratoryRate", "temperature", "heartRate", "weight"];
   var _physicalExam = ["general", "ENT", "heart", "lungs", "abdomen", "extremities", "psych"];
+  // NOTE: Our starting time will be 10am
+  var _startingTime = moment(10, 'HH');
 
   // Note:
   // We are storing each of our lab values in an array. This allows
@@ -394,7 +396,7 @@ var CRRTApp = (function() {
   }
 
   function setPageTime() {
-    $("#currentTime").text(_currentTime);
+    $(".currentTime").text(currentTimeToTimestamp);
   }
 
   function setPageCaseStudyId() {
@@ -457,6 +459,7 @@ var CRRTApp = (function() {
 
   function calculatePH(bicarbonate) {
     // TODO: Use pCO2 values from lab tab
+    // * currently only two PC02 values in the labs tab - checking with Ben to see what to do
     var pCO2 = 30.5;
     var pH = 6.1 + Math.log(bicarbonate/(0.03*pCO2)) / Math.log(10);
     return pH;
@@ -706,6 +709,7 @@ var CRRTApp = (function() {
     // 1L = 1Kg
     // output = ultrafiltration rate = Gross fluid removal = Gross ultrafiltration 
     // TODO: Not currently factoring in citrate, D5W, or 3%NS
+    // * Review again with Ben to ensure we are factoring everything needed to accurately calculate weight
     console.log("calculateNewWeight() : totalHoursOfFiltration : ", totalHoursOfFiltration);
     var fluidInPastSixHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
     var grossFiltrationPastSixHoursInLiters = (orders["grossUF"]/1000)*totalHoursOfFiltration;
@@ -1071,6 +1075,8 @@ var CRRTApp = (function() {
 
   function checkDose(effluentFlowRate) {
     var dose;
+    var effluentFlowRate = effluentFlowRate*1000;
+    var totalPoints;
     switch(_currentOrders["modality"]) {
       case "pre-filter-cvvh":
         dose = (_currentOrders["BFR"] * 60/1000) / ((_currentOrders["BFR"] * 60/1000) + _currentOrders["Qr"] ) * effluentFlowRate / _currentCaseStudy.startingData.usualWeight;
@@ -1083,8 +1089,23 @@ var CRRTApp = (function() {
         break;
     }
 
-    return dose;
+    if (dose >= 20 && dose <= 40) {
+      totalPoints = 10;
+    }
 
+    if (dose >= 20 && dose <= 25) {
+      // TODO: Ben didn't delineate how many extra points should be given
+      // for dose values between 20 and 25. I set it to ten extra points (for
+      // a total of 20), but should check with him.
+      totalPoints = 20;
+    }
+
+    if ((dose < 20) || (dose > 40)) {
+      totalPoints = -50;
+    }
+    _points.doseInRange.push(totalPoints);
+
+    return dose;
   }
 
   function handleOrderFormChanges() {
@@ -1169,11 +1190,15 @@ var CRRTApp = (function() {
   function showMessage(msg) {
     var messageContainer = $('<p></p>').addClass('card-text');
     var message = $('<samp></samp>').text(msg);
-    var time = $('<p></p>').addClass('case-time').text("Case time: " + _currentTime);
+    var time = $('<p></p>').addClass('case-time').text("Case time: " + currentTimeToTimeStamp());
     messageContainer.append(time)
     messageContainer.append(message);
     $("#message-box").prepend("<hr>");
     $("#message-box").prepend(messageContainer);
+  }
+
+  function currentTimeToTimestamp() {
+    return _startingTime.add(_currentTime, 'hours').format("h:mmA");
   }
 
   function getParameterByName(name, url) {
