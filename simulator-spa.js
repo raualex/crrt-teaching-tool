@@ -481,7 +481,7 @@ var CRRTApp = (function() {
     var volumeOfDistribution = calculateVolumeOfDistribution(orders);
     var productionRates = _currentCaseStudySheet.productionRates.elements;
 
-    preLabChecks();
+    preLabChecks(effluentFlowRate);
     for(var i = 0; i < productionRates.length; i++) {
 
       console.log("calculateLab(): component: ", productionRates[i].component);
@@ -794,9 +794,10 @@ var CRRTApp = (function() {
   }
 
 
-  function preLabChecks() {
+  function preLabChecks(effluentFlowRate) {
     checkBloodFlowRate();
     checkFilterClotting();
+    checkDose(effluentFlowRate);
   }
 
   function postLabChecks() {
@@ -808,7 +809,6 @@ var CRRTApp = (function() {
     checkMagnesium();
     checkPhosphorous();
     checkGrossUltrafiltration();
-    checkDose();
   }
 
   function checkBloodFlowRate() {
@@ -1069,7 +1069,21 @@ var CRRTApp = (function() {
     return;
   }
 
-  function checkDose() {
+  function checkDose(effluentFlowRate) {
+    var dose;
+    switch(_currentOrders["modality"]) {
+      case "pre-filter-cvvh":
+        dose = (_currentOrders["BFR"] * 60/1000) / ((_currentOrders["BFR"] * 60/1000) + _currentOrders["Qr"] ) * effluentFlowRate / _currentCaseStudy.startingData.usualWeight;
+        break;
+      case "post-filter-cvvh":
+        dose = effluentFlowRate / _currentCaseStudy.startingData.usualWeight;
+        break;
+      case "cvvhd":
+        dose = effluentFlowRate / _currentCaseStudy.startingData.usualWeight;
+        break;
+    }
+
+    return dose;
 
   }
 

@@ -1,5 +1,5 @@
-- [ ] add hypotonic saline calculations (just bite the bullet)
 - [ ] finish checkDose() method
+    - Talk to Ben -- getting results on the wrong order of magnitude (why?)
 - [ ] add CRRT screen
 - [ ] persist form values that should be persisted
 - [ ] pH - use PC02 from labs
@@ -15,6 +15,7 @@
 - [ ] add calculater page
 - [ ] setup Google Sheets proxy
 - [ ] add case #2
+- [X] add hypotonic saline calculations (just bite the bullet)
 - [X] calcWeight - add case where citrate is in use / filter clots
 - [X] checkFilterClotting - add case where citrate is in user / filter clots (run iCal calculation first, then run all labs with new effluent value)
 
