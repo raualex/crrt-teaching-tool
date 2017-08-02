@@ -1,5 +1,3 @@
-// TODO:
-// Start here:
 $( document ).ready(function() {
   CRRTApp.run();
 });
@@ -507,6 +505,7 @@ var CRRTApp = (function() {
       console.log("newLabs : ", newLabs);
     }
 
+    newLabs["sodium"] = calculateSodium(volumeOfDistribution, effluentFlowRate);
 
     if(orders.anticoagulation === 'citrate') {
       var citrateResults = runCitrateCalculations(startingWeight, effluentFlowRate, newLabs["ionizedCalcium"])
@@ -522,6 +521,44 @@ var CRRTApp = (function() {
     setNewWeight(totalHoursOfFiltration);
     setPageVariables();
     postLabChecks();
+  }
+
+  function calculateSodium(volumeOfDistribution, effluentFlowRate) {
+    // NOTE: This is where we are accounting for hypo/hypertonic solutions and recalculating our sodium values
+    // NOTE: Params for calculateLab(): initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate
+    var bolusValue = _currentOrders["otherFluidsBolusValue"];
+    var infusionValue = _currentOrders["otherFluidsInfusionValue"];
+    var otherFluidsSaline = _currentOrders["otherFluidsSaline"];
+    var otherFluidsD5W = _currentOrders["otherFluidsD5W"];
+    var otherFluidsSodiumPhosphate = _currentOrders["otherFluidsSodiumPhosphate"];
+    var userDialysateValue = _currentOrders.fluidDialysateValues["sodium"];
+
+    // default initial sodium is the previous historical value.
+    var initialSodium =  parseFloat(_historicalLabs["sodium"][_historicalLabs["sodium"].length-1]);
+
+    var startingWeight = parseFloat(_historicalVitals["weight"][_historicalVitals["weight"].length-1]);
+    var threePercentSalineConcentration;
+
+    // default dialysate value is the user entered value
+    var newDialysate = userDialysateValue;
+
+    if (otherFluidsSaline) {
+      threePercentSalineConcentration = 513;
+      newDialysate = infusionValue/1000/effluentFlowRate*373+userDialysateValue;
+    } 
+
+    if (otherFluidsD5W) {
+      threePercentSalineConcentration = 0;
+      newDialysate = userDialysateValue-infusionValue/1000/effluentFlowRate*userDialysateValue;
+    }
+
+    if (bolusValue) {
+      initialSodium = initialSodium + (((threePercentSalineConcentration - initialSodium)/(volumeOfDistribution+1))*(bolusValue/1000));
+    }
+
+    finalSodium = calculateLab(initialSodium, newDialysate, effluentFlowRate, _currentOrders["timeToNextLabs"], startingWeight, volumeOfDistribution, 0);
+
+    return finalSodium;
   }
 
   function calculateTotalHoursOfFiltration(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium) {
@@ -648,11 +685,11 @@ var CRRTApp = (function() {
       Qd : parseInt($('#fluidFlowRate').val()),
       grossUF : parseInt($('#grossHourlyFluidRemoval').val()),
       timeToNextLabs : calculateTimeToNextSetOfLabs(),
-      otherfluidsSaline : $('input[name=otherFluidsSaline]:checked').val(),
-      otherfluidsD5W : $('input[name=otherFluidsD5W]:checked').val(),
-      otherfluidsSodiumPhosphate : $('input[name=otherFluidsSodiumPhosphate]:checked').val(),
-      otherFluidsBolusValue :  $('input[name=otheFluidsBolusValue]').val(),
-      otherFluidsInfusionValue : $('input[name=otherFluidsInfusionValue]').val()
+      otherFluidsSaline : $('input[name=otherFluidsSaline]:checked').val(),
+      otherFluidsD5W : $('input[name=otherFluidsD5W]:checked').val(),
+      otherFluidsSodiumPhosphate : $('input[name=otherFluidsSodiumPhosphate]:checked').val(),
+      otherFluidsBolusValue :  parseFloat($('input[name=otherFluidsBolusValue]').val()),
+      otherFluidsInfusionValue : parseFloat($('input[name=otherFluidsInfusionValue]').val())
     }
     var ff = calculateFiltrationFraction(orders);
     orders.filtrationFraction = ff;
