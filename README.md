@@ -1,10 +1,7 @@
-- [ ] add case ending logic
 - [ ] add results page 
+- [ ] add case ending logic
 - [ ] add CRRT screen
 - [ ] persist form values that should be persisted
-- [ ] pH - use PC02 from labs
-- [ ] calcWeight - factor in additional fluids
-- [ ] calcFiltFract - dynamically set HCT (in labs data)
 - [ ] checkCalcium - update to use iCal values when using citrate
 - [ ] checkPhosphorous - update to use modified diaylsate when using Sodium Phosphate
 - [ ] add scoring page
@@ -13,6 +10,10 @@
 - [ ] add calculater page
 - [ ] setup Google Sheets proxy
 - [ ] add case #2
+- [X] calcFiltFract - dynamically set HCT (in labs data)
+- [X] add weight to vitals
+- [X] calcWeight - factor in additional fluids
+- [X] pH - use PC02 from labs
 - [X] Use "real" times instead of integers
 - [X] finish checkDose() method
 - [X] add hypotonic saline calculations (just bite the bullet)

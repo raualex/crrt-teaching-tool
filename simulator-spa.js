@@ -252,8 +252,8 @@ var CRRTApp = (function() {
     setPageImaging();
     setPagePhysicalExam();
     createInputOutputTable();
-    createVitalsTabls();
-    createLabsTabel();
+    createVitalsTable();
+    createLabsTable();
   }
 
   function createInputOutputTable() {
@@ -301,7 +301,7 @@ var CRRTApp = (function() {
     $("#inputOutput").append(table);
   }
 
-  function createVitalsTabls() {
+  function createVitalsTable() {
     // If table already exists, remove, so we can rebuid it.
     if ($(".vitalsTable")) {
       $(".vitalsTable").remove();
@@ -339,7 +339,17 @@ var CRRTApp = (function() {
       var data = $('<td></td').text(_currentCaseStudySheet.vitals.columnNames[i+columnOffset]);
       row.append(data);
       for(j=_currentTime-numColumns; j<_currentTime; j++) {
-        var data = $('<td></td>').text(_currentCaseStudySheet.vitals.elements[j+initialValuesOffset][_currentCaseStudySheet.vitals.columnNames[i+columnOffset]]);
+
+        // NOTE: While most vitals are coming from the spreadsheet, we are dynamically calculating
+        // the patient's weight. So, we're jumping in here and inserting that dynamic value (I know it's dirty)
+        if (_currentCaseStudySheet.vitals.columnNames[i+columnOffset] === "weight" && j === (_currentTime-1)) {
+          var currentWeight = _historicalVitals["weight"][_historicalVitals["weight"].length-1];
+          var data = $('<td></td>').text(currentWeight);
+        } else {
+          var data = $('<td></td>').text(_currentCaseStudySheet.vitals.elements[j+initialValuesOffset][_currentCaseStudySheet.vitals.columnNames[i+columnOffset]]);
+
+        }
+
         row.append(data);
       }
       table.append(row);
@@ -347,7 +357,7 @@ var CRRTApp = (function() {
     $("#vitals").append(table);
   }
 
-  function createLabsTabel() {
+  function createLabsTable() {
     // If table already exists, remove, so we can rebuid it.
     if ($(".labsTable")) {
       $(".labsTable").remove();
@@ -396,7 +406,8 @@ var CRRTApp = (function() {
   }
 
   function setPageTime() {
-    $(".currentTime").text(currentTimeToTimestamp);
+    $(".currentTime").text(currentTimeToTimestamp(false));
+    $(".currentTimeWithElapsed").text(currentTimeToTimestamp(true));
   }
 
   function setPageCaseStudyId() {
@@ -435,7 +446,7 @@ var CRRTApp = (function() {
       _historicalVitals[_vitals[i]].push(_currentCaseStudySheet.vitals.elements[0][_vitals[i]]);
     }
     // Set initial pH
-    var pH = calculatePH(_historicalLabs["bicarbonate"][_historicalLabs["bicarbonate"].length-1]);
+    var pH = excelRound(calculatePH(_historicalLabs["bicarbonate"][_historicalLabs["bicarbonate"].length-1]), 2);
     _historicalLabs["pH"][0] = pH;
 
     console.log("_currentCaseStudyId : ", _currentCaseStudyId);
@@ -458,11 +469,22 @@ var CRRTApp = (function() {
   }
 
   function calculatePH(bicarbonate) {
-    // TODO: Use pCO2 values from lab tab
-    // * currently only two PC02 values in the labs tab - checking with Ben to see what to do
-    var pCO2 = 30.5;
-    var pH = 6.1 + Math.log(bicarbonate/(0.03*pCO2)) / Math.log(10);
+    var PCO2 = getCurrentLab("PC02");
+    var pH = 6.1 + Math.log(bicarbonate/(0.03*PCO2)) / Math.log(10);
+    console.log("calculatePH : pH", pH);
     return pH;
+  }
+
+  function getCurrentLab(lab) {
+    var currentLabSetIndex;
+
+    if (_currentTime === 0) {
+      currentLabSetIndex = 1;
+    } else {
+      currentLabSetIndex = (_currentTime/6) + 1;
+    }
+
+    return parseFloat(_currentCaseStudySheet.labs.elements[currentLabSetIndex][lab]);
   }
 
   function runLabs() {
@@ -620,7 +642,7 @@ var CRRTApp = (function() {
   }
 
   function setNewWeight(totalHoursOfFiltration) {
-    var newWeight = calculateNewWeight(_currentOrders, totalHoursOfFiltration);
+    var newWeight = excelRound(calculateNewWeight(_currentOrders, totalHoursOfFiltration), 2);
     console.log("newWeight : ", newWeight);
     _historicalVitals["weight"].push(newWeight);
   }
@@ -659,10 +681,10 @@ var CRRTApp = (function() {
     var bicarbonateWithCitrateFinal = calculateLab(bicarbonateWithCitrateInitial, bicarbonateWithCitrateDialysate, effluentFlowRate, _currentOrders["timeToNextLabs"], startingWeight, startingWeight*0.6, -10);
     var calciumTotal = ((caFinalPostFilter*(_currentOrders.BFR*60/1000)+calciumClInMmolPerL*calciumClFlowRateInLPerHr)/((_currentOrders.BFR*60/1000)+calciumClFlowRateInLPerHr))*8+caCitFinalPostFilter*4;
 
-    results["bicarbonate"] = bicarbonateWithCitrateFinal;
-    results["calcium"] = calciumTotal;
-    results["ionizedCalcium"] = ionizedCalciumFinal;
-    results["calciumFinalPostFilter"] = caFinalPostFilter;
+    results["bicarbonate"] = excelRound(bicarbonateWithCitrateFinal, 2);
+    results["calcium"] = excelRound(calciumTotal, 2);
+    results["ionizedCalcium"] = excelRound(ionizedCalciumFinal, 2);
+    results["calciumFinalPostFilter"] = excelRound(caFinalPostFilter, 2);
 
     return results;
   }
@@ -708,21 +730,69 @@ var CRRTApp = (function() {
     // new weight = old weight + difference between input and output
     // 1L = 1Kg
     // output = ultrafiltration rate = Gross fluid removal = Gross ultrafiltration 
-    // TODO: Not currently factoring in citrate, D5W, or 3%NS
-    // * Review again with Ben to ensure we are factoring everything needed to accurately calculate weight
     console.log("calculateNewWeight() : totalHoursOfFiltration : ", totalHoursOfFiltration);
-    var fluidInPastSixHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
+
+    var totalInputInL = 0;
+    var bolusValue = _currentOrders["otherFluidsBolusValue"];
+    var infusionValue = _currentOrders["otherFluidsInfusionValue"];
+    var otherFluidsSaline = _currentOrders["otherFluidsSaline"];
+    var otherFluidsD5W = _currentOrders["otherFluidsD5W"];
+    var otherFluidsSodiumPhosphate = _currentOrders["otherFluidsSodiumPhosphate"];
+    var labFluidsInPastSixHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
+
+    totalInputInL += labFluidsInPastSixHoursInLiters;
+    console.log("labFluidsInPastSixHoursInLiters :", labFluidsInPastSixHoursInLiters);
+    console.log("totalInputInL :", totalInputInL);
+
+    if(orders.anticoagulation === 'citrate') {
+      var citrateFlowRateInLPerHr = (parseFloat($('#citrateFlowRate').val())/1000);
+      var citratePastSixHoursInLiters = citrateFlowRateInLPerHr*6;
+      totalInputInL += citratePastSixHoursInLiters;
+
+      console.log("citratePastSixHoursInLiters : ", citratePastSixHoursInLiters);
+      console.log("totalInputInL :", totalInputInL);
+
+      var calciumClFlowRateInLPerHr = (parseFloat($('#caclInfusionRate').val())/1000);
+      var calciumClPastSixHoursInLiters = calciumClFlowRateInLPerHr*6;
+      totalInputInL += calciumClPastSixHoursInLiters;
+
+      console.log("calciumClPastSixHoursInLiters : ", calciumClPastSixHoursInLiters);
+      console.log("totalInputInL :", totalInputInL);
+    }
+
+
+    if(orders.otherFluidsSodiumPhosphate) {
+      var sodiumPhosphateInLiters = 0.1;
+      totalInputInL += sodiumPhosphateInLiters;
+      console.log("totalInputInL :", totalInputInL);
+    }
+
+    if(bolusValue) {
+      var bolusInL = bolusValue/1000;
+      totalInputInL += bolusInL;
+      console.log("bolusInL : ", bolusInL);
+      console.log("totalInputInL :", totalInputInL);
+    }
+
+    if (infusionValue) {
+      var infusionInL = infusionValue/1000;
+      var infusionPastSixHours = infusionInL*6;
+      totalInputInL += infusionPastSixHours;
+      console.log("infusionPastSixHours : ", infusionPastSixHours);
+      console.log("totalInputInL :", totalInputInL);
+    }
+
     var grossFiltrationPastSixHoursInLiters = (orders["grossUF"]/1000)*totalHoursOfFiltration;
     var previousWeightInKilos = parseFloat(_historicalVitals['weight'][_historicalVitals['weight'].length-1]);
-    var currentWeightInKilos = previousWeightInKilos + (fluidInPastSixHoursInLiters - grossFiltrationPastSixHoursInLiters);
+
+    var currentWeightInKilos = previousWeightInKilos + (totalInputInL - grossFiltrationPastSixHoursInLiters);
     return currentWeightInKilos;
   }
 
   function calculateFiltrationFraction(orders) {
     var ff;
-    // TODO: Is hct hard-coded? No.
-    // hct is a percent-value. Take this value from labs (divide by 100)
-    var hct = 0.3;
+    var hct = getCurrentLab("hematocrit")/100;
+    console.log("calculateFiltrationFraction : hematocrit ", hct);
 
     switch(orders["modality"]) {
       case "pre-filter-cvvh":
@@ -792,7 +862,7 @@ var CRRTApp = (function() {
 
   function calculateLab(initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate) {
     var newValue = initialValue + (dialysate - initialValue) * (1 - Math.exp(-effluentFlowRate*time/volumeOfDistribution)) + (productionRate/effluentFlowRate)*(1 - Math.exp(-effluentFlowRate*time/volumeOfDistribution));
-    newValue = excelRound(newValue, 6);
+    newValue = excelRound(newValue, 2);
     return newValue
 
   }
@@ -813,6 +883,7 @@ var CRRTApp = (function() {
     checkMagnesium();
     checkPhosphorous();
     checkGrossUltrafiltration();
+    checkSimulationCompletion();
   }
 
   function checkBloodFlowRate() {
@@ -1108,6 +1179,16 @@ var CRRTApp = (function() {
     return dose;
   }
 
+  function checkSimulationCompletion() {
+    // TODO:
+    // * check to see if patient has died
+    // * check to see if time limit has been reached
+    // * handle simulation completion 
+    //   - show results
+    //   - disable orders/etc.
+
+  }
+
   function handleOrderFormChanges() {
     handleModalityChanges();
     handleAnticoagulationChanges();
@@ -1190,15 +1271,20 @@ var CRRTApp = (function() {
   function showMessage(msg) {
     var messageContainer = $('<p></p>').addClass('card-text');
     var message = $('<samp></samp>').text(msg);
-    var time = $('<p></p>').addClass('case-time').text("Case time: " + currentTimeToTimeStamp());
+    var time = $('<p></p>').addClass('case-time').text(currentTimeToTimestamp(false));
     messageContainer.append(time)
     messageContainer.append(message);
     $("#message-box").prepend("<hr>");
     $("#message-box").prepend(messageContainer);
   }
 
-  function currentTimeToTimestamp() {
-    return _startingTime.add(_currentTime, 'hours').format("h:mmA");
+  function currentTimeToTimestamp(showTimeElapsed) {
+    var timeStamp = moment(_startingTime).add(_currentTime, 'hours').format("H:mm");
+    if (showTimeElapsed === true) {
+      return timeStamp + " (T+" + _currentTime + "hrs)";
+    } else {
+      return timeStamp;
+    }
   }
 
   function getParameterByName(name, url) {

@@ -21,7 +21,7 @@
     </nav>
     <div class="container">
       <h1>Case: <span id="currentCaseStudyId"></span></h1>
-      <h2><span class="currentTime"></span></h2>
+      <h2><span class="currentTimeWithElapsed"></span></h2>
 
       <div class="btn-group mt-3" role="group" aria-label="Basic example">
         <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#ordersModal">Orders</button>
@@ -251,150 +251,6 @@
                 </button>
               </div>
               <div id="labs"class="modal-body">
-                <!--
-                <table class="table table-hover mt-4">
-                  <thead>
-                    <tr>
-                      <th></th>
-                      <th>Previous</th>
-                      <th>Current</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row">Sodium</th>
-                      <td id="previousSodium"></td>
-                      <td id="currentSodium"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Potassium</th>
-                      <td id="previousPotassium"></td>
-                      <td id="currentPotassium"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Chloride</th>
-                      <td id="previousChloride"></td>
-                      <td id="currentChloride"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Bicarbonate</th>
-                      <td id="previousBicarbonate"></td>
-                      <td id="currentBicarbonate"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">BUN</th>
-                      <td id="previousBUN"></td>
-                      <td id="currentBUN"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Creatinine</th>
-                      <td id="previousCreatinine"></td>
-                      <td id="currentCreatinine"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Calcium</th>
-                      <td id="previousCalcium"></td>
-                      <td id="currentCalcium"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Ionized Calcium</th>
-                      <td id="previousIonizedCalcium"></td>
-                      <td id="currentIonizedCalcium"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Magnesium</th>
-                      <td id="previousMagnesium"></td>
-                      <td id="currentMagnesium"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Phosphorous</th>
-                      <td id="previousPhosphorous"></td>
-                      <td id="currentPhosphorous"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">pH</th>
-                      <td id="previousPH"></td>
-                      <td id="currentPH"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Lactate</th>
-                      <td id="previousLactate"></td>
-                      <td id="currentLactate"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Albumin</th>
-                      <td id="previousAlbumin"></td>
-                      <td id="currentAlbumin"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">WBC</th>
-                      <td id="previousWBC"></td>
-                      <td id="currentWBC"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Hemoglobin</th>
-                      <td id="previousHemoglobin"></td>
-                      <td id="currentHemoglobin"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Hematocrit</th>
-                      <td id="previousHematocrit"></td>
-                      <td id="currentHematocrit"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">PlateletCount</th>
-                      <td id="previousPlateletCount"></td>
-                      <td id="currentPlateletCount"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">PC02</th>
-                      <td id="previousPC02"></td>
-                      <td id="currentPC02"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">GranularCasts</th>
-                      <td id="previousGranularCasts"></td>
-                      <td id="currentGranularCasts"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">RenalEpithelialCasts</th>
-                      <td id="previousRenalEpithelialCasts"></td>
-                      <td id="currentRenalEpithelialCasts"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">BloodCulture</th>
-                      <td id="previousBloodCulture"></td>
-                      <td id="currentBloodCulture"></td>
-                    </tr>
-                    <tr>
-                      <th scope="row">UrineCulture</th>
-                      <td id="previousUrineCulture"></td>
-                      <td id="currentUrineCulture"></td>
-                    </tr>
-                    -->
-                    <!--
-                    <tr>
-                      <th scope="row">Calcium Final Post Filter</th>
-                      <td id="previousCalciumFinalPostFilter"></td>
-                      <td id="currentCalciumFinalPostFilter"></td>
-                    </tr>
-                    -->
-                    <!--
-                    <tr>
-                      <th scope="row">Filtration Fraction</th>
-                      <td id="previousFiltrationFraction"></td>
-                      <td id="currentFiltrationFraction"></td>
-                    </tr>
-                    -->
-                    <!--
-                    <tr>
-                      <th scope="row">pH</th>
-                      <td id="previousPH"></td>
-                      <td id="currentPH"></td>
-                    </tr>
-                  </tbody>
-                </table>
-                -->
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -500,12 +356,33 @@
             </div>
           </div>
         </div>
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#resultsModal">Results</button>
+        <!-- Results Modal -->
+        <div class="modal fade" id="resultsModal" tabindex="-1" role="dialog" aria-labelledby="resultsModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="resultsModalLabel">Results</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <div class="modal-body">
+                <div id="results"></div>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div class="row">
         <div class="col-md-12">
           <div class="card mt-3">
             <div id="message-box" class="card-block">
-              <p class="case-time currentTime">
+              <p class="case-time">
+              10:00
               </p>
               <p class="card-text">
                 <samp>
