@@ -25,6 +25,7 @@ var CRRTApp = (function() {
   var _currentCaseStudyId;
   var _currentCaseStudy;
   var _currentCaseStudySheet;
+  var _currentDose;
   var _dynamicLabs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "pH"];
   var _staticLabs = ["lactate", "albumin", "WBC", "hemoglobin", "hematocrit", "plateletCount", "PC02", "granularCasts", "renalEpithelialCasts", "bloodCulture", "urineCulture"];
   var _allLabs = _dynamicLabs.concat(_staticLabs);
@@ -110,6 +111,7 @@ var CRRTApp = (function() {
           "CKD 3 (baseline creatinine 1.4 - 1.6)"
         ],
         "pastSurgicalHistory": [
+
           "Abdominal hernia repair"
         ],
         "socialHistory": [
@@ -251,9 +253,25 @@ var CRRTApp = (function() {
     setPageHistoryOfPresentIllness();
     setPageImaging();
     setPagePhysicalExam();
+    setCRRTDisplay();
     createInputOutputTable();
     createVitalsTable();
     createLabsTable();
+  }
+
+  function setCRRTDisplay() {
+    if (_currentTime !== 0) {
+      $("#noOrders").hide();
+      $("#CRRTDisplay").show();
+      $(".therapyFluid").text(_currentOrders.Qr);
+      $(".accessPressure").text(getCurrentAccessPressure("accessPressure"));
+      $(".dose").text(_currentDose);
+      $(".ultrafiltrationRate").text(_currentOrders.grossUF);
+      $(".venousPressure").text(getCurrentAccessPressure("venousPressure"));
+      $(".filtrationFraction").text(_currentOrders.filtrationFraction);
+      $(".bloodFlowRate").text(_currentOrders.BFR);
+      $(".effluentPressure").text(getCurrentAccessPressure("effluentPressure"));
+    }
   }
 
   function createInputOutputTable() {
@@ -485,6 +503,11 @@ var CRRTApp = (function() {
     }
 
     return parseFloat(_currentCaseStudySheet.labs.elements[currentLabSetIndex][lab]);
+  }
+
+  function getCurrentAccessPressure(pressure) {
+    currentLabSetIndex = _currentTime/6;
+    return parseFloat(_currentCaseStudySheet.accessPressures.elements[currentLabSetIndex][pressure]);
   }
 
   function runLabs() {
@@ -1175,6 +1198,8 @@ var CRRTApp = (function() {
       totalPoints = -50;
     }
     _points.doseInRange.push(totalPoints);
+    // NOTE: Set dose so we have access to it in the future
+    _currentDose = dose;
 
     return dose;
   }

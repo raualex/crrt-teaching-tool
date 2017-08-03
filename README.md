@@ -1,6 +1,5 @@
 - [ ] add results page 
 - [ ] add case ending logic
-- [ ] add CRRT screen
 - [ ] persist form values that should be persisted
 - [ ] checkCalcium - update to use iCal values when using citrate
 - [ ] checkPhosphorous - update to use modified diaylsate when using Sodium Phosphate
@@ -10,6 +9,7 @@
 - [ ] add calculater page
 - [ ] setup Google Sheets proxy
 - [ ] add case #2
+- [X] add CRRT screen
 - [X] calcFiltFract - dynamically set HCT (in labs data)
 - [X] add weight to vitals
 - [X] calcWeight - factor in additional fluids

@@ -22,10 +22,9 @@
     <div class="container">
       <h1>Case: <span id="currentCaseStudyId"></span></h1>
       <h2><span class="currentTimeWithElapsed"></span></h2>
-
       <div class="btn-group mt-3" role="group" aria-label="Basic example">
-        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#ordersModal">Orders</button>
-        <!-- Input / Output Modal -->
+
+        <!-- Orders Modal -->
         <div class="modal fade" id="ordersModal" tabindex="-1" role="dialog" aria-labelledby="ordersModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -171,8 +170,59 @@
           </div>
         </div>
 
-        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#historyOfPresentIllnessModal">History of Present Illness</button>
+        <!-- CRRT Display Modal -->
+        <div class="modal fade" id="CRRTDisplayModal" tabindex="-1" role="dialog" aria-labelledby="CRRTDisplayModalLabel" aria-hidden="true">
+          <div class="modal-dialog modal-lg" role="document">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h5 class="modal-title" id="CRRTDisplayModalLabel">CRRT Display</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                  <span aria-hidden="true">&times;</span>
+                </button>
+              </div>
+              <h6 class="text-center mt-3 mb-3" id="noOrders">No values yet.</h6>
+              <div style="display: none;" id="CRRTDisplay"class="modal-body">
+                <table class="table table-hover mt-4">
+                  <thead>
+                    <tr>
+                      <th>Flow Rates</th>
+                      <th>Pressures (mmHg)</th>
+                      <th>CRRT Variables</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Therapy Fluid <span class="therapyFluid"></span>/hr</td>
+                      <td>Access Pressure <span class="accessPressure"></span></td>
+                      <td>Dose <span class="dose"></span> mL/kg/hr</td>
+                    </tr>
+                    <tr>
+                      <td>Ultrafiltration <span class="ultrafiltrationRate"></span> mL/hr</td>
+                      <td>Venous <span class="venousPressure"</span></td>
+                      <td>Filtration Fraction <span class="filtrationFraction"></span>%</td>
+                    </tr>
+                    <tr>
+                      <td>Blood  <span class="bloodFlowRate"></span> mL/min</td>
+                      <td>Effluent <span class="effluentPressure"></span></td>
+                      <td></td>
+                    </tr>
+                    <tr>
+                      <td></td>
+                      <td>Balance Chamber 200</td>
+                      <td></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- History of Present Illness Modal -->
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#historyOfPresentIllnessModal">History of Present Illness</button>
         <div class="modal fade" id="historyOfPresentIllnessModal" tabindex="-1" role="dialog" aria-labelledby="historyOfPresentIllnessModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -200,8 +250,9 @@
             </div>
           </div>
         </div>
-        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#inputOutputModal">Input/Output</button>
+
         <!-- Input / Output Modal -->
+        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#inputOutputModal">Input/Output</button>
         <div class="modal fade" id="inputOutputModal" tabindex="-1" role="dialog" aria-labelledby="inputOutputModalLabel" aria-hidden="true">
           <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
@@ -375,6 +426,12 @@
               </div>
             </div>
           </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-12 mt-3">
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ordersModal">Orders</button>
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#CRRTDisplayModal">CRRT Display</button>
         </div>
       </div>
       <div class="row">
