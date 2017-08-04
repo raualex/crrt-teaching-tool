@@ -58,3 +58,7 @@ body.loading .modal-spin {
 #inputOutput {
   overflow-x: scroll;
 }
+
+#vitals {
+  overflow-x: scroll;
+}

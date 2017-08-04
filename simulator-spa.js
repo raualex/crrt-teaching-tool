@@ -249,7 +249,7 @@ var CRRTApp = (function() {
         },
         "gross-hourly-fluid-removal": {
           min: 0,
-          max: 1000
+          max: 2000
         }
       },
       messages: {
@@ -261,7 +261,7 @@ var CRRTApp = (function() {
         "replacement-fluid-magnesium-value": "The hospital pharmacy can only compound magnesium between 0 and 2 mgd/L",
         "replacement-fluid-phosphorous-value": "The hospital pharmacy cannot compound fluid with > 1mg/dL of phosphorous, due to precipitation of calcium phosphate.",
         "fluidFlowRate": "The CRRT machine cannot deliver fluid above 8 L/hr",
-        "gross-hourly-fluid-removal": "The CRRT machine will not accept ultrafiltration rates above 1,000 mL/hour"
+        "gross-hourly-fluid-removal": "The CRRT machine will not accept ultrafiltration rates above 2,000 mL/hour"
       },
       submitHandler: function(form) {
         $('#ordersModal').modal('hide');
@@ -485,7 +485,8 @@ var CRRTApp = (function() {
     if (_currentTime === 0) {
       numColumns = 1;
     } else {
-      numColumns = 6;
+      //numColumns = 6;
+      numColumns = _currentTime + 1;
     }
 
     var head = $('<thead></thead');
@@ -507,8 +508,9 @@ var CRRTApp = (function() {
 
         // NOTE: While most vitals are coming from the spreadsheet, we are dynamically calculating
         // the patient's weight. So, we're jumping in here and inserting that dynamic value (I know it's dirty)
-        if (_currentCaseStudySheet.vitals.columnNames[i+columnOffset] === "weight" && j === (_currentTime-1)) {
-          var currentWeight = _historicalVitals["weight"][_historicalVitals["weight"].length-1];
+        //if (_currentCaseStudySheet.vitals.columnNames[i+columnOffset] === "weight" && j === (_currentTime-1)) {
+        if (_currentCaseStudySheet.vitals.columnNames[i+columnOffset] === "weight" && ((j+1)%6) === 0) {
+          var currentWeight = _historicalVitals["weight"][(j+1)/6];
           var data = $('<td></td>').text(currentWeight);
         } else {
           var data = $('<td></td>').text(_currentCaseStudySheet.vitals.elements[j+initialValuesOffset][_currentCaseStudySheet.vitals.columnNames[i+columnOffset]]);
@@ -1477,7 +1479,7 @@ var CRRTApp = (function() {
       console.log("checkSimulationCompletion() : Patient has expired.");
       resultsOverview = "Your patient died of overwhelming acidosis and infection.  Mortality is high in critically ill patients who require dialysis, but your patient would have benefitted from more efficient CRRT.  Try increasing the bicarbonate concentration in the replacement or  dialysate fluid, or using more effective anticoagulation.  Restart the case and see if you can improve the outcome!";
       _caseOver = true;
-    } else if (_currentTime === 72 && currentWeight < 96) {
+    } else if (_currentTime === 72 && currentWeight < 98) {
       console.log("checkSimulationCompletion() : You won!");
       resultsOverview = "Your patient survived her episode of sepsis due to pneumonia, complicated by severe AKI requiring CRRT.";
       setResultsTableVariables();
