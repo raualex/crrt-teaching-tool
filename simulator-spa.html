@@ -5,6 +5,7 @@
     <title>CRRT Sim SPA</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
@@ -13,7 +14,7 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js'></script>
     <script src="simulator-spa.js"></script>
   </head>
-  <body>
+  <body class="loading">
     <nav class="navbar navbar-light bg-faded">
       <a class="navbar-brand" href="./index.html">
         CRRT Education App
@@ -39,8 +40,14 @@
                   <div class="row">
                     <div class="col-md-6">
                       <fieldset class="form-group">
-                        <legend><span>
-                            Modality</span><span><i class="fa fa-question-circle-o ml-1"></i></span></legend>
+                        <legend>
+                          <span> Modality </span>
+                          <span>
+                            <a href="./material.html#modality" target="_blank">
+                              <i class="fa fa-question-circle-o ml-1"></i>
+                            </a>
+                          </span>
+                        </legend>
                         <div class="form-check">
                           <label class="form-check-label">
                             <input type="radio" class="form-check-input modality-input" name="modality" id="pre-filter-cvvh" value="pre-filter-cvvh" checked>
@@ -147,7 +154,13 @@
 
                       </fieldset>
                       <div class="form-group citrate">
-                        <legend id="citrateFlowLegend">Citrate Flow Rate (mL/hr)</legend>
+                        <legend id="citrateFlowLegend">
+                          <span>Citrate Flow Rate (mL/hr)</span>
+                          <a href="./material.html#citrate-flow-rate" target="_blank">
+                            <span><i class="fa fa-question-circle-o ml-1"></i></span>
+                          </a>
+                        </legend>
+
                         <input type="citrateFlowRate" class="form-control" id="citrateFlowRate" placeholder="0" value="300">
                       </div>
                       <div class="form-group citrate">
@@ -419,7 +432,110 @@
                 </button>
               </div>
               <div class="modal-body">
-                <div id="results"></div>
+                <div id="results">
+                  <p id="resultsOverview">
+                  </p>
+                  <div style="display: none;" id="resultsTable">
+                    <div id="doseSection">
+                      <h5>Dose</h5>
+                      <p>
+                        <span id="totalDosePoints"></span> earned out of a possible <span id="dosePointsPossible"></span>
+                      </p>
+                      <p>
+                        The average dose delivered was: <span id="doseAverageDelivered">/<span>
+                      </p>
+                      <p>
+                        Kidney Disease: Improving Global Outcomes (KDIGO) recommends an average dose of 20 – 25 mL/kg/hr.  Other experts recommend maintaining a "dosing window" of 20-40 mL/kg/hr.  See the Dosing section in the written material for more information.
+                      </p>
+                    </div>
+                    <div id="filterLifeSection">
+                      <h5>Filter Life</h5>
+                      <p>
+                        <span id="totalFilterPoints"></span> earned out of a possible <span id="filterPointsPossible"></span>
+                      </p>
+                      <p>
+                        You used <span id="filterNumberUsed"></span> over the course of the simulation. The average filter life was <span id="filterAverageFilterLife"></span> hours
+                      </p>
+                      <p>
+                        Your average filtration fraction was <span id="filterAverageFiltrationFraction"></span>
+                      </p>
+                      <p>
+                      Filtration Fraction measures how much the plasma entering the filter is concentrated by ultrafiltration.  It should be kept below 25% to reduce clotting.  See the Non-pharmacologic approach to clotting for more information.
+                      </p>
+                    </div>
+                    <div id="electrolyteSection">
+                      <h5>Electrolytes</h5>
+                      <p>
+                        <span id="totalElectrolytePoints"></span> earned out of a possible <span id="electrolytePointsPossible"></span>
+                      </p>
+                      <p>
+                        Final sodium score was <span id="finalSodiumScore"></span>
+                      </p>
+                      <p>
+                        Final potassium score was <span id="finalPotassiumScore"></span>
+                      </p>
+                      <p>
+                        Final calcium score was <span id="finalCalciumScore"></span>
+                      <p>
+                        Final magnesium score was <span id="finalMagnesiumScore"></span>
+                      </p>
+                      <p>
+                        Final phosphorous score was <span id="finalPhosphorousScore"></span>
+                      </p>
+                      <p>
+                      One of the goals of CRRT is to normalize electrolyte values.  See Electrolytes for an in-depth discussion about how to do this in CRRT.
+                      </p>
+                    </div>
+                    <div id="acidBaseSection">
+                      <h5>Acid/Base</h5>
+                      <p>
+                        <span id="totalAcidBasePoints"></span> earned out of a possible <span id="acidBasePointsPossible"></span>
+                      </p>
+                      <p>
+                        Final pH was <span id="finalPH"></span>
+                      </p>
+                      <p>
+                        Lowest pH was <span id="lowestPH"></span>
+                      </p>
+                      <p>
+                        Highest pH was <span id="highestPH"></span>
+                      </p>
+                      <p>
+                      The goal in CRRT is to correct acidosis, and then to maintain the patient within a normal pH range.  See Acid-Base for more information.
+                      </p>
+                    </div>
+                    <div style="display: none;" id="citrateSection">
+                      <h5>Citrate</h5>
+                      <p>
+                        <span id="totalCitratePoints"></span> earned out of a possible <span id="citratePointsPossible">
+                      </p>
+                      <p>
+                        Average post-filter ionized calcium was <span id="citrateAveragePostFilterIonizedCalcium"></span>
+                      </p>
+                      <p>
+                        Citrate is a very effective form of anticoagulation if used correctly, but requires careful observation to avoid potential complications.  See the Citrate section for more information.
+                      </p>
+                    </div>
+                    <div id="volumeSection">
+                      <h5>Volume</h5>
+                      <p>
+                        <span id="totalVolumePoints"></span> earned out of a possible <span id="volumePointsPossible"></span>
+                      </p>
+                      <p>
+                      The patient's cumulative change in volume was <span id="volumeCumulativeChange"></span> (Initial weight: <span id="volumeInitialWeight"></span> final weight: <span id="volumeFinalWeight"></span>)
+                      </p>
+                      <p>
+                        The patient started the case at <span id="volumeOverloadInitial"></span>% overload
+                      </p>
+                      <p>
+                        At 48 hours, the patient was <span id="volumeOverload48Hours"></span>% overloaded
+                      </p>
+                      <p>
+                        At 72 hours, the patient was <span id="volumeOverload72Hours"></span>% overloaded
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
               <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
@@ -430,8 +546,13 @@
       </div>
       <div class="row">
         <div class="col-md-12 mt-3">
-          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#ordersModal">Orders</button>
+          <button id="ordersButton" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ordersModal">Orders</button>
           <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#CRRTDisplayModal">CRRT Display</button>
+          <a href="./simulator-spa.html?caseId=1">
+            <button type="button" class="btn btn-danger">
+              Restart Case
+            </button>
+          </a>
         </div>
       </div>
       <div class="row">
@@ -451,5 +572,6 @@
         </div>
       </div>
     </div>
+    <div class="modal"><!-- Place at bottom of page --></div>
   </body>
 </html>

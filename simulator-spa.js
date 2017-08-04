@@ -14,10 +14,24 @@ var CRRTApp = (function() {
     phosphorousInRange: [],
     grossUltrafiltrationInRange: [],
     filtrationFractionInRange: [],
-    doseInRange: []
+    doseInRange: [],
+    maxPointsPerCycle: {
+      bloodFlowRateInRange: 5,
+      sodiumInRange: 5,
+      potassiumInRange: 5,
+      pHInRange: 10,
+      calciumInRange: 5,
+      magnesiumInRange: 5,
+      phosphorousInRange: 10,
+      grossUltrafiltrationInRange: 0,
+      filtrationFractionInRange: 5,
+      doseInRange: 20
+    }
   };
+  
+  var _runTestLabsNum = 0;
 
-  var _numClottedFilters = 0;
+  var _numFiltersUsed = 1;
   var _currentCycleClotNumber = 0;
   var _messages = [];
   var _caseStudies;
@@ -26,7 +40,12 @@ var CRRTApp = (function() {
   var _currentCaseStudy;
   var _currentCaseStudySheet;
   var _currentDose;
-  var _dynamicLabs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "pH"];
+  var _usedCitrate = false;
+  var _usedCitrateFirst = false;
+  var _historicalDose = [];
+  var _historicalOverload = [];
+  var _caseOver = false;
+  var _dynamicLabs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "pH", "filtrationFraction", "calciumFinalPostFilter"];
   var _staticLabs = ["lactate", "albumin", "WBC", "hemoglobin", "hematocrit", "plateletCount", "PC02", "granularCasts", "renalEpithelialCasts", "bloodCulture", "urineCulture"];
   var _allLabs = _dynamicLabs.concat(_staticLabs);
   var _labs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "calciumFinalPostFilter", "filtrationFraction", "PH"];
@@ -66,7 +85,7 @@ var CRRTApp = (function() {
     bloodCulture: [],
     urineCulture: []
   }
-  var _dynamicLabs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "pH"];
+  var _dynamicLabs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "pH", "filtrationFraction"];
   var _dynamicComponents = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "phosphorous", "magnesium"];
   var _staticLabs = ["lactate", "albumin", "WBC", "hemoglobin", "hematocrit", "plateletCount", "PC02", "granularCasts", "renalEpithelialCasts", "bloodCulture", "urineCulture"];
   var _historicalVitals = {
@@ -155,6 +174,15 @@ var CRRTApp = (function() {
       initializeCaseStudy();
       setPageVariables();
       initializeOrderForm();
+
+      $body = $("body");
+      $body.removeClass("loading");
+      if (_runTestLabsNum !== 0) {
+        for (var i = 0; i < _runTestLabsNum; i++) {
+          runLabs();
+        }
+      }
+
     })
   }
 
@@ -457,8 +485,12 @@ var CRRTApp = (function() {
     _currentCaseStudy = _currentCaseStudy;
     _currentTime = 0;
     for(var i = 0; i < _allLabs.length; i++) {
-      _historicalLabs[_allLabs[i]].push(_currentCaseStudySheet.labs.elements[0][_allLabs[i]]);
-      _historicalLabs[_allLabs[i]].push(_currentCaseStudySheet.labs.elements[1][_allLabs[i]]);
+      if(_currentCaseStudySheet.labs.elements[0][_allLabs[i]]) {
+        _historicalLabs[_allLabs[i]].push(_currentCaseStudySheet.labs.elements[0][_allLabs[i]]);
+      }
+      if(_currentCaseStudySheet.labs.elements[1][_allLabs[i]]) {
+        _historicalLabs[_allLabs[i]].push(_currentCaseStudySheet.labs.elements[1][_allLabs[i]]);
+      }
     }
     for(var i = 0; i < _vitals.length; i++) {
       _historicalVitals[_vitals[i]].push(_currentCaseStudySheet.vitals.elements[0][_vitals[i]]);
@@ -466,6 +498,9 @@ var CRRTApp = (function() {
     // Set initial pH
     var pH = excelRound(calculatePH(_historicalLabs["bicarbonate"][_historicalLabs["bicarbonate"].length-1]), 2);
     _historicalLabs["pH"][0] = pH;
+
+    // Set initial overload
+    setVolumeOverload();
 
     console.log("_currentCaseStudyId : ", _currentCaseStudyId);
     console.log("_currentCaseStudy : ", _currentCaseStudy);
@@ -490,7 +525,7 @@ var CRRTApp = (function() {
     var PCO2 = getCurrentLab("PC02");
     var pH = 6.1 + Math.log(bicarbonate/(0.03*PCO2)) / Math.log(10);
     console.log("calculatePH : pH", pH);
-    return pH;
+    return excelRound(pH, 2);
   }
 
   function getCurrentLab(lab) {
@@ -567,8 +602,16 @@ var CRRTApp = (function() {
     saveLabValues(newLabs);
     incrementTime();
     setNewWeight(totalHoursOfFiltration);
+    setVolumeOverload()
     setPageVariables();
     postLabChecks();
+  }
+
+  function setVolumeOverload() {
+    var usualWeight = _currentCaseStudy.startingData["usualWeight"];
+    var currentWeight = _historicalVitals["weight"][_historicalVitals["weight"].length-1];
+    var overload = excelRound(((currentWeight - usualWeight)/usualWeight)*100, 2);
+    _historicalOverload.push(overload);
   }
 
   function calculateSodium(volumeOfDistribution, effluentFlowRate) {
@@ -828,7 +871,7 @@ var CRRTApp = (function() {
         ff = (orders["grossUF"]/1000) / ((orders["BFR"]*60/1000) * (1-hct))*100;
         break;
     }
-    return ff;
+    return excelRound(ff,2);
   }
 
   function calculateEffluentFlowRate(orders) {
@@ -892,6 +935,7 @@ var CRRTApp = (function() {
 
 
   function preLabChecks(effluentFlowRate) {
+    checkIfUsedCitrate();
     checkBloodFlowRate();
     checkFilterClotting();
     checkDose(effluentFlowRate);
@@ -906,7 +950,17 @@ var CRRTApp = (function() {
     checkMagnesium();
     checkPhosphorous();
     checkGrossUltrafiltration();
-    checkSimulationCompletion();
+    handleSimulationCompletion();
+  }
+
+  function checkIfUsedCitrate() {
+    if(orders.anticoagulation === 'citrate') {
+      _usedCitrate = true;
+
+      if(currentTime === 6) {
+        _usedCitrateFirst = true;
+      }
+    }
   }
 
   function checkBloodFlowRate() {
@@ -992,7 +1046,7 @@ var CRRTApp = (function() {
     var totalPoints = 0;
     var currentPH = _historicalLabs["pH"][_historicalLabs["pH"].length-1];
       
-    if (currentPH <= 7.2 && currentPH >= 7.45) {
+    if (currentPH >= 7.2 && currentPH <= 7.45) {
       console.log("checkPH() : within bounds ", currentPH);
       totalPoints = totalPoints + 10;
     }
@@ -1143,7 +1197,7 @@ var CRRTApp = (function() {
 
     if (currentFiltrationFraction > 25 && currentFiltrationFraction <= 30 && _currentOrders.anticoagulation === 'none') {
       var msg = "The patient’s filter clotted once, and was replaced.";
-      _numClottedFilters = _numClottedFilters + 1;
+      _numFiltersUsed = _numFiltersUsed + 1;
       _messages.push(msg);
       showMessage(msg);
       totalPoints = totalPoints - 50;
@@ -1152,7 +1206,7 @@ var CRRTApp = (function() {
     if (currentFiltrationFraction > 30 && _currentOrders.anticoagulation === 'none') {
       // TODO: effluent is divided by 3, gross UF for 4 hours will be 0 (Not sure what to do if BFR is also modifying effluent rate and UF time)
       var msg = "The patient’s filter clotted twice, and was replaced.";
-      _numClottedFilters = _numClottedFilters + 2;
+      _numFiltersUsed = _numFiltersUsed + 2;
       _messages.push(msg);
       showMessage(msg);
       totalPoints = totalPoints - 100;
@@ -1200,18 +1254,197 @@ var CRRTApp = (function() {
     _points.doseInRange.push(totalPoints);
     // NOTE: Set dose so we have access to it in the future
     _currentDose = dose;
+    _historicalDose.push(dose)
 
     return dose;
   }
 
-  function checkSimulationCompletion() {
+  function handleSimulationCompletion() {
     // TODO:
     // * check to see if patient has died
     // * check to see if time limit has been reached
     // * handle simulation completion 
     //   - show results
     //   - disable orders/etc.
+    var currentWeight = _historicalVitals["weight"][_historicalVitals["weight"].length-1];
+    var currentPH = _historicalLabs["pH"][_historicalLabs["pH"].length-1];
+    var resultsOverview;
+    var caseEndingTime = 90;
 
+    console.log("handleSimulationCompletion : currentTime", _currentTime);
+
+    if (currentPH < 7.0) {
+      console.log("checkSimulationCompletion() : Patient has expired.");
+      resultsOverview = "Your patient died of overwhelming acidosis and infection.  Mortality is high in critically ill patients who require dialysis, but your patient would have benefitted from more efficient CRRT.  Try increasing the bicarbonate concentration in the replacement or  dialysate fluid, or using more effective anticoagulation.  Restart the case and see if you can improve the outcome!";
+      _caseOver = true;
+    } else if (_currentTime === 72 && currentWeight < 96) {
+      console.log("checkSimulationCompletion() : You won!");
+      resultsOverview = "Your patient survived her episode of sepsis due to pneumonia, complicated by severe AKI requiring CRRT.";
+      setResultsTableVariables();
+      $("#resultsTable").show();
+      _caseOver = true;
+    } else if (_currentTime === 90) {
+      console.log("checkSimulationCompletion() : Patient has expired.")
+        resultsOverview = "Your patient developed a secondary infection in the ICU, and subsequently died of overwhelming sepsis.  Mortality is high in critically ill patients who require dialysis, but your patient would have benefitted from more aggressive fluid removal.  Try the case again and see if you can improve the outcome!";
+      setResultsTableVariables();
+      $("#resultsTable").show();
+      _caseOver = true;
+    }
+
+    if (_caseOver) {
+      console.log("case over!");
+      $('#resultsOverview').text(resultsOverview);
+      $('#resultsModal').modal('show');
+      $('#ordersButton').hide();
+    }
+  }
+
+  function setResultsTableVariables() {
+    console.log("setResultsTableVariables()");
+    var numRounds = _currentTime/6;
+    console.log("numRounds :", numRounds);
+
+    var dosePointsEarned = sum(_points.doseInRange);
+    var dosePointsMaxBonus = 350;
+    var dosePointsPossible = (_points.maxPointsPerCycle["doseInRange"]*numRounds)+dosePointsMaxBonus;
+    var doseAverageDelivered = excelRound(average(_historicalDose),2);
+    var doseBonus = 0;
+    if (doseAverageDelivered >= 20 && doseAverageDelivered <= 40) {
+      doseBonus += 100;
+    }
+
+    if (doseAverageDelivered >= 20 && doseAverageDelivered <= 25) {
+      doseBonus += 250;
+    }
+
+    var totalDosePoints = dosePointsEarned + doseBonus;
+
+    var filterPointsEarned = sum(_points.filtrationFractionInRange);
+    var filterPointsMaxBonus = 300;
+    var filterPointsPossible = (_points.maxPointsPerCycle["filtrationFractionInRange"]*numRounds)+filterPointsMaxBonus;
+    var filterNumberUsed = _numFiltersUsed;
+    var filterAverageFilterLife = excelRound(_currentTime/_numFiltersUsed, 2);
+    var filterAverageFiltrationFraction = excelRound(average(_historicalLabs["filtrationFraction"]),2);
+    var filterBonus = 0;
+
+    if(filterNumberUsed === 1) {
+      filterBonus += 250;
+    }
+
+    if(filterAverageFiltrationFraction < 25) {
+      filterBonus += 50;
+    }
+
+    var totalFilterPoints = filterPointsEarned+filterBonus;
+
+    var finalSodiumScore = sum(_points.sodiumInRange);
+    var finalPotassiumScore = sum(_points.potassiumInRange);
+    var finalCalciumScore = sum(_points.calciumInRange);
+    var finalMagnesiumScore = sum(_points.magnesiumInRange);
+    var finalPhosphorousScore = sum(_points.phosphorousInRange);
+    var electrolyteBonus = 0;
+    var electrolytePointsMaxBonus = 200;
+    var electrolytePointsEarned = finalSodiumScore+finalPotassiumScore+finalCalciumScore+finalMagnesiumScore+finalPhosphorousScore;
+    var electrolytePointsPossible =
+      (_points.maxPointsPerCycle["sodiumInRange"]*6)+
+      (_points.maxPointsPerCycle["potassiumInRange"]*6)+
+      (_points.maxPointsPerCycle["calciumInRange"]*6)+
+      (_points.maxPointsPerCycle["magnesiumInRange"]*6)+
+      (_points.maxPointsPerCycle["phosphorousInRange"]*6)+electrolytePointsMaxBonus;
+
+    if (electrolytePointsEarned === electrolytePointsPossible) {
+      electrolyteBonus += 200;
+    }
+
+    var totalElectrolytePoints = electrolytePointsEarned+electrolyteBonus;
+
+    var acidBasePointsEarned = sum(_points.pHInRange);
+    var acidBasePointsPossible = _points.maxPointsPerCycle["pHInRange"]*numRounds;
+    var finalPH = _historicalLabs["pH"][_historicalLabs["pH"].length-1];
+    var lowestPH = min(_historicalLabs["pH"]);
+    var highestPH = max(_historicalLabs["pH"]);
+    var acidBaseBonus = 0;
+
+    if (_historicalLabs["pH"].every(pHInRange)) {
+      acidBaseBonus += 250;
+    }
+
+    var totalAcidBasePoints = acidBasePointsEarned+acidBaseBonus;
+
+    if (checkIfUsedCitrate()) {
+      var citrateBonus = 0;
+      var citratePointsEarned;
+      var citratePointsMaxBonus = 150
+      var citratePointsPossible = citratePointsMaxBonus;
+      var citrateAveragePostFilterIonizedCalcium = average(_historicalLabs["calciumFinalPostFilter"]);
+
+      if (_usedCitrate) {
+        citrateBonus += 50;
+      }
+
+      if (_usedCitrateFirst) {
+        citrateBonus += 100;
+      }
+
+      var totalCitratePoints = citrateBonus;
+      $("#citrateSection").show();
+
+    }
+
+    var volumePointsEarned = 0;
+    var volumePointsPossible = 200;
+    var initialWeight = _historicalVitals["weight"][0];
+    var finalWeight = _historicalVitals["weight"][_historicalVitals["weight"].length-1];
+
+    var volumeCumulativeChange = excelRound(Math.abs(initialWeight-finalWeight),2);
+    var volumeOverloadInitial = _historicalOverload[0];
+    var volumeOverload48Hours = _historicalOverload[48/6];
+    var volumeOverload72Hours = _historicalOverload[72/6];
+
+    if (volumeOverload48Hours < 15){
+      volumePointsEarned += 100;
+    }
+
+    if (volumeOverload72Hours < 10){
+      volumePointsEarned += 100;
+    } else {
+      volumePointsEarned += -1000;
+    }
+
+    var totalVolumePoints = volumePointsEarned;
+
+    var totalScore = totalDosePoints+totalFilterPoints+totalElectrolytePoints+totalAcidBasePoints+totalCitratePoints+totalVolumePoints;
+    $("#totalDosePoints").text(totalDosePoints);
+    $("#dosePointsPossible").text(dosePointsPossible);
+    $("#doseAverageDelivered").text(doseAverageDelivered);
+    $("#totalFilterPoints").text(totalFilterPoints);
+    $("#filterPointsPossible").text(filterPointsPossible);
+    $("#filterNumberUsed").text(filterNumberUsed);
+    $("#filterAverageFilterLife").text(filterAverageFilterLife);
+    $("#filterAverageFiltrationFraction").text(filterAverageFiltrationFraction);
+    $("#totalElectrolytePoints").text(totalElectrolytePoints);
+    $("#electrolytePointsPossible").text(electrolytePointsPossible);
+    $("#finalSodiumScore").text(finalSodiumScore);
+    $("#finalPotassiumScore").text(finalPotassiumScore);
+    $("#finalCalciumScore").text(finalCalciumScore);
+    $("#finalMagnesiumScore").text(finalMagnesiumScore);
+    $("#finalPhosphorousScore").text(finalPhosphorousScore);
+    $("#totalAcidBasePoints").text(totalAcidBasePoints);
+    $("#acidBasePointsPossible").text(acidBasePointsPossible);
+    $("#finalPH").text(finalPH);
+    $("#lowestPH").text(lowestPH);
+    $("#highestPH").text(highestPH);
+    $("#totalCitratePoints").text(totalCitratePoints);
+    $("#citratePointsPossible").text(citratePointsPossible);
+    $("#citrateAveragePostFilterIonizedCalcium").text(citrateAveragePostFilterIonizedCalcium);
+    $("#totalVolumePoints").text(totalVolumePoints);
+    $("#volumePointsPossible").text(volumePointsPossible);
+    $("#volumeCumulativeChange").text(volumeCumulativeChange);
+    $("#volumeOverloadInitial").text(volumeOverloadInitial);
+    $("#volumeOverload48Hours").text(volumeOverload48Hours);
+    $("#volumeOverload72Hours").text(volumeOverload72Hours);
+    $("#volumeInitialWeight").text(initialWeight);
+    $("#volumeFinalWeight").text(finalWeight);
   }
 
   function handleOrderFormChanges() {
@@ -1310,6 +1543,29 @@ var CRRTApp = (function() {
     } else {
       return timeStamp;
     }
+  }
+
+  function pHInRange(element, index, array) {
+    return (element >= 7.2 && element <= 7.45);
+  }
+
+  function sum(array) {
+    var sum = array.reduce(function(previousValue, currentValue){
+        return currentValue + previousValue;
+    });
+    return sum;
+  }
+
+  function average(array) {
+    return (sum(array) / array.length);
+  }
+
+  function min(array) {
+    return Math.min.apply(Math,array);
+  }
+
+  function max(array) {
+    return Math.max.apply(Math,array);
   }
 
   function getParameterByName(name, url) {
