@@ -514,9 +514,7 @@ var CRRTApp = (function() {
           var data = $('<td></td>').text(currentWeight);
         } else {
           var data = $('<td></td>').text(_currentCaseStudySheet.vitals.elements[j+initialValuesOffset][_currentCaseStudySheet.vitals.columnNames[i+columnOffset]]);
-
         }
-
         row.append(data);
       }
       table.append(row);
@@ -535,14 +533,17 @@ var CRRTApp = (function() {
     var initialValuesOffset = 2;
     var columnOffset = 0;
     var numLabs = _allLabs.length;
-    var numColumns = 2;
+    var numColumns;
     var currentLabSet;
     var previousLabSet;
 
+
     if (_currentTime === 0) {
+      numColumns = 2;
       currentLabSet = 1;
       previousLabSet = 0;
     } else {
+      numColumns = (_currentTime/6)+2;
       currentLabSet = (_currentTime/6) + 1;
       previousLabSet = currentLabSet - 1;
     }
@@ -563,11 +564,18 @@ var CRRTApp = (function() {
       var data = $('<td></td').text(_allLabs[i]);
       row.append(data);
 
-      var previous = $('<td></td>').text(_historicalLabs[_allLabs[i]][previousLabSet]);
-      var current = $('<td></td>').text(_historicalLabs[_allLabs[i]][currentLabSet]);
-      row.append(previous);
-      row.append(current);
+      for(j=(_currentTime/6)-numColumns; j<(_currentTime/6); j++) {
+        var data = $('<td></td>').text(_historicalLabs[_allLabs[i]][j+initialValuesOffset]);
+        row.append(data);
+      }
       table.append(row);
+
+      //var previous = $('<td></td>').text(_historicalLabs[_allLabs[i]][previousLabSet]);
+      //var current = $('<td></td>').text(_historicalLabs[_allLabs[i]][currentLabSet]);
+
+      //row.append(previous);
+      //row.append(current);
+      //table.append(row);
     }
     $("#labs").append(table);
   }
