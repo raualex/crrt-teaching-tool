@@ -706,7 +706,8 @@ var CRRTApp = (function() {
       console.log("calculateLab(): productionRate: ", productionRates[i].productionRate);
 
       // Note: Params for calculateLab(): initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate
-      if (productionRates[i].component === 'phosphorous') {
+      if (productionRates[i].component === 'sodium') {
+        debugger;
       }
       newLabs[productionRates[i].component] = calculateLab(
           parseFloat(_historicalLabs[productionRates[i].component][_historicalLabs[productionRates[i].component].length-1]),
@@ -765,6 +766,7 @@ var CRRTApp = (function() {
     var otherFluidsD5W = _currentOrders["otherFluidsD5W"];
     var otherFluidsSodiumPhosphate = _currentOrders["otherFluidsSodiumPhosphate"];
     var userDialysateValue = _currentOrders.fluidDialysateValues["sodium"];
+    debugger;
 
     // default initial sodium is the previous historical value.
     var initialSodium =  parseFloat(_historicalLabs["sodium"][_historicalLabs["sodium"].length-1]);
@@ -785,9 +787,10 @@ var CRRTApp = (function() {
       newDialysate = userDialysateValue-infusionValue/1000/effluentFlowRate*userDialysateValue;
     }
 
-    if (bolusValue) {
+    if ((otherFluidsSaline || otherFluidsD5W) && (bolusValue)) {
       initialSodium = initialSodium + (((threePercentSalineConcentration - initialSodium)/(volumeOfDistribution+1))*(bolusValue/1000));
     }
+
 
     finalSodium = calculateLab(initialSodium, newDialysate, effluentFlowRate, _currentOrders["timeToNextLabs"], startingWeight, volumeOfDistribution, 0);
 
