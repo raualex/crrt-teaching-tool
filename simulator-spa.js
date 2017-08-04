@@ -52,7 +52,7 @@ var CRRTApp = (function() {
   var _vitals = ["bloodPressure", "respiratoryRate", "temperature", "heartRate", "weight"];
   var _physicalExam = ["general", "ENT", "heart", "lungs", "abdomen", "extremities", "psych"];
   // NOTE: Our starting time will be 10am
-  var _startingTime = moment(10, 'HH');
+  var _startingTime = moment(0, 'HH');
 
   // Note:
   // We are storing each of our lab values in an array. This allows
@@ -91,7 +91,9 @@ var CRRTApp = (function() {
     ultrafiltration: [],
     totalOutput: [],
     netInputOutput: [],
-    cumulativeInputOutput: []
+    cumulativeInputOutput: [],
+    citrate: [],
+    cacl: []
   }
 
   var _dynamicLabs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "pH", "filtrationFraction"];
@@ -353,6 +355,32 @@ var CRRTApp = (function() {
       }
       table.append(row);
     }
+
+    var rowCitrate = $('<tr></tr>');
+    var rowCacl = $('<tr></tr>');
+
+    var title = $('<td></td>').text("Citrate");
+    rowCitrate.append(title);
+
+    if (_currentTime !== 0) {
+      for(j=_currentTime-numColumns; j<_currentTime; j++) {
+        var data = $('<td></td>').text(_historicalInputOutput["citrate"][j]);
+        rowCitrate.append(data);
+      }
+    }
+
+    var title = $('<td></td>').text("Calcium Chloride");
+    rowCacl.append(title);
+
+    if (_currentTime !== 0) {
+      for(j=_currentTime-numColumns; j<_currentTime; j++) {
+        var data = $('<td></td>').text(_historicalInputOutput["cacl"][j]);
+        rowCacl.append(data);
+      }
+    }
+
+    table.append(rowCitrate);
+    table.append(rowCacl);
 
     var rowTotalInput = $('<tr></tr>');
     var rowUltrafiltration = $('<tr></tr>');
@@ -959,6 +987,22 @@ var CRRTApp = (function() {
       var input = 0;
       input += parseFloat(_currentCaseStudySheet.inputOutput.elements[startingTime+i+2]["total"]);
 
+      if (orders.anticoagulation === 'citrate') {
+        var citFlowRate = parseFloat($('#citrateFlowRate').val());
+        var caclFlowRate = parseFloat($('#caclInfusionRate').val());
+
+        if (citFlowRate) {
+          input += citFlowRate;
+          _historicalInputOutput["citrate"].push(citFlowRate);
+        }
+
+        if (caclFlowRate) {
+          input += caclFlowRate;
+          _historicalInputOutput["cacl"].push(caclFlowRate);
+        }
+
+      }
+
       if (infusionValue) {
         input += infusionValue;
       }
@@ -1331,7 +1375,7 @@ var CRRTApp = (function() {
     var grossFiltrationPastSixHoursInLiters = (_currentOrders["grossUF"]/1000)*totalHoursOfFiltration;
     var filtrationRate = (grossFiltrationPastSixHoursInLiters - fluidInPastSixHoursInLiters)*1000;
 
-    if (filtrationRate > 200) {
+    if (filtrationRate > 1500) {
       console.log("checkGrossUltrafiltration() : > 200 ", filtrationRate);
       var msg = "The patient's pressor requirements are increasing, and the team is concerned that the high rate of ultrafiltration is causing hemodynamic instability. Please reduce your ultrafiltration rate";
       _messages.push(msg);
@@ -1693,12 +1737,16 @@ var CRRTApp = (function() {
   }
 
   function currentTimeToTimestamp(showTimeElapsed, additionalOffsetInHours=0) {
-    var timeStamp = moment(_startingTime).add(_currentTime, 'hours').add(additionalOffsetInHours, 'hours').format("H:mm");
+    var timestamp = moment(_startingTime).add(_currentTime, 'hours').add(additionalOffsetInHours, 'hours').format("H:mm");
+    var currentDay = Math.floor(_currentTime/24)+1;
+
     if (showTimeElapsed === true) {
-      return timeStamp + " (T+" + _currentTime + "hrs)";
-    } else {
-      return timeStamp;
-    }
+      timestamp += " (T+" + _currentTime + "hrs)";
+    } 
+
+    timestamp += " Day " + currentDay;
+
+    return timestamp;
   }
 
   function pHInRange(element, index, array) {
