@@ -1284,8 +1284,8 @@ var CRRTApp = (function() {
       $("#resultsTable").show();
       _caseOver = true;
     } else if (_currentTime === 90) {
-      console.log("checkSimulationCompletion() : Patient has expired.")
-        resultsOverview = "Your patient developed a secondary infection in the ICU, and subsequently died of overwhelming sepsis.  Mortality is high in critically ill patients who require dialysis, but your patient would have benefitted from more aggressive fluid removal.  Try the case again and see if you can improve the outcome!";
+      console.log("checkSimulationCompletion() : Patient has expired.");
+      resultsOverview = "Your patient developed a secondary infection in the ICU, and subsequently died of overwhelming sepsis.  Mortality is high in critically ill patients who require dialysis, but your patient would have benefitted from more aggressive fluid removal.  Try the case again and see if you can improve the outcome!";
       setResultsTableVariables();
       $("#resultsTable").show();
       _caseOver = true;
