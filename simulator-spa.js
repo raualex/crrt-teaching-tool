@@ -85,6 +85,15 @@ var CRRTApp = (function() {
     bloodCulture: [],
     urineCulture: []
   }
+
+  var _historicalInputOutput = {
+    totalInput: [],
+    ultrafiltration: [],
+    totalOutput: [],
+    netInputOutput: [],
+    cumulativeInputOutput: []
+  }
+
   var _dynamicLabs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "pH", "filtrationFraction"];
   var _dynamicComponents = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "phosphorous", "magnesium"];
   var _staticLabs = ["lactate", "albumin", "WBC", "hemoglobin", "hematocrit", "plateletCount", "PC02", "granularCasts", "renalEpithelialCasts", "bloodCulture", "urineCulture"];
@@ -320,7 +329,7 @@ var CRRTApp = (function() {
     if (_currentTime === 0) {
       numColumns = 2;
     } else {
-      numColumns = 6;
+      numColumns = _currentTime + 2;
     }
 
     var head = $('<thead></thead');
@@ -344,6 +353,88 @@ var CRRTApp = (function() {
       }
       table.append(row);
     }
+
+    var rowTotalInput = $('<tr></tr>');
+    var rowUltrafiltration = $('<tr></tr>');
+    var rowTotalOutput = $('<tr></tr>');
+    var rowNetInputOutput = $('<tr></tr>');
+    var rowCumulativeInputOutput = $('<tr></tr>');
+
+    var title = $('<td></td>').addClass("emphasis").text("Total Input");
+    rowTotalInput.append(title);
+
+
+    // NOTE: We are pulling our intitial data from the spreadsheet. After that, we will be dynamically
+    // calculating Input/Output based on user inputs AND spreadsheet values
+    if (_currentTime === 0) {
+      var data = $('<td></td>').text(_currentCaseStudySheet.inputOutput.elements[0]["total"]);
+      rowTotalInput.append(data);
+      var data = $('<td></td>').text(_currentCaseStudySheet.inputOutput.elements[1]["total"]);
+      rowTotalInput.append(data);
+    } else {
+      for(j=_currentTime-numColumns; j<_currentTime; j++) {
+        var data = $('<td></td>').text(_historicalInputOutput["totalInput"][j]);
+        rowTotalInput.append(data);
+      }
+    }
+
+
+    var title = $('<td></td>').text("Ultrafiltration");
+    rowUltrafiltration.append(title);
+
+    if (_currentTime !== 0) {
+      for(j=_currentTime-numColumns; j<_currentTime; j++) {
+        var data = $('<td></td>').text(_historicalInputOutput["ultrafiltration"][j]);
+        rowUltrafiltration.append(data);
+      }
+    }
+
+    var title = $('<td></td>').addClass("emphasis").text("Total Output");
+    rowTotalOutput.append(title);
+
+    if (_currentTime !== 0) {
+      for(j=_currentTime-numColumns; j<_currentTime; j++) {
+        var data = $('<td></td>').text(_historicalInputOutput["totalOutput"][j]);
+        rowTotalOutput.append(data);
+      }
+    }
+
+    var title = $('<td></td>').addClass("emphasis").text("Net Input/Output");
+    rowNetInputOutput.append(title);
+
+    if (_currentTime !== 0) {
+      for(j=_currentTime-numColumns; j<_currentTime; j++) {
+        var data = $('<td></td>').text(_historicalInputOutput["netInputOutput"][j]);
+        rowNetInputOutput.append(data);
+      }
+    } else {
+      var data = $('<td></td>').text(_currentCaseStudySheet.inputOutput.elements[0]["total"]);
+      rowNetInputOutput.append(data);
+      var data = $('<td></td>').text(_currentCaseStudySheet.inputOutput.elements[1]["total"]);
+      rowNetInputOutput.append(data);
+    }
+
+    var title = $('<td></td>').addClass("emphasis").text("Cumulative Input/Output");
+    rowCumulativeInputOutput.append(title);
+
+    if (_currentTime !== 0) {
+      for(j=_currentTime-numColumns; j<_currentTime; j++) {
+        var data = $('<td></td>').text(_historicalInputOutput["cumulativeInputOutput"][j]);
+        rowCumulativeInputOutput.append(data);
+      }
+    } else {
+      var data = $('<td></td>').text(_currentCaseStudySheet.inputOutput.elements[0]["total"]);
+      rowCumulativeInputOutput.append(data);
+      var data = $('<td></td>').text(parseFloat(_currentCaseStudySheet.inputOutput.elements[0]["total"])+parseFloat(_currentCaseStudySheet.inputOutput.elements[1]["total"]));
+      rowCumulativeInputOutput.append(data);
+    }
+
+    table.append(rowTotalInput);
+    table.append(rowUltrafiltration);
+    table.append(rowTotalOutput);
+    table.append(rowNetInputOutput);
+    table.append(rowCumulativeInputOutput);
+
     $("#inputOutput").append(table);
   }
 
@@ -577,6 +668,8 @@ var CRRTApp = (function() {
       console.log("calculateLab(): productionRate: ", productionRates[i].productionRate);
 
       // Note: Params for calculateLab(): initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate
+      if (productionRates[i].component === 'phosphorous') {
+      }
       newLabs[productionRates[i].component] = calculateLab(
           parseFloat(_historicalLabs[productionRates[i].component][_historicalLabs[productionRates[i].component].length-1]),
           parseFloat(orders.fluidDialysateValues[productionRates[i].component]),
@@ -601,10 +694,21 @@ var CRRTApp = (function() {
 
     saveLabValues(newLabs);
     incrementTime();
+    copyStaticLabsToHistorical();
     setNewWeight(totalHoursOfFiltration);
     setVolumeOverload()
     setPageVariables();
     postLabChecks();
+  }
+
+  function copyStaticLabsToHistorical() {
+    var currentLabSet = (_currentTime/6) + 1;
+
+    for(var i = 0; i < _staticLabs.length; i++) {
+      if(_currentCaseStudySheet.labs.elements[currentLabSet][_staticLabs[i]]) {
+        _historicalLabs[_staticLabs[i]].push(_currentCaseStudySheet.labs.elements[currentLabSet][_staticLabs[i]]);
+      }
+    }
   }
 
   function setVolumeOverload() {
@@ -663,7 +767,7 @@ var CRRTApp = (function() {
     }
 
     if (currentFiltrationFraction > 30 && _currentOrders.anticoagulation === 'none') {
-      efrAdjustment = 2;
+      hoursOfFiltration = 2;
     }
     if (_currentOrders.anticoagulation === 'citrate') {
       var initialCitrateResults = runCitrateCalculations(startingWeight, effluentFlowRate, ionizedCalcium);
@@ -729,7 +833,7 @@ var CRRTApp = (function() {
     var caCitFinalPreFilter = (-1*(-ionizedCalciumInitial-citrateInitial-kForCaCit)-Math.sqrt(Math.pow(-ionizedCalciumInitial-citrateInitial-kForCaCit, 2)-4*(1)*(ionizedCalciumInitial*citrateInitial)))/(2*(1))
     var caFinalPreFilter = ionizedCalciumInitial - caCitFinalPreFilter;
     var citratFinalPreFilter = citrateInitial - caCitFinalPreFilter;
-    var bicarbonateWithCitrateInitial = 24;
+    var bicarbonateWithCitrateInitial = 13;
     var caFinalPostFilter = caFinalPreFilter*(1-(effluentFlowRate/(_currentOrders.BFR*60/1000))*((caFinalPreFilter-(dialysateCalcium/2))/caFinalPreFilter));
     var citratFinalPostFilter = citratFinalPreFilter*(1-(effluentFlowRate/(_currentOrders.BFR*60/1000)));
     var caCitFinalPostFilter = caCitFinalPreFilter*(1-(effluentFlowRate/(_currentOrders.BFR*60/1000)));
@@ -759,13 +863,13 @@ var CRRTApp = (function() {
     var orders = {
       fluid : $('input[name=fluid]:checked').val(),
       fluidDialysateValues : {
-        "sodium": parseInt($("#replacement-fluid-sodium-value").val()),
-        "potassium": parseInt($("#replacement-fluid-potassium-value").val()),
-        "chloride": parseInt($("#replacement-fluid-chloride-value").val()),
-        "bicarbonate": parseInt($("#replacement-fluid-bicarbonate-value").val()),
-        "calcium": parseInt($("#replacement-fluid-calcium-value").val()),
-        "magnesium": parseInt($("#replacement-fluid-magnesium-value").val()),
-        "phosphorous": parseInt($("#replacement-fluid-phosphorous-value").val()),
+        "sodium": parseFloat($("#replacement-fluid-sodium-value").val()),
+        "potassium": parseFloat($("#replacement-fluid-potassium-value").val()),
+        "chloride": parseFloat($("#replacement-fluid-chloride-value").val()),
+        "bicarbonate": parseFloat($("#replacement-fluid-bicarbonate-value").val()),
+        "calcium": parseFloat($("#replacement-fluid-calcium-value").val())*4,
+        "magnesium": parseFloat($("#replacement-fluid-magnesium-value").val()),
+        "phosphorous": parseFloat($("#replacement-fluid-phosphorous-value").val()),
         "BUN": 0,
         "creatinine": 0
       },
@@ -797,6 +901,8 @@ var CRRTApp = (function() {
     // 1L = 1Kg
     // output = ultrafiltration rate = Gross fluid removal = Gross ultrafiltration 
     console.log("calculateNewWeight() : totalHoursOfFiltration : ", totalHoursOfFiltration);
+
+    var data = {}
 
     var totalInputInL = 0;
     var bolusValue = _currentOrders["otherFluidsBolusValue"];
@@ -846,6 +952,56 @@ var CRRTApp = (function() {
       totalInputInL += infusionPastSixHours;
       console.log("infusionPastSixHours : ", infusionPastSixHours);
       console.log("totalInputInL :", totalInputInL);
+    }
+
+    var startingTime = _currentTime - 6;
+    for(var i=0;i<6;i++) {
+      var input = 0;
+      input += parseFloat(_currentCaseStudySheet.inputOutput.elements[startingTime+i+2]["total"]);
+
+      if (infusionValue) {
+        input += infusionValue;
+      }
+
+      if (i === 0){
+        if (bolusValue) {
+          input += bolusValue;
+        }
+        if (orders.otherFluidsSodiumPhosphate) {
+          input += 100;
+        }
+      }
+
+      _historicalInputOutput["totalInput"].push(input);
+    }
+
+    var startingTime = _currentTime-6;
+    var ultrafiltrationStartingTime = _currentTime - totalHoursOfFiltration;
+    var differenceBetweenStartingTimeAndHoursOfFiltration = _currentTime - totalHoursOfFiltration;
+
+    // NOTE: Make sure we set the ultrafiltration rate to 0 for the time that
+    // the filter is clogged.
+    for (var i=0;i<differenceBetweenStartingTimeAndHoursOfFiltration;i++){
+      _historicalInputOutput["ultrafiltration"][startingTime+i] = 0;
+      // NOTE: For now, totalOutput == ultrafiltration -- however this may not be the case in the future
+      _historicalInputOutput["totalOutput"][startingTime+i] = 0;
+    }
+
+    for (var i=0;i<totalHoursOfFiltration;i++){
+      _historicalInputOutput["ultrafiltration"][ultrafiltrationStartingTime+i] = orders["grossUF"];
+      // NOTE: For now, totalOutput == ultrafiltration -- however this may not be the case in the future
+      _historicalInputOutput["totalOutput"][ultrafiltrationStartingTime+i] = orders["grossUF"];
+    }
+
+    for (var i=0;i<6;i++) {
+      var input = _historicalInputOutput["totalInput"][startingTime+i];
+      var output= _historicalInputOutput["totalOutput"][startingTime+i];
+      _historicalInputOutput["netInputOutput"][startingTime+i]=input-output;
+      if (startingTime+i === 0) {
+        _historicalInputOutput["cumulativeInputOutput"][startingTime+i] = _historicalInputOutput["netInputOutput"][startingTime+i];
+      } else {
+        _historicalInputOutput["cumulativeInputOutput"][startingTime+i] = _historicalInputOutput["netInputOutput"][startingTime+i] + _historicalInputOutput["cumulativeInputOutput"][startingTime+i-1];
+      }
     }
 
     var grossFiltrationPastSixHoursInLiters = (orders["grossUF"]/1000)*totalHoursOfFiltration;
@@ -973,14 +1129,14 @@ var CRRTApp = (function() {
     if (_currentOrders["BFR"] <= 150) {
       var msg = "The patient's nurse called.  She's been having many \"Low Return Pressure Alarms\" over the past 4 hours, and the machine is not running well.";
       _messages.push(msg);
-      showMessage(msg);
+      showMessage(msg,6);
       totalPoints = totalPoints - 100;
     }
 
     if (_currentOrders["BFR"] > 350 ) {
       var msg = "The patient's nurse called to inform you of frequent \"Access Pressure Extremely Low\" alarms, and had to decrease BFR to 300.";
       _messages.push(msg);
-      showMessage(msg);
+      showMessage(msg,6);
       _currentOrders["BFR"] = 300;
       totalPoints = totalPoints - 50;
     }
@@ -1199,7 +1355,7 @@ var CRRTApp = (function() {
       var msg = "The patient’s filter clotted once, and was replaced.";
       _numFiltersUsed = _numFiltersUsed + 1;
       _messages.push(msg);
-      showMessage(msg);
+      showMessage(msg,6);
       totalPoints = totalPoints - 50;
     }
 
@@ -1208,7 +1364,7 @@ var CRRTApp = (function() {
       var msg = "The patient’s filter clotted twice, and was replaced.";
       _numFiltersUsed = _numFiltersUsed + 2;
       _messages.push(msg);
-      showMessage(msg);
+      showMessage(msg,6);
       totalPoints = totalPoints - 100;
     }
 
@@ -1526,18 +1682,18 @@ var CRRTApp = (function() {
     $(".citrate").hide();
   }
 
-  function showMessage(msg) {
+  function showMessage(msg, timeOffsetInHours=0) {
     var messageContainer = $('<p></p>').addClass('card-text');
     var message = $('<samp></samp>').text(msg);
-    var time = $('<p></p>').addClass('case-time').text(currentTimeToTimestamp(false));
+    var time = $('<p></p>').addClass('case-time').text(currentTimeToTimestamp(false, timeOffsetInHours));
     messageContainer.append(time)
     messageContainer.append(message);
     $("#message-box").prepend("<hr>");
     $("#message-box").prepend(messageContainer);
   }
 
-  function currentTimeToTimestamp(showTimeElapsed) {
-    var timeStamp = moment(_startingTime).add(_currentTime, 'hours').format("H:mm");
+  function currentTimeToTimestamp(showTimeElapsed, additionalOffsetInHours=0) {
+    var timeStamp = moment(_startingTime).add(_currentTime, 'hours').add(additionalOffsetInHours, 'hours').format("H:mm");
     if (showTimeElapsed === true) {
       return timeStamp + " (T+" + _currentTime + "hrs)";
     } else {

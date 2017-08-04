@@ -2,9 +2,13 @@
 button { cursor: pointer; }
 legend { font-size: 16px !important; }
 
-.calculater {
+.calculator {
   height: 600px;
   width: 1000px;
+}
+
+.emphasis {
+  font-weight: bold;
 }
 
 .case-time { font-weight: 700; }
@@ -49,4 +53,8 @@ body.loading .modal-spin {
 
 #resultsModal {
   overflow-y: scroll !important;
+}
+
+#inputOutput {
+  overflow-x: scroll;
 }
