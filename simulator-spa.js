@@ -29,7 +29,8 @@ var CRRTApp = (function() {
     }
   };
   
-  var _runTestLabsNum = 0;
+  var _runTestMode = true;
+  var _runTestLabsNum = 14;
 
   var _numFiltersUsed = 1;
   var _currentCycleClotNumber = 0;
@@ -188,13 +189,42 @@ var CRRTApp = (function() {
 
       $body = $("body");
       $body.removeClass("loading");
-      if (_runTestLabsNum !== 0) {
-        for (var i = 0; i < _runTestLabsNum; i++) {
-          runLabs();
+
+      if (_runTestMode) {
+        setTestFormInputs();
+        if (_runTestLabsNum !== 0) {
+          for (var i = 0; i < _runTestLabsNum; i++) {
+            runLabs();
+          }
         }
       }
-
     })
+  }
+
+  function setTestFormInputs() {
+    $("#replacement-fluid-sodium-value").val("140");
+    $("#replacement-fluid-potassium-value").val("3.6");
+    $("#replacement-fluid-chloride-value").val("100");
+    $("#replacement-fluid-bicarbonate-value").val("24");
+    $("#replacement-fluid-calcium-value").val("2");
+    $("#replacement-fluid-magnesium-value").val("1.7");
+    $("#replacement-fluid-phosphorous-value").val(".5");
+    $("#gross-hourly-fluid-removal").val("200");
+    $("#bloodFlowRate").val("200");
+    $("#fluidFlowRate").val("2");
+    $("#citrateFlowRate").val("300");
+    $("caclInfusionRate").val("100");
+  }
+
+  function resetFormInputs() {
+    $("#replacement-fluid-sodium-value").val("");
+    $("#replacement-fluid-potassium-value").val("");
+    $("#replacement-fluid-chloride-value").val("");
+    $("#replacement-fluid-bicarbonate-value").val("");
+    $("#replacement-fluid-calcium-value").val("");
+    $("#replacement-fluid-magnesium-value").val("");
+    $("#replacement-fluid-phosphorous-value").val("");
+
   }
 
   function initializeOrderForm() {
@@ -266,6 +296,7 @@ var CRRTApp = (function() {
       submitHandler: function(form) {
         $('#ordersModal').modal('hide');
         runLabs();
+        resetFormInputs();
       }
     });
   }
@@ -295,6 +326,7 @@ var CRRTApp = (function() {
     setCRRTDisplay();
     createInputOutputTable();
     createVitalsTable();
+    createMedicationsTable();
     createLabsTable();
   }
 
@@ -522,6 +554,76 @@ var CRRTApp = (function() {
     $("#vitals").append(table);
   }
 
+  function createMedicationsTable() {
+    // If table already exists, remove, so we can rebuid it.
+    if ($(".medicationsTable")) {
+      $(".medicationsTable").remove();
+    }
+
+    var table = $("<table></table>").addClass('medicationsTable table table-hover');
+    var initialValuesOffset = 1;
+    var numColumns;
+    if (_currentTime === 0) {
+      numColumns = 1;
+    } else {
+      numColumns = (_currentTime/6) + 1;
+    }
+
+    var head = $('<thead></thead');
+    var row = $('<tr></tr>');
+    head.append(row);
+    row.append($("<th></th>"));
+    for(var i=0; i<numColumns; i++) {
+      var th = $('<th></th>').text(_currentCaseStudySheet.medications.elements[i].time);
+      row.append(th);
+    }
+    table.append(head);
+
+    var rowScheduled = $("<tr></tr>");
+    var rowInfusions = $("<tr></tr>");
+
+    var title = $('<td></td>').text("Scheduled");
+    rowScheduled.append(title);
+
+    for(j=0;j<numColumns;j++){
+      var medsArray = JSON.parse(_currentCaseStudySheet.medications.elements[j].scheduledMedications);
+      var cell = $('<td></td>');
+      var list = $('<ul></ul>');
+
+      cell.append(list);
+
+      for (var k=0;k<medsArray.length;k++){
+        var item = $('<li></li>').text(medsArray[k]);
+        list.append(item);
+      }
+
+      rowScheduled.append(cell);
+    }
+
+    var title = $('<td></td>').text("Infusions");
+    rowInfusions.append(title);
+
+    for(j=0;j<numColumns;j++){
+      var infusionsArray = JSON.parse(_currentCaseStudySheet.medications.elements[j].infusions);
+      var cell = $('<td></td>');
+      var list = $('<ul></ul>');
+
+      cell.append(list);
+
+      for (var l=0;l<infusionsArray.length;l++){
+        var item = $('<li></li>').text(infusionsArray[l]);
+        list.append(item);
+      }
+
+      rowInfusions.append(cell);
+    }
+
+    table.append(rowScheduled);
+    table.append(rowInfusions);
+    $("#medications").append(table);
+
+  }
+
   function createLabsTable() {
     // If table already exists, remove, so we can rebuid it.
     if ($(".labsTable")) {
@@ -645,6 +747,7 @@ var CRRTApp = (function() {
       _currentCaseStudySheet.labs = _currentCaseStudySheet.labsCase1;
       _currentCaseStudySheet.productionRates = _currentCaseStudySheet.productionRatesCase1;
       _currentCaseStudySheet.accessPressures = _currentCaseStudySheet.accessPressuresCase1;
+      _currentCaseStudySheet.medications = _currentCaseStudySheet.medicationsCase1;
       promise.resolve();
       console.log(data);
     }
@@ -707,7 +810,6 @@ var CRRTApp = (function() {
 
       // Note: Params for calculateLab(): initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate
       if (productionRates[i].component === 'sodium') {
-        debugger;
       }
       newLabs[productionRates[i].component] = calculateLab(
           parseFloat(_historicalLabs[productionRates[i].component][_historicalLabs[productionRates[i].component].length-1]),
@@ -766,7 +868,6 @@ var CRRTApp = (function() {
     var otherFluidsD5W = _currentOrders["otherFluidsD5W"];
     var otherFluidsSodiumPhosphate = _currentOrders["otherFluidsSodiumPhosphate"];
     var userDialysateValue = _currentOrders.fluidDialysateValues["sodium"];
-    debugger;
 
     // default initial sodium is the previous historical value.
     var initialSodium =  parseFloat(_historicalLabs["sodium"][_historicalLabs["sodium"].length-1]);

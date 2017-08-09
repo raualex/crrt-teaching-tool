@@ -62,3 +62,7 @@ body.loading .modal-spin {
 #vitals {
   overflow-x: scroll;
 }
+
+#medications {
+  overflow-x: scroll;
+}
