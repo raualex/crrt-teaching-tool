@@ -55,14 +55,35 @@ body.loading .modal-spin {
   overflow-y: scroll !important;
 }
 
-#inputOutput {
+#labs, #medications, #vitals, #inputOutput {
   overflow-x: scroll;
+  overflow-y:visible;
 }
 
-#vitals {
-  overflow-x: scroll;
+#labs { margin-left: 180px; }
+#vitals { margin-left: 150px; }
+#medications { margin-left: 180px; }
+#inputOutput { margin-left: 160px; }
+
+#vitals, #labs, #medications, #inputOutput table {
+  width: auto;
 }
 
-#medications {
-  overflow-x: scroll;
+table thead th {
+  border-bottom: none !important;
+}
+
+table td, th {
+  border-top: none !important;
+}
+
+td, th {
+  padding: 5px 20px;
+  width: 100px;
+
+}
+
+th:first-child {
+  position: fixed;
+  left: 5px
 }

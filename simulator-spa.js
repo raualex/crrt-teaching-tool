@@ -30,7 +30,7 @@ var CRRTApp = (function() {
   };
   
   var _runTestMode = true;
-  var _runTestLabsNum = 0;
+  var _runTestLabsNum = 12;
 
   var _numFiltersUsed = 1;
   var _currentCycleClotNumber = 0;
@@ -380,7 +380,7 @@ var CRRTApp = (function() {
 
     for(i=0; i<numFluidInputs; i++) {
       var row = $('<tr></tr>');
-      var data = $('<td></td').text(_currentCaseStudySheet.inputOutput.columnNames[i+columnOffset]);
+      var data = $('<th></th>').text(_currentCaseStudySheet.inputOutput.columnNames[i+columnOffset]);
       row.append(data);
       for(j=_currentTime-numColumns; j<_currentTime; j++) {
         var data = $('<td></td>').text(_currentCaseStudySheet.inputOutput.elements[j+initialValuesOffset][_currentCaseStudySheet.inputOutput.columnNames[i+columnOffset]]);
@@ -392,20 +392,21 @@ var CRRTApp = (function() {
     var rowCitrate = $('<tr></tr>');
     var rowCacl = $('<tr></tr>');
 
-    var title = $('<td></td>').text("Citrate");
-    rowCitrate.append(title);
 
     if (_currentTime !== 0) {
+      var title = $('<th></th>').text("Citrate");
+      rowCitrate.append(title);
       for(j=_currentTime-numColumns; j<_currentTime; j++) {
         var data = $('<td></td>').text(_historicalInputOutput["citrate"][j]);
         rowCitrate.append(data);
       }
     }
 
-    var title = $('<td></td>').text("Calcium Chloride");
-    rowCacl.append(title);
 
     if (_currentTime !== 0) {
+      var title = $('<th></th>').text("Calcium Chloride");
+      rowCacl.append(title);
+
       for(j=_currentTime-numColumns; j<_currentTime; j++) {
         var data = $('<td></td>').text(_historicalInputOutput["cacl"][j]);
         rowCacl.append(data);
@@ -421,7 +422,7 @@ var CRRTApp = (function() {
     var rowNetInputOutput = $('<tr></tr>');
     var rowCumulativeInputOutput = $('<tr></tr>');
 
-    var title = $('<td></td>').addClass("emphasis").text("Total Input");
+    var title = $('<th></th>').addClass("emphasis").text("Total Input");
     rowTotalInput.append(title);
 
 
@@ -440,27 +441,28 @@ var CRRTApp = (function() {
     }
 
 
-    var title = $('<td></td>').text("Ultrafiltration");
-    rowUltrafiltration.append(title);
 
     if (_currentTime !== 0) {
+      var title = $('<th></th>').text("Ultrafiltration");
+      rowUltrafiltration.append(title);
       for(j=_currentTime-numColumns; j<_currentTime; j++) {
         var data = $('<td></td>').text(_historicalInputOutput["ultrafiltration"][j]);
         rowUltrafiltration.append(data);
       }
     }
 
-    var title = $('<td></td>').addClass("emphasis").text("Total Output");
-    rowTotalOutput.append(title);
 
     if (_currentTime !== 0) {
+    var title = $('<th></th>').addClass("emphasis").text("Total Output");
+    rowTotalOutput.append(title);
+
       for(j=_currentTime-numColumns; j<_currentTime; j++) {
         var data = $('<td></td>').text(_historicalInputOutput["totalOutput"][j]);
         rowTotalOutput.append(data);
       }
     }
 
-    var title = $('<td></td>').addClass("emphasis").text("Net Input/Output");
+    var title = $('<th></th>').addClass("emphasis").text("Net Input/Output");
     rowNetInputOutput.append(title);
 
     if (_currentTime !== 0) {
@@ -475,7 +477,7 @@ var CRRTApp = (function() {
       rowNetInputOutput.append(data);
     }
 
-    var title = $('<td></td>').addClass("emphasis").text("Cumulative Input/Output");
+    var title = $('<th></td>').addClass("emphasis").text("Cumulative Input/Output");
     rowCumulativeInputOutput.append(title);
 
     if (_currentTime !== 0) {
@@ -496,7 +498,12 @@ var CRRTApp = (function() {
     table.append(rowNetInputOutput);
     table.append(rowCumulativeInputOutput);
 
+
     $("#inputOutput").append(table);
+
+    // NOTE: In order to keep the table looking pretty, we need to make sure our empty cells
+    // have at least *some* content (in our case, a dash)
+    $("td:empty").html("-");
   }
 
   function createVitalsTable() {
@@ -535,7 +542,7 @@ var CRRTApp = (function() {
 
     for(i=0; i<numVitals; i++) {
       var row = $('<tr></tr>');
-      var data = $('<td></td').text(_currentCaseStudySheet.vitals.columnNames[i+columnOffset]);
+      var data = $('<th></th>').text(_currentCaseStudySheet.vitals.columnNames[i+columnOffset]);
       row.append(data);
       for(j=_currentTime-numColumns; j<_currentTime; j++) {
 
@@ -583,7 +590,7 @@ var CRRTApp = (function() {
     var rowScheduled = $("<tr></tr>");
     var rowInfusions = $("<tr></tr>");
 
-    var title = $('<td></td>').text("Scheduled");
+    var title = $('<th></th>').text("Scheduled");
     rowScheduled.append(title);
 
     for(j=0;j<numColumns;j++){
@@ -601,7 +608,7 @@ var CRRTApp = (function() {
       rowScheduled.append(cell);
     }
 
-    var title = $('<td></td>').text("Infusions");
+    var title = $('<th></th>').text("Infusions");
     rowInfusions.append(title);
 
     for(j=0;j<numColumns;j++){
@@ -664,7 +671,7 @@ var CRRTApp = (function() {
 
     for(i=0; i<numLabs; i++) {
       var row = $('<tr></tr>');
-      var data = $('<td></td').text(_allLabs[i]);
+      var data = $('<th></th>').text(_allLabs[i]);
       row.append(data);
 
       for(j=(_currentTime/6)-numColumns; j<(_currentTime/6); j++) {
