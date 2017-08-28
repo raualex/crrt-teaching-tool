@@ -226,6 +226,14 @@ var CRRTApp = (function() {
     $("#replacement-fluid-magnesium-value").val("");
     $("#replacement-fluid-phosphorous-value").val("");
 
+    $("#bloodFlowRate").val("");
+    $("#fluidFlowRate").val("");
+    $("#grossHourlyFluidRemoval").val("");
+
+    $("#other-fluids-sodium-phosphate").prop('checked',false);
+    $("#other-fluids-saline").prop('checked',false);
+    $("#other-fluids-D5W").prop('checked',false);
+
   }
 
   function initializeOrderForm() {
