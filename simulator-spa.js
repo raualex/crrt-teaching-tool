@@ -30,11 +30,12 @@ var CRRTApp = (function() {
   };
   
   var _runTestMode = true;
-  var _runTestLabsNum = 14;
+  var _runTestLabsNum = 0;
 
   var _numFiltersUsed = 1;
   var _currentCycleClotNumber = 0;
   var _messages = [];
+  var _newMessages = [];
   var _caseStudies;
   var _currentOrders;
   var _currentCaseStudyId;
@@ -778,6 +779,7 @@ var CRRTApp = (function() {
   }
 
   function runLabs() {
+    //var newMessages = {};
     var newLabs = {};
     var dialysate = {}; 
     var orders = getOrders();
@@ -833,6 +835,7 @@ var CRRTApp = (function() {
     }
     newLabs["pH"] = calculatePH(newLabs["bicarbonate"]);
 
+    newLabs = roundLabs(newLabs);
     saveLabValues(newLabs);
     incrementTime();
     copyStaticLabsToHistorical();
@@ -840,6 +843,21 @@ var CRRTApp = (function() {
     setVolumeOverload()
     setPageVariables();
     postLabChecks();
+    processMessages();
+  }
+
+  function roundLabs(newLabs){
+    newLabs["sodium"] = excelRound(newLabs["sodium"],0);
+    newLabs["potassium"] = excelRound(newLabs["potassium"],1);
+    newLabs["chloride"] = excelRound(newLabs["chloride"],0);
+    newLabs["bicarbonate"] = excelRound(newLabs["bicarbonate"],0);
+    newLabs["BUN"] = excelRound(newLabs["BUN"],0);
+    newLabs["creatinine"] = excelRound(newLabs["creatinine"],2);
+    newLabs["calcium"] = excelRound(newLabs["calcium"],1);
+    newLabs["ionizedCalcium"] = excelRound(newLabs["ionizedCalcium"],2);
+    newLabs["magnesium"] = excelRound(newLabs["magnesium"],1);
+    newLabs["phosphorous"] = excelRound(newLabs["phosphorous"],1);
+    return newLabs;
   }
 
   function copyStaticLabsToHistorical() {
@@ -1286,15 +1304,13 @@ var CRRTApp = (function() {
 
     if (_currentOrders["BFR"] <= 150) {
       var msg = "The patient's nurse called.  She's been having many \"Low Return Pressure Alarms\" over the past 4 hours, and the machine is not running well.";
-      _messages.push(msg);
-      showMessage(msg,6);
+      _newMessages.push(msg);
       totalPoints = totalPoints - 100;
     }
 
     if (_currentOrders["BFR"] > 350 ) {
       var msg = "The patient's nurse called to inform you of frequent \"Access Pressure Extremely Low\" alarms, and had to decrease BFR to 300.";
-      _messages.push(msg);
-      showMessage(msg,6);
+      _newMessages.push(msg);
       _currentOrders["BFR"] = 300;
       totalPoints = totalPoints - 50;
     }
@@ -1312,15 +1328,13 @@ var CRRTApp = (function() {
 
     if (currentSodium < 135) {
       var msg = "The primary team is concerned about the patient's hyponatremia. Please modify the CRRT prescription.";
-      _messages.push(msg);
-      showMessage(msg);
+      _newMessages.push(msg);
       totalPoints = totalPoints - 100;
     }
 
     if (currentSodium > 145) {
       var msg = "The primary team is concerned about the patient's hypernatremia. Please modify the CRRT prescription.";
-      _messages.push(msg);
-      showMessage(msg);
+      _newMessages.push(msg);
       totalPoints = totalPoints - 100;
     }
 
@@ -1339,8 +1353,7 @@ var CRRTApp = (function() {
 
     if (currentPotassium < 3.3) {
       var msg = "The primary team is concerned about the patient’s hypokalemia.  Please modify the CRRT prescription";
-      _messages.push(msg);
-      showMessage(msg);
+      _newMessages.push(msg);
       totalPoints = totalPoints - 100;
     }
 
@@ -1367,29 +1380,25 @@ var CRRTApp = (function() {
 
     if (currentPH < 7.0) {
       var msg = "The patient has died of overwhelming sepsis and acidosis.";
-      _messages.push(msg);
-      showMessage(msg);
+      _newMessages.push(msg);
       totalPoints = totalPoints - 1000;
     }
 
     if (currentPH < 7.2 && currentPH > 7.0) {
       var msg = "The primary team called with concerns regarding the patient's ongoing acidosis.  Please modify the CRRT prescription.";
-      _messages.push(msg);
-      showMessage(msg);
+      _newMessages.push(msg);
       totalPoints = totalPoints - 100;
     }
 
     if (currentPH > 7.45 && currentPH < 7.5) {
       var msg = "The primary team called with concerns regarding the patient's new alkalosis.  Please modify the CRRT prescription.”";
-      _messages.push(msg);
-      showMessage(msg);
+      _newMessages.push(msg);
       totalPoints = totalPoints - 50;
     }
 
     if (currentPH > 7.5) {
       var msg = "The ICU team is very concerned about the patient’s alkalosis.  They will be calling your attending if it is not addressed immediately.";
-      _messages.push(msg);
-      showMessage(msg);
+      _newMessages.push(msg);
       totalPoints = totalPoints - 100;
     }
 
@@ -1410,22 +1419,19 @@ var CRRTApp = (function() {
 
     if (currentCalcium < 7.5) {
       var msg = "The primary team is concerned about the patient's ongoing hypocalcemia. Please modify the prescription.";
-      _messages.push(msg);
-      showMessage(msg);
+      _newMessages.push(msg);
       totalPoints = totalPoints - 1000;
     }
 
     if (currentCalcium > 10 && currentCalcium <= 12) {
       var msg = "The primary team is concerned about the patient's new hypercalcemia. Please modify the prescription.";
-      _messages.push(msg);
-      showMessage(msg);
+      _newMessages.push(msg);
       totalPoints = totalPoints - 100;
     }
 
     if (currentCalcium > 12) {
       var msg = "The ICU team is very concerned about the patient's hypercalcemia. They will be calling your attending if it is not addressed immediately.";
-      _messages.push(msg);
-      showMessage(msg);
+      _newMessages.push(msg);
       totalPoints = totalPoints - 200;
     }
 
@@ -1444,8 +1450,7 @@ var CRRTApp = (function() {
 
     if (currentMagnesium < 1.4) {
       var msg = "The primary team is concerned about the patient's hypomagnesemia, and would like you to address it";
-      _messages.push(msg);
-      showMessage(msg);
+      _newMessages.push(msg);
       totalPoints = totalPoints - 50;
     }
 
@@ -1469,8 +1474,7 @@ var CRRTApp = (function() {
     if (currentPhosphorous < 1) {
       console.log("checkPhosphorous() : < 1 ", currentPhosphorous);
       var msg = "The primary team is concerned about the patient's hypophosphatemia, and would like you to address the problem";
-      _messages.push(msg);
-      showMessage(msg);
+      _newMessages.push(msg);
       totalPoints = totalPoints - 100;
     }
 
@@ -1492,8 +1496,7 @@ var CRRTApp = (function() {
     if (filtrationRate > 1500) {
       console.log("checkGrossUltrafiltration() : > 200 ", filtrationRate);
       var msg = "The patient's pressor requirements are increasing, and the team is concerned that the high rate of ultrafiltration is causing hemodynamic instability. Please reduce your ultrafiltration rate";
-      _messages.push(msg);
-      showMessage(msg);
+      _newMessages.push(msg);
       totalPoints = totalPoints - 100;
     }
 
@@ -1512,8 +1515,7 @@ var CRRTApp = (function() {
     if (currentFiltrationFraction > 25 && currentFiltrationFraction <= 30 && _currentOrders.anticoagulation === 'none') {
       var msg = "The patient’s filter clotted once, and was replaced.";
       _numFiltersUsed = _numFiltersUsed + 1;
-      _messages.push(msg);
-      showMessage(msg,6);
+      _newMessages.push(msg);
       totalPoints = totalPoints - 50;
     }
 
@@ -1521,8 +1523,7 @@ var CRRTApp = (function() {
       // TODO: effluent is divided by 3, gross UF for 4 hours will be 0 (Not sure what to do if BFR is also modifying effluent rate and UF time)
       var msg = "The patient’s filter clotted twice, and was replaced.";
       _numFiltersUsed = _numFiltersUsed + 2;
-      _messages.push(msg);
-      showMessage(msg,6);
+      _newMessages.push(msg);
       totalPoints = totalPoints - 100;
     }
 
@@ -1567,7 +1568,7 @@ var CRRTApp = (function() {
     }
     _points.doseInRange.push(totalPoints);
     // NOTE: Set dose so we have access to it in the future
-    _currentDose = dose;
+    _currentDose = excelRound(dose,1);
     _historicalDose.push(dose)
 
     return dose;
@@ -1840,13 +1841,29 @@ var CRRTApp = (function() {
     $(".citrate").hide();
   }
 
-  function showMessage(msg, timeOffsetInHours=0) {
+  function processMessages(){
+    var newMessages = _newMessages;
     var messageContainer = $('<p></p>').addClass('card-text');
-    var message = $('<samp></samp>').text(msg);
-    var time = $('<p></p>').addClass('case-time').text(currentTimeToTimestamp(false, timeOffsetInHours));
-    messageContainer.append(time)
-    messageContainer.append(message);
-    $("#message-box").prepend("<hr>");
+    var time = $('<p></p>').addClass('case-time').text(currentTimeToTimestamp(false, 0));
+    messageContainer.append(time);
+
+    for (var i=0; i<newMessages.length;i++){
+      var message = $('<samp></samp>').text(newMessages[i]);
+      messageContainer.append(message);
+      messageContainer.append("<hr>");
+    }
+
+    if (newMessages.length === 0) {
+      var message = $('<samp></samp>').text("CRRT is running smoothly. There were no reported issues since the previous update.");
+      messageContainer.append(message);
+      messageContainer.append("<hr>");
+    }
+
+    if (newMessages.length > 0) {
+      _messages.push(newMessages);
+      _newMessages = [];
+    }
+
     $("#message-box").prepend(messageContainer);
   }
 
@@ -1898,7 +1915,7 @@ var CRRTApp = (function() {
 
   function excelRound(val, num) {
     var coef = Math.pow(10, num);
-    return (Math.round(val * coef))/coef
+    return (Math.round(val * coef))/coef;
   }
 
   String.prototype.capitalize = function() {
