@@ -33,7 +33,7 @@ var CRRTApp = (function() {
   // _runTestMode and _runTestLabsNum can be used for testing
   // to autofill data, automatically run labs, etc.
   var _runTestMode = true;
-  var _runTestLabsNum = 0;
+  var _runTestLabsNum = 14;
 
   var _numFiltersUsed = 1;
   var _currentCycleClotNumber = 0;
@@ -1639,6 +1639,7 @@ var CRRTApp = (function() {
       $('#resultsOverview').text(resultsOverview);
       $('#resultsModal').modal('show');
       $('#ordersButton').hide();
+      $('#resultsButton').show();
     }
   }
 
