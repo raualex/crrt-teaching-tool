@@ -28,9 +28,12 @@ var CRRTApp = (function() {
       doseInRange: 20
     }
   };
-  
+
+  // NOTE:
+  // _runTestMode and _runTestLabsNum can be used for testing
+  // to autofill data, automatically run labs, etc.
   var _runTestMode = true;
-  var _runTestLabsNum = 12;
+  var _runTestLabsNum = 0;
 
   var _numFiltersUsed = 1;
   var _currentCycleClotNumber = 0;
@@ -56,7 +59,7 @@ var CRRTApp = (function() {
   // NOTE: Our starting time will be 10am
   var _startingTime = moment(0, 'HH');
 
-  // Note:
+  // NOTE:
   // We are storing each of our lab values in an array. This allows
   // us to keep track of historical values. Since new values will
   // always be pushed onto the front of the array, current value will 
@@ -362,9 +365,9 @@ var CRRTApp = (function() {
 
     var table = $('<table></table>').addClass('inputOutputTable table table-hover');
     var numFluidInputs = _currentCaseStudySheet.inputOutput.elements[0]["numInputs"];
-    // Note: This number reflects the number of rows of initial data.
+    // NOTE: This number reflects the number of rows of initial data.
     var initialValuesOffset = 2;
-    // Note: These data are being pulled from a Google spreadsheet. This number represents the number of 
+    // NOTE: These data are being pulled from a Google spreadsheet. This number represents the number of 
     // "extra" columns (notes, ID, etc.) before we get to the "real" data. Keep in mind, this number could change
     // if the spreadsheet is modified and additional columns are added before the columns storing our data.
     var columnOffset = 3;
@@ -522,9 +525,9 @@ var CRRTApp = (function() {
 
     var initialValuesOffset = 1;
     var table = $('<table></table>').addClass('vitalsTable table table-hover');
-    // Note: This number reflects the number of rows of initial data.
+    // NOTE: This number reflects the number of rows of initial data.
     var initialValuesOffset = 1;
-    // Note: These data are being pulled from a Google spreadsheet. This number represents the number of 
+    // NOTE: These data are being pulled from a Google spreadsheet. This number represents the number of 
     // "extra" columns (notes, ID, etc.) before we get to the "real" data. Keep in mind, this number could change
     // if the spreadsheet is modified and additional columns are added before the columns storing our data.
     var columnOffset = 3;
@@ -647,7 +650,7 @@ var CRRTApp = (function() {
     }
 
     var table = $('<table></table>').addClass('labsTable table table-hover');
-    // Note: This number reflects the number of rows of initial data.
+    // NOTE: This number reflects the number of rows of initial data.
     var initialValuesOffset = 2;
     var columnOffset = 0;
     var numLabs = _allLabs.length;
@@ -687,13 +690,6 @@ var CRRTApp = (function() {
         row.append(data);
       }
       table.append(row);
-
-      //var previous = $('<td></td>').text(_historicalLabs[_allLabs[i]][previousLabSet]);
-      //var current = $('<td></td>').text(_historicalLabs[_allLabs[i]][currentLabSet]);
-
-      //row.append(previous);
-      //row.append(current);
-      //table.append(row);
     }
     $("#labs").append(table);
   }
@@ -794,7 +790,6 @@ var CRRTApp = (function() {
   }
 
   function runLabs() {
-    //var newMessages = {};
     var newLabs = {};
     var dialysate = {}; 
     var orders = getOrders();
@@ -825,9 +820,7 @@ var CRRTApp = (function() {
       console.log("calculateLab(): volumeOfDistribution: ", volumeOfDistribution);
       console.log("calculateLab(): productionRate: ", productionRates[i].productionRate);
 
-      // Note: Params for calculateLab(): initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate
-      if (productionRates[i].component === 'sodium') {
-      }
+      // NOTE: Params for calculateLab(): initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate
       newLabs[productionRates[i].component] = calculateLab(
           parseFloat(_historicalLabs[productionRates[i].component][_historicalLabs[productionRates[i].component].length-1]),
           parseFloat(orders.fluidDialysateValues[productionRates[i].component]),
@@ -839,7 +832,16 @@ var CRRTApp = (function() {
       console.log("newLabs : ", newLabs);
     }
 
+    // NOTE: Because sodium calculations are a bit different than other lab values, we need to recalculate
+    // sodium using the calculateSodium() function.
     newLabs["sodium"] = calculateSodium(volumeOfDistribution, effluentFlowRate);
+
+    // NOTE: If we're using sodium phosphate, we need to recalculate the phosphorous results
+    if (orders.otherFluidsSodiumPhosphate) {
+      console.log("runLabs : using sodium phosphate");
+      newLabs["phosphorous"] = calculatePhosphourous(volumeOfDistribution, effluentFlowRate);
+    }
+
 
     if(orders.anticoagulation === 'citrate') {
       var citrateResults = runCitrateCalculations(startingWeight, effluentFlowRate, newLabs["ionizedCalcium"])
@@ -892,9 +894,10 @@ var CRRTApp = (function() {
     _historicalOverload.push(overload);
   }
 
+
   function calculateSodium(volumeOfDistribution, effluentFlowRate) {
+    var finalSodium;
     // NOTE: This is where we are accounting for hypo/hypertonic solutions and recalculating our sodium values
-    // NOTE: Params for calculateLab(): initialValue, dialysate, effluentFlowRate, time, weight, volumeOfDistribution, productionRate
     var bolusValue = _currentOrders["otherFluidsBolusValue"];
     var infusionValue = _currentOrders["otherFluidsInfusionValue"];
     var otherFluidsSaline = _currentOrders["otherFluidsSaline"];
@@ -929,6 +932,16 @@ var CRRTApp = (function() {
     finalSodium = calculateLab(initialSodium, newDialysate, effluentFlowRate, _currentOrders["timeToNextLabs"], startingWeight, volumeOfDistribution, 0);
 
     return finalSodium;
+  }
+
+  function calculatePhosphourous(volumeOfDistribution, effluentFlowRate) {
+    var finalPhosphorous;
+    var initialPhosphorous =  parseFloat(_historicalLabs["phosphorous"][_historicalLabs["phosphorous"].length-1]);
+    var startingWeight = parseFloat(_historicalVitals["weight"][_historicalVitals["weight"].length-1]);
+    var initialDialysate= _currentOrders["fluidDialysateValues"]["phosphorous"];
+    var newDialysate = initialDialysate+((465/_currentOrders["timeToNextLabs"])/(effluentFlowRate*10));
+    finalPhosphorous = calculateLab(initialPhosphorous, newDialysate, effluentFlowRate, _currentOrders["timeToNextLabs"], startingWeight, volumeOfDistribution, 0);
+    return finalPhosphorous;
   }
 
   function calculateTotalHoursOfFiltration(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium) {
@@ -1002,7 +1015,7 @@ var CRRTApp = (function() {
     var dialysateCalcium = _currentOrders["fluidDialysateValues"]["calcium"];
     var previousIonizedCalcium = _historicalLabs['ionizedCalcium'][_historicalLabs['ionizedCalcium'].length-1];
     var citrateInitial = citrateBloodConcentration;
-    // Note: For now,  caCitInitial will be hard-coded.
+    // NOTE: For now,  caCitInitial will be hard-coded.
     var caCitInitial = 0;
     var kForCaCit = 1;
     var caCitFinalPreFilter = (-1*(-ionizedCalciumInitial-citrateInitial-kForCaCit)-Math.sqrt(Math.pow(-ionizedCalciumInitial-citrateInitial-kForCaCit, 2)-4*(1)*(ionizedCalciumInitial*citrateInitial)))/(2*(1))
@@ -1013,7 +1026,7 @@ var CRRTApp = (function() {
     var citratFinalPostFilter = citratFinalPreFilter*(1-(effluentFlowRate/(_currentOrders.BFR*60/1000)));
     var caCitFinalPostFilter = caCitFinalPreFilter*(1-(effluentFlowRate/(_currentOrders.BFR*60/1000)));
 
-    // Note: In case 2 This number will change based on the case time
+    // NOTE: In case 2 This number will change based on the case time
     // TODO: Add ability to change this number with time
     var citrateMetabolismFactor = 1;
     var calciumClInMmolPerL = 54;
@@ -1071,7 +1084,7 @@ var CRRTApp = (function() {
   }
 
   function calculateNewWeight(orders, totalHoursOfFiltration) {
-    // Note:
+    // NOTE:
     // new weight = old weight + difference between input and output
     // 1L = 1Kg
     // output = ultrafiltration rate = Gross fluid removal = Gross ultrafiltration 
@@ -1245,7 +1258,7 @@ var CRRTApp = (function() {
   }
 
   function calculateEdema(orders) {
-    // Note: edema = current weight - usual weight
+    // NOTE: edema = current weight - usual weight
     return _historicalVitals["weight"][_historicalVitals["weight"].length-1] - _currentCaseStudy.startingData["usualWeight"];
   }
 
@@ -1501,7 +1514,7 @@ var CRRTApp = (function() {
     var totalPoints = 0;
     var fluidInPastSixHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
     var totalHoursOfFiltration = 6;
-    // Note: If BFR is <= 150, grossUF for two hours is 0, therefore, we only have 4 hours of filtration. (This *might* only be for case study #1)
+    // NOTE: If BFR is <= 150, grossUF for two hours is 0, therefore, we only have 4 hours of filtration. (This *might* only be for case study #1)
     if (_currentOrders["BFR"] <= 150) {
       totalHoursOfFiltration = 4;
     }
