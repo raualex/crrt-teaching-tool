@@ -32,8 +32,9 @@ var CRRTApp = (function() {
   // NOTE:
   // _runTestMode and _runTestLabsNum can be used for testing
   // to autofill data, automatically run labs, etc.
-  var _runTestMode = true;
-  var _runTestLabsNum = 14;
+  var _runTestMode = false;
+  // NOTE: 16 labs is a full case for case #1
+  var _runTestLabsNum = 16;
 
   var _numFiltersUsed = 1;
   var _currentCycleClotNumber = 0;
@@ -201,6 +202,7 @@ var CRRTApp = (function() {
             runLabs();
           }
         }
+        setTestFormInputs();
       }
     })
   }
@@ -213,7 +215,7 @@ var CRRTApp = (function() {
     $("#replacement-fluid-calcium-value").val("2");
     $("#replacement-fluid-magnesium-value").val("1.7");
     $("#replacement-fluid-phosphorous-value").val(".5");
-    $("#gross-hourly-fluid-removal").val("200");
+    $("#grossHourlyFluidRemoval").val("500");
     $("#bloodFlowRate").val("200");
     $("#fluidFlowRate").val("2");
     $("#citrateFlowRate").val("300");
