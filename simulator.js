@@ -32,9 +32,9 @@ var CRRTApp = (function() {
   // NOTE:
   // _runTestMode and _runTestLabsNum can be used for testing
   // to autofill data, automatically run labs, etc.
-  var _runTestMode = false;
+  var _runTestMode = true;
   // NOTE: 16 labs is a full case for case #1
-  var _runTestLabsNum = 16;
+  var _runTestLabsNum = 0;
 
   var _numFiltersUsed = 1;
   var _currentCycleClotNumber = 0;
@@ -180,11 +180,91 @@ var CRRTApp = (function() {
         "extremities": "No edema",
         "psych": "Intubated and sedated"
       }
+    }),
+    2: new _caseStudy({
+      "sodiumProductionRate": 0,
+      "potassiumProductionRate" : 4.3,
+      "chlorideProductionRate" : 0,
+      "bicarbonateProductionRate" : -20,
+      "BUNProductionRate" : 40,
+      "creatinineProductionRate" : 3,
+      "calciumProductionRate" : 0,
+      "filtrationFractionStarting": 0,
+      "gender" : "female",
+      "usualWeight" : 86.8,
+      "historyOfPresentIllness" : {
+        "overview" : [
+          "Jackie Smith is a 51 year old lady with a history of alcohol abuse, chronic pancreatitis, major depressive disorder, and recurrent c. diff colitis who was brought to the Emergency Department by ambulance after being found unresponsive by family members.",
+          "Empty bottles of Percocet and Tylenol were found nearby.  Initial labs reveal an AST of 12,000 and an INR of 4.1.",
+          "Upon arrival she is unresponsive and not protecting her airway.  She undergoes emergent intubation.",
+          "Initial vital signs are HR 130, BP 83/37, RR 28.  She is started on norepinephrine and vasopressin.",
+          "She does not make any urine while in the emergency department, and intial creatinine is 3.1, up from 0.46 one month earlier.",
+          "The decision is made to start the patient on continuous renal replacement therapy.  A 15 cm Mahurkar catheter is placed in the right internal jugular vein."
+        ],
+        "pastMedicalHistory" : [
+          "Hypertension",
+          "Alcohol abuse",
+          "Chronic pancreatitis",
+          "Pulmonary embolism",
+          "Diffuse chronic pain",
+          "Major Depressive Disorder"
+        ],
+        "pastSurgicalHistory": [
+          "Back surgery",
+          "Hysterectomy"
+        ],
+        "socialHistory": [
+          "Never smoker",
+          "Heavy alcohol use, ongoing"
+        ],
+        "familyHistory": [
+          "No family history of renal disease on mom's side.",
+          "Dad's history is unknown"
+        ]
+      },
+      "vitalSigns": {
+        "bloodPressureStarting": "78/53",
+        "respiratoryRateStarting": 30,
+        "temperatureStarting": 39.1,
+        "heartRateStarting": 128,
+        "weightStarting": 102
+      },
+      "medications": [
+        "Diazepam 5 mg four times daily as needed",
+        "Fluoxetine 40 mg Daily",
+        "Gabapentin 300 mg TID",
+        "Percocet 1-2 tablets q6hrs prn",
+        "Zolpidem 10 mg qPM prn for insomnia"
+      ],
+      "imaging" : [
+        "13:42 – CT Brain w/o contrast",
+        "1) No acute intracranial abnormalities.",
+        "2) Mild diffuse cerebral volume loss.  These findings do not totally exclude mild cerebral edema, as the baseline of the patient is not known.",
+        "",
+        "15:01 – XR Chest Single View",
+        "1) Limited portable chest x-ray demonstrates no focal consolidation, pneumothorax or pleural effusion.",
+        "2) Distal side-port of the esophagogastric tube is not clearly below the gastroesophageal junction.  Recommend advancing 5 cm.",
+        "",
+        "19:12 – US Abdomen Complete",
+        "1) Hepatomegaly with increased parenchymal echogenicity and coarsened echotexture suggesting chronic liver disease.",
+        "2) Patent hepatic vasculature in the appropriate direction of flow, without evidence of thrombus.",
+        "3) Status post cholecystectomy, prominence of the extrahepatic biliary tree likely related to postcholecystectomy status in the absence of elevated bilirubin."
+      ],
+      "physicalExam": {
+        "general": "Appears acutely ill",
+        "ENT": "Intubated",
+        "heart": "Tachycardic, no murmurs, rubs, or gallops",
+        "lungs": "Clear to auscultation",
+        "abdomen": "Distended, non-edematous",
+        "extremities": "No edema",
+        "psych": "Intubated and sedated"
+      }
     })
   }
 
   function initialize() {
     console.log("CRRTApp : initialize()");
+    initializeCaseStudyID();
     var d1 = $.Deferred();
     initializeSpreadsheet(d1);
     $.when(d1).done(function() {
@@ -723,9 +803,29 @@ var CRRTApp = (function() {
     }
   }
 
+  function initializeCaseStudyID(){
+    _currentCaseStudyId = getParameterByName("caseId");
+
+    if (!_currentCaseStudyId) {
+      _currentCaseStudyId = promptForID();
+    }
+
+    function promptForID() {
+      var validIDs = [1,2];
+      var id = parseInt(prompt("Enter case study ID (Valid cases: "+validIDs.toString()+")"));
+      if (validIDs.includes(id)){
+        console.log("valid IDs contains: ",id);
+        return id;
+      } else {
+        console.log("valid IDs does not contain: ", id);
+        promptForID();
+      }
+    }
+
+  }
+
   function initializeCaseStudy() {
     console.log("CRRTApp : initializeCaseStudy()");
-    _currentCaseStudyId = getParameterByName("caseId");
     _currentCaseStudy = _caseStudies[_currentCaseStudyId];
     _currentCaseStudy = _currentCaseStudy;
     _currentTime = 0;
@@ -756,12 +856,18 @@ var CRRTApp = (function() {
     Tabletop.init( { key: publicSpreadsheetUrl, callback: showInfo, simpleSheet: false } );
     function showInfo(data, tabletop) {
       _currentCaseStudySheet = data;
-      _currentCaseStudySheet.inputOutput = _currentCaseStudySheet.inputOutputCase1;
-      _currentCaseStudySheet.vitals = _currentCaseStudySheet.vitalsCase1;
-      _currentCaseStudySheet.labs = _currentCaseStudySheet.labsCase1;
-      _currentCaseStudySheet.productionRates = _currentCaseStudySheet.productionRatesCase1;
-      _currentCaseStudySheet.accessPressures = _currentCaseStudySheet.accessPressuresCase1;
-      _currentCaseStudySheet.medications = _currentCaseStudySheet.medicationsCase1;
+      _currentCaseStudySheet.inputOutput = _currentCaseStudySheet["inputOutputCase"+_currentCaseStudyId];
+      _currentCaseStudySheet.vitals = _currentCaseStudySheet["vitalsCase"+_currentCaseStudyId];
+      _currentCaseStudySheet.labs = _currentCaseStudySheet["labsCase"+_currentCaseStudyId];
+      _currentCaseStudySheet.productionRates = _currentCaseStudySheet["productionRatesCase"+_currentCaseStudyId];
+      _currentCaseStudySheet.accessPressures = _currentCaseStudySheet["accessPressuresCase"+_currentCaseStudyId];
+      _currentCaseStudySheet.medications = _currentCaseStudySheet["medicationsCase"+_currentCaseStudyId];
+
+      //_currentCaseStudySheet.vitals = _currentCaseStudySheet.vitalsCase1;
+      //_currentCaseStudySheet.labs = _currentCaseStudySheet.labsCase1;
+      //_currentCaseStudySheet.productionRates = _currentCaseStudySheet.productionRatesCase1;
+      //_currentCaseStudySheet.accessPressures = _currentCaseStudySheet.accessPressuresCase1;
+      //_currentCaseStudySheet.medications = _currentCaseStudySheet.medicationsCase1;
       promise.resolve();
       console.log(data);
     }
@@ -795,6 +901,7 @@ var CRRTApp = (function() {
     var newLabs = {};
     var dialysate = {}; 
     var orders = getOrders();
+    var didClot = false;
     _currentOrders = orders;
     var startingWeight = _historicalVitals["weight"][_historicalVitals["weight"].length-1];
     newLabs["ionizedCalcium"] = _historicalLabs['calcium'][_historicalLabs['calcium'].length-1]/8;
@@ -802,8 +909,20 @@ var CRRTApp = (function() {
 
     var initialEffluentFlowRate = calculateEffluentFlowRate(orders);
     console.log("initialEffluentFlowRate :", initialEffluentFlowRate);
-    var adjustedEffluentFlowRate = calculateAdjustedEffluentFlowRate(initialEffluentFlowRate, newLabs["filtrationFraction"], startingWeight, newLabs["ionizedCalcium"]);
-    var totalHoursOfFiltration = calculateTotalHoursOfFiltration(initialEffluentFlowRate, newLabs["filtrationFraction"], startingWeight, newLabs["ionizedCalcium"]);
+
+    switch (_currentCaseStudyId) {
+      case "1":
+        console.log("case 1 : checkFilterClottingCase1()")
+        didClot = checkFilterClottingCase1();
+        break;
+      case "2":
+        console.log("case 2 : checkFilterClottingCase2()")
+        didClot = checkFilterClottingCase2(startingWeight, effluentFlowRate, newLabs["ionizedCalcium"]);
+        break;
+    }
+    
+    var adjustedEffluentFlowRate = calculateAdjustedEffluentFlowRate(initialEffluentFlowRate, newLabs["filtrationFraction"], startingWeight, newLabs["ionizedCalcium"], didClot);
+    var totalHoursOfFiltration = calculateTotalHoursOfFiltration(initialEffluentFlowRate, newLabs["filtrationFraction"], startingWeight, newLabs["ionizedCalcium"], didClot);
     console.log("adjustedEffluentFlowRate :", adjustedEffluentFlowRate);
     var effluentFlowRate = adjustedEffluentFlowRate;
 
@@ -946,12 +1065,22 @@ var CRRTApp = (function() {
     return finalPhosphorous;
   }
 
-  function calculateTotalHoursOfFiltration(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium) {
+  function calculateTotalHoursOfFiltration(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot) {
+    switch (_currentCaseStudyId) {
+      case "1":
+        return calculateTotalHoursOfFiltrationCase1(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium);
+        break;
+      case "2":
+        return calculateTotalHoursOfFiltrationCase2(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot);
+        break;
+    }
+  }
+
+  function calculateTotalHoursOfFiltrationCase1(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium) {
     var initialEFR = effluentFlowRate;
     var defaultHoursOfFiltration = 6;
     var hoursOfFiltration = defaultHoursOfFiltration;
-    // NOTE: these adjustments to the total hours of filtration
-    // might only be applicable to case #1
+
     if ((_currentOrders["BFR"] <= 150 ) || (currentFiltrationFraction > 25 && currentFiltrationFraction <= 30 && _currentOrders.anticoagulation === 'none')) {
       hoursOfFiltration = 4;
     }
@@ -970,7 +1099,36 @@ var CRRTApp = (function() {
     return hoursOfFiltration;
   }
 
-  function calculateAdjustedEffluentFlowRate(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium) {
+  function calculateTotalHoursOfFiltrationCase2(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot) {
+    var initialEFR = effluentFlowRate;
+    var defaultHoursOfFiltration = 6;
+    var hoursOfFiltration = defaultHoursOfFiltration;
+
+    if (_currentOrders["BFR"] < 150) {
+      hoursOfFiltration = 4;
+    }
+
+    if (didClot) {
+      hoursOfFiltration = 4;
+    }
+
+    return hoursOfFiltration;
+  }
+
+  function calculateAdjustedEffluentFlowRate(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot) {
+    switch (_currentCaseStudyId) {
+      case "1":
+        console.log("case 1 : calculateAdjustedEffluentFlowRateCase1()")
+        calculateAdjustedEffluentFlowRateCase1(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium);
+        break;
+      case "2":
+        console.log("case 2 : calculateAdjustedEffluentFlowRateCase2()")
+        calculateAdjustedEffluentFlowRateCase2(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot);
+        break;
+    }
+  }
+
+  function calculateAdjustedEffluentFlowRateCase1(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium) {
     var initialEFR = effluentFlowRate;
     var adjustedEFR;
     var efrAdjustment = 1;
@@ -991,6 +1149,23 @@ var CRRTApp = (function() {
         efrAdjustment = 1.5;
       }
     }
+    adjustedEFR = initialEFR/efrAdjustment;
+    return adjustedEFR;
+  }
+
+  function calculateAdjustedEffluentFlowRateCase2(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot) {
+    var initialEFR = effluentFlowRate;
+    var adjustedEFR;
+    var efrAdjustment = 1;
+
+    if (didClot) {
+      efrAdjustment = 1.5;
+    }
+
+    if (_currentOrders["BFR"] < 150) {
+      efrAdjustment = 1.5;
+    }
+
     adjustedEFR = initialEFR/efrAdjustment;
     return adjustedEFR;
   }
@@ -1297,10 +1472,11 @@ var CRRTApp = (function() {
 
 
   function preLabChecks(effluentFlowRate) {
+    console.log("preLabChecks()");
     checkIfUsedCitrate();
     checkBloodFlowRate();
-    checkFilterClotting();
     checkDose(effluentFlowRate);
+
   }
 
   function postLabChecks() {
@@ -1533,9 +1709,10 @@ var CRRTApp = (function() {
     _points.grossUltrafiltrationInRange.push(totalPoints);
   }
 
-  function checkFilterClotting() {
+  function checkFilterClottingCase1() {
     var totalPoints = 0;
     var currentFiltrationFraction = _currentOrders.filtrationFraction;
+    var didClot = false;
 
     if (currentFiltrationFraction < 25) {
       console.log("checkFiltrationFraction() : within bounds ", currentFiltrationFraction);
@@ -1547,6 +1724,7 @@ var CRRTApp = (function() {
       _numFiltersUsed = _numFiltersUsed + 1;
       _newMessages.push(msg);
       totalPoints = totalPoints - 50;
+      didClot = true;
     }
 
     if (currentFiltrationFraction > 30 && _currentOrders.anticoagulation === 'none') {
@@ -1555,15 +1733,63 @@ var CRRTApp = (function() {
       _numFiltersUsed = _numFiltersUsed + 2;
       _newMessages.push(msg);
       totalPoints = totalPoints - 100;
+      ditClot = true;
     }
 
-    // TODO: Need to add case wherein citrate is in use. However, in order to calculate
-    // post-filter ionized calcium, we need the effluent flow rate - which is itself
-    // affected by the outcome of this calculation. Seems like a chicken-or-the-egg situation -- need to
-    // talk to Ben about how to overcome this situation.
+    _points.filtrationFractionInRange.push(totalPoints);
+    return didClot;
+  }
+  function checkFilterClottingCase2(startingWeight, effluentFlowRate, ionizedCalcium) {
+    var totalPoints = 0;
+    var currentFiltrationFraction = _currentOrders.filtrationFraction;
+    var didClot = false;
+
+    var initialCitrateResults = runCitrateCalculations(startingWeight, effluentFlowRate, ionizedCalcium);
+    var initialPostFilterIonizedCalcium = initialCitrateResults["calciumFinalPostFilter"];
+
+    if (_currentOrders.anticoagulation === 'none') {
+      var msg = "The filter clotted once, and was replaced.  The nurse reports that the access does not seem to be pulling well.  She has reversed the lines and positioned the patient appropriately.  The primary team does not feel a new access placement is currently possible given the highly elevated INR.";
+      _numFiltersUsed = _numFiltersUsed + 1;
+      _newMessages.push(msg);
+      // For the first filter, we don't detract points for a clotted filter. For future filters, we subtract 100 points.
+      //
+
+      if (_numFiltersUsed !== 1){
+        totalPoints = totalPoints - 100;
+
+      }
+      didClot = true;
+    }
+
+    if ( (initialPostFilterIonizedCalcium >= 0.3 ) && (initialPostFilterIonizedCalcium <=0.4) ) {
+      // 10% chance of a clot
+      double d = Math.Random();
+      if (d < 0.10 ){
+        didClot = true;
+        totalPoints = totalPoints -50;
+      }
+    }
+
+    if ( (initialPostFilterIonizedCalcium > 0.4 ) && (initialPostFilterIonizedCalcium <=0.5) ) {
+      // 50% chance of a clot
+      double d = Math.Random();
+      if (d < 0.50 ){
+        didClot = true;
+        totalPoints = totalPoints -50;
+      }
+    }
+
+    if (initialPostFilterIonizedCalcium > 0.5 ) {
+      didClot = true;
+      totalPoints = totalPoints -50;
+    }
+
+    if (currentFiltrationFraction < 25) {
+      totalPoints = totalPoints + 5;
+    }
 
     _points.filtrationFractionInRange.push(totalPoints);
-    return;
+    return didClot;
   }
 
   function checkDose(effluentFlowRate) {
