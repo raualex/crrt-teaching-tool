@@ -1202,10 +1202,8 @@ var CRRTApp = (function() {
     var caFinalPostFilter = caFinalPreFilter*(1-(effluentFlowRate/(_currentOrders.BFR*60/1000))*((caFinalPreFilter-(dialysateCalcium/2))/caFinalPreFilter));
     var citratFinalPostFilter = citratFinalPreFilter*(1-(effluentFlowRate/(_currentOrders.BFR*60/1000)));
     var caCitFinalPostFilter = caCitFinalPreFilter*(1-(effluentFlowRate/(_currentOrders.BFR*60/1000)));
+    var citrateMetabolismFactor = getCitrateMetabolismFactor();
 
-    // NOTE: In case 2 This number will change based on the case time
-    // TODO: Add ability to change this number with time
-    var citrateMetabolismFactor = 1;
     var calciumClInMmolPerL = 54;
     var calciumClFlowRateInMlPerHr = $('#caclInfusionRate').val();
     var calciumClFlowRateInLPerHr = calciumClFlowRateInMlPerHr/1000;
@@ -1222,6 +1220,28 @@ var CRRTApp = (function() {
     results["calciumFinalPostFilter"] = excelRound(caFinalPostFilter, 2);
 
     return results;
+  }
+
+  function getCitrateMetabolismFactor() {
+    var factor;
+    if (_currentCaseStudyId === "2") {
+
+      if (_currentTime < 48) {
+        factor = 0;
+      } else if (_currentTime < 72) {
+        factor = 0.5;
+      } else {
+        factor = 1;
+      }
+    } else {
+      factor = 1;
+    }
+
+    console.log("getCitrateMetabolismFactor() : _currentTime :", _currentTime);
+    console.log("getCitrateMetabolismFactor() : factor :", factor);
+
+    return factor;
+
   }
 
   function getOrders() {
@@ -1480,15 +1500,31 @@ var CRRTApp = (function() {
   }
 
   function postLabChecks() {
-    checkSodium();
-    checkPotassium();
-    checkChloride();
-    checkBicarbonate();
-    checkCalcium();
-    checkMagnesium();
-    checkPhosphorous();
-    checkGrossUltrafiltration();
-    handleSimulationCompletion();
+    switch (_currentCaseStudyId) {
+      case "1":
+        checkSodium();
+        checkPotassium();
+        checkChloride();
+        checkBicarbonate();
+        checkCalcium();
+        checkMagnesium();
+        checkPhosphorous();
+        checkGrossUltrafiltration();
+        handleSimulationCompletion();
+        break;
+      case "2":
+        checkSodiumCase2();
+        checkPotassiumCase2();
+        checkChloride();
+        checkBicarbonateCase2();
+        checkCalciumCase2();
+        checkMagnesiumCase2();
+        checkPhosphorous();
+        checkGrossUltrafiltration();
+        handleSimulationCompletion();
+        break;
+    }
+
   }
 
   function checkIfUsedCitrate() {
@@ -1548,6 +1584,50 @@ var CRRTApp = (function() {
     return;
   }
 
+  function checkSodiumCase2() {
+    var totalPoints = 0;
+    var currentSodium = _historicalLabs["sodium"][_historicalLabs["sodium"].length-1];
+
+    // Bonus 150 points if sodium is 154-156 (inclusive) after the first order
+    if ((_currentTime === 6) && (currentSodium >= 154 && currentSodium <= 156)){
+      totalPoints = totalPoints + 150;
+    }
+
+    if (currentSodium >= 150 && currentSodium <= 160) {
+      console.log("checkSodium() : within bounds ", currentSodium);
+      totalPoints = totalPoints + 5;
+    }
+
+    if (currentSodium < 150) {
+      var msg = "The primary team is concerned about the patient's hyponatremia. Please modify the CRRT prescription.";
+      _newMessages.push(msg);
+      totalPoints = totalPoints - 50;
+    }
+
+    if (currentSodium > 160) {
+      var msg = "The primary team is concerned about the patient's hypernatremia. Please modify the CRRT prescription.";
+      _newMessages.push(msg);
+      totalPoints = totalPoints - 50;
+    }
+
+    if (currentSodium > 170) {
+      var msg = "The patient developed a subarachnoid hemorrhage in the hospital, and was transitioned to comfort care by the family. The sodium concentration >170 mmol/L was thought to be the main culprit. Try the scenario again, with less 3% saline";
+      _caseOver = true;
+      _newMessages.push(msg);
+      totalPoints = totalPoints - 1000;
+    }
+
+    if (currentSodium < 130) {
+      var msg = "The patient developed cerebral edema leading to brain herniation, and passed away. The sodium concentration <130 mmol/L was thought to be the etiology. Try the scenario again, without using D5W.";
+      _caseOver = true;
+      _newMessages.push(msg);
+      totalPoints = totalPoints - 1000;
+    }
+
+    _points.sodiumInRange.push(totalPoints);
+    return;
+  }
+
   function checkPotassium() {
     var totalPoints = 0;
     var currentPotassium = _historicalLabs["potassium"][_historicalLabs["potassium"].length-1];
@@ -1567,12 +1647,45 @@ var CRRTApp = (function() {
     return;
   }
 
+  function checkPotassiumCase2() {
+    var totalPoints = 0;
+    var currentPotassium = _historicalLabs["potassium"][_historicalLabs["potassium"].length-1];
+
+    if (currentPotassium > 3.3) {
+      console.log("checkPotassium() : within bounds ", currentPotassium);
+      totalPoints = totalPoints + 5;
+    }
+
+    if (currentPotassium < 3.3) {
+      var msg = "The primary team is concerned about the patient’s hypokalemia.  Please modify the CRRT prescription";
+      _newMessages.push(msg);
+      totalPoints = totalPoints - 100;
+    }
+
+    if (currentPotassium < 2.5){
+      var d = Math.Random();
+      if (d < 0.50 ){
+        _caseOver = true;
+        var msg = "The patient developed ventricular fibrillation, and resuscitation efforts were ended after 30 minutes of CPR. The patient’s extreme hypokalemia was thought to be the inciting factor. Try the case again, and make sure there is enough potassium in the replacement or dialysate fluid to maintain normal values.";
+        totalPoints = totalPoints - 1000;
+      }
+
+    }
+
+    _points.potassiumInRange.push(totalPoints);
+    return;
+  }
+
   function checkChloride() {
     // No errors associated with Chloride in Case #1
   }
 
   function checkBicarbonate() {
     checkPH();
+  }
+
+  function checkBicarbonateCase2() {
+    checkPHCase2();
   }
 
   function checkPH() {
@@ -1612,6 +1725,46 @@ var CRRTApp = (function() {
     return;
   }
 
+  function checkPHCase2() {
+    var totalPoints = 0;
+    var currentPH = _historicalLabs["pH"][_historicalLabs["pH"].length-1];
+      
+    if (currentPH < 7.0) {
+      var msg = "The patient has died of overwhelming acidosis.";
+      _newMessages.push(msg);
+      _caseOver = true;
+      totalPoints = totalPoints - 1000;
+    }
+
+    if (currentPH < 7.2 && currentPH > 7.0) {
+      var msg = "The primary team called with concerns regarding the patient's ongoing acidosis.  Please modify the CRRT prescription.";
+      _newMessages.push(msg);
+      totalPoints = totalPoints - 100;
+    }
+
+    if (currentPH > 7.45 && currentPH < 7.55) {
+      var msg = "The primary team called with concerns regarding the patient's new alkalosis.  Please modify the CRRT prescription.";
+      _newMessages.push(msg);
+      totalPoints = totalPoints - 50;
+    }
+
+    if (currentPH > 7.55 && currentPH < 7.65) {
+      var msg = "The ICU team is very concerned about the patient’s alkalosis.  They will be calling your attending if it is not addressed immediately.";
+      _newMessages.push(msg);
+      totalPoints = totalPoints - 100;
+    }
+
+    if (currentPH > 7.65) {
+      var msg = "The patient developed intractable seizures, and sustained severe brain damage eventually leading to withdrawal of care. The alkalosis to > 7.65 was thought to be the inciting factor.";
+      _newMessages.push(msg);
+      _caseOver = true;
+      totalPoints = totalPoints - 1000;
+    }
+
+    _points.pHInRange.push(totalPoints);
+    return;
+  }
+
   function checkCalcium() {
     // TODO: Doc from Ben says "NOT when using citrate" -- do we not run these checks if we are using citrate?
     // if using citrate - divide by 8
@@ -1645,6 +1798,65 @@ var CRRTApp = (function() {
     return;
   }
 
+  function checkCalciumCase2() {
+    var totalPoints = 0;
+    var currentCalcium = _historicalLabs["calcium"][_historicalLabs["calcium"].length-1];
+
+    if(orders.anticoagulation === 'citrate') {
+      var currentCalciumIonized = _historicalLabs["ionizedCalcium"][_historicalLabs["ionizedCalcium"].length-1];
+    }
+
+    if (currentCalcium >= 8 && currentCalcium <= 10) {
+      console.log("checkCalciumCase2() : within bounds ", currentCalcium);
+      totalPoints = totalPoints + 5;
+    }
+
+    if (currentCalciumIonized >= 1.0 && currentCalciumIonized <= 1.3) {
+      console.log("checkCalciumCase2() : ionized calcium within bounds ", currentCalciumIonized);
+      totalPoints = totalPoints + 5;
+    }
+
+    if (currentCalciumIonized >= 1.1 && currentCalciumIonized <= 1.2) {
+      console.log("checkCalciumCase2() : ionized calcium within bounds bonus", currentCalciumIonized);
+      totalPoints = totalPoints + 5;
+    }
+
+    if (currentCalcium < 6.5) {
+      var msg = "The patient developed ventricular fibrillation, and resuscitation efforts were ended after 30 minutes of CPR. The patient’s extreme hypocalcemia was thought to be the inciting factor. Try the case again, and make sure there is enough calcium in the replacement or dialysate fluid to maintain normal values";
+      _newMessages.push(msg);
+      _caseOver = true;
+      totalPoints = totalPoints - 1000;
+    }
+
+    if (currentCalcium >= 6.5 && currentCalcium < 7.5) {
+      var msg = "The primary team is concerned about the patient's ongoing hypocalcemia.  Please modify the prescription.";
+      _newMessages.push(msg);
+      totalPoints = totalPoints - 100;
+    }
+
+    if (currentCalcium > 10 && currentCalcium <= 12) {
+      var msg = "The primary team is concerned about the patient's new hypercalcemia. Please modify the prescription.";
+      _newMessages.push(msg);
+      totalPoints = totalPoints - 100;
+    }
+
+    if (currentCalcium > 12 && currentCalcium <= 14) {
+      var msg = "The ICU team is very concerned about the patient's hypercalcemia. They will be calling your attending if it is not addressed immediately.";
+      _newMessages.push(msg);
+      totalPoints = totalPoints - 200;
+    }
+
+    if (currentCalcium > 14) {
+      var msg = "The patient developed ventricular fibrillation, and resuscitation efforts were ended after 30 minutes of CPR. The patient’s extreme hypercalcemia was thought to be the inciting factor. Try the case again. If using citrate and make sure there is enough calcium in the replacement or dialysate fluid to maintain normal values.";
+      _newMessages.push(msg);
+      _caseOver = true;
+      totalPoints = totalPoints - 1000;
+    }
+
+    _points.calciumInRange.push(totalPoints);
+    return;
+  }
+
   function checkMagnesium() {
     var totalPoints = 0;
     var currentMagnesium = _historicalLabs["magnesium"][_historicalLabs["magnesium"].length-1];
@@ -1658,6 +1870,30 @@ var CRRTApp = (function() {
       var msg = "The primary team is concerned about the patient's hypomagnesemia, and would like you to address it";
       _newMessages.push(msg);
       totalPoints = totalPoints - 50;
+    }
+
+    _points.magnesiumInRange.push(totalPoints);
+    return;
+  }
+
+  function checkMagnesiumCase2() {
+    var totalPoints = 0;
+    var currentMagnesium = _historicalLabs["magnesium"][_historicalLabs["magnesium"].length-1];
+
+    if (currentMagnesium >= 1.0 && currentMagnesium < 1.4) {
+      var msg = "The primary team is concerned about the patient's hypomagnesemia, and would like you to address it";
+      _newMessages.push(msg);
+      totalPoints = totalPoints - 50;
+    }
+      
+    if (currentMagnesium < 1.0){
+      var d = Math.Random();
+      if (d < 0.20 ){
+        _caseOver = true;
+        var msg = "The patient developed Torsades de Pointes, and resuscitation efforts were ended after 30 minutes of CPR. The patient’s extreme hypomagnesemia was thought to be the inciting factor. Try the case again, and make sure there is enough magnesium in the replacement or dialysate fluid to maintain normal values.";
+        totalPoints = totalPoints - 1000;
+      }
+
     }
 
     _points.magnesiumInRange.push(totalPoints);
@@ -1763,7 +1999,7 @@ var CRRTApp = (function() {
 
     if ( (initialPostFilterIonizedCalcium >= 0.3 ) && (initialPostFilterIonizedCalcium <=0.4) ) {
       // 10% chance of a clot
-      double d = Math.Random();
+      var d = Math.Random();
       if (d < 0.10 ){
         didClot = true;
         totalPoints = totalPoints -50;
@@ -1772,7 +2008,7 @@ var CRRTApp = (function() {
 
     if ( (initialPostFilterIonizedCalcium > 0.4 ) && (initialPostFilterIonizedCalcium <=0.5) ) {
       // 50% chance of a clot
-      double d = Math.Random();
+      var d = Math.Random();
       if (d < 0.50 ){
         didClot = true;
         totalPoints = totalPoints -50;
