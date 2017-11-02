@@ -1119,11 +1119,11 @@ var CRRTApp = (function() {
     switch (_currentCaseStudyId) {
       case "1":
         console.log("case 1 : calculateAdjustedEffluentFlowRateCase1()")
-        calculateAdjustedEffluentFlowRateCase1(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium);
+        return calculateAdjustedEffluentFlowRateCase1(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium);
         break;
       case "2":
         console.log("case 2 : calculateAdjustedEffluentFlowRateCase2()")
-        calculateAdjustedEffluentFlowRateCase2(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot);
+        return calculateAdjustedEffluentFlowRateCase2(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot);
         break;
     }
   }
