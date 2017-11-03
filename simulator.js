@@ -32,7 +32,7 @@ var CRRTApp = (function() {
   // NOTE:
   // _runTestMode and _runTestLabsNum can be used for testing
   // to autofill data, automatically run labs, etc.
-  var _runTestMode = true;
+  var _runTestMode = false;
   // NOTE: 16 labs is a full case for case #1
   var _runTestLabsNum = 0;
 
