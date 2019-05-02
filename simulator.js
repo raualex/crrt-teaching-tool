@@ -755,8 +755,14 @@ var CRRTApp = (function() {
     var row = $('<tr></tr>');
     head.append(row);
 
+
+    //currentLabSet = the number of lab results starting at the patients default settings (1)
+
+    //i should start at the start time (whatever that is) and then increment up by 8 hours for each incrementation of currentLabSet (ex. currentLabSet = 1, 12:00noon, currentLabSet = 2, 8pm, currentLabSet = 3, 4am, etc.)
+
     row.append($("<th></th>"));
     for(i=currentLabSet-numColumns; i<currentLabSet; i++) {
+      console.log('currentLabSet from line 760 deez nuts ' + currentLabSet)
       var th = $('<th></th>').text(i-1);
       row.append(th);
     }
