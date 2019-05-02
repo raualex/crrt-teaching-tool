@@ -762,7 +762,6 @@ var CRRTApp = (function() {
 
     row.append($("<th></th>"));
     for(i=currentLabSet-numColumns; i<currentLabSet; i++) {
-      console.log('currentLabSet from line 760 deez nuts ' + currentLabSet)
       var th = $('<th></th>').text(i-1);
       row.append(th);
     }
