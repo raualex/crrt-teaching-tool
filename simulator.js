@@ -916,11 +916,11 @@ var CRRTApp = (function() {
     console.log("initialEffluentFlowRate :", initialEffluentFlowRate);
 
     switch (_currentCaseStudyId) {
-      case "1":
+      case 1:
         console.log("case 1 : checkFilterClottingCase1()")
         didClot = checkFilterClottingCase1();
         break;
-      case "2":
+      case 2:
         console.log("case 2 : checkFilterClottingCase2()")
         didClot = checkFilterClottingCase2(startingWeight, effluentFlowRate, newLabs["ionizedCalcium"]);
         break;
@@ -928,6 +928,7 @@ var CRRTApp = (function() {
     
     var adjustedEffluentFlowRate = calculateAdjustedEffluentFlowRate(initialEffluentFlowRate, newLabs["filtrationFraction"], startingWeight, newLabs["ionizedCalcium"], didClot);
     var totalHoursOfFiltration = calculateTotalHoursOfFiltration(initialEffluentFlowRate, newLabs["filtrationFraction"], startingWeight, newLabs["ionizedCalcium"], didClot);
+
     console.log("adjustedEffluentFlowRate :", adjustedEffluentFlowRate);
     var effluentFlowRate = adjustedEffluentFlowRate;
 
@@ -961,7 +962,7 @@ var CRRTApp = (function() {
     // NOTE: Because sodium calculations are a bit different than other lab values, we need to recalculate
     // sodium using the calculateSodium() function.
     newLabs["sodium"] = calculateSodium(volumeOfDistribution, effluentFlowRate);
-
+    console.log('Nan Problemmmmmmm: ' + effluentFlowRate)
     // NOTE: If we're using sodium phosphate, we need to recalculate the phosphorous results
     if (orders.otherFluidsSodiumPhosphate) {
       console.log("runLabs : using sodium phosphate");
@@ -1022,6 +1023,7 @@ var CRRTApp = (function() {
 
 
   function calculateSodium(volumeOfDistribution, effluentFlowRate) {
+    console.log('calculateSodium params: ' + volumeOfDistribution, effluentFlowRate)
     var finalSodium;
     // NOTE: This is where we are accounting for hypo/hypertonic solutions and recalculating our sodium values
     var bolusValue = _currentOrders["otherFluidsBolusValue"];
@@ -1072,10 +1074,10 @@ var CRRTApp = (function() {
 
   function calculateTotalHoursOfFiltration(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot) {
     switch (_currentCaseStudyId) {
-      case "1":
+      case 1:
         return calculateTotalHoursOfFiltrationCase1(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium);
         break;
-      case "2":
+      case 2:
         return calculateTotalHoursOfFiltrationCase2(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot);
         break;
     }
@@ -1121,12 +1123,13 @@ var CRRTApp = (function() {
   }
 
   function calculateAdjustedEffluentFlowRate(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot) {
+    console.log(_currentCaseStudyId, typeof _currentCaseStudyId)
     switch (_currentCaseStudyId) {
-      case "1":
-        console.log("case 1 : calculateAdjustedEffluentFlowRateCase1()")
+      case 1:
+        console.log("case 1 : calculateAdjustedEffluentFlowRateCase1():", calculateAdjustedEffluentFlowRateCase1(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium))
         return calculateAdjustedEffluentFlowRateCase1(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium);
         break;
-      case "2":
+      case 2:
         console.log("case 2 : calculateAdjustedEffluentFlowRateCase2()")
         return calculateAdjustedEffluentFlowRateCase2(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot);
         break;
@@ -1506,7 +1509,7 @@ var CRRTApp = (function() {
 
   function postLabChecks() {
     switch (_currentCaseStudyId) {
-      case "1":
+      case 1:
         checkSodium();
         checkPotassium();
         checkChloride();
@@ -1517,7 +1520,7 @@ var CRRTApp = (function() {
         checkGrossUltrafiltration();
         handleSimulationCompletion();
         break;
-      case "2":
+      case 2:
         checkSodiumCase2();
         checkPotassiumCase2();
         checkChloride();
