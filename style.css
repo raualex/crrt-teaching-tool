@@ -58,19 +58,57 @@ body.loading .modal-spin {
 #labs, #medications, #vitals, #inputOutput {
   overflow-x: scroll;
   overflow-y:visible;
+  padding: 0 15px 15px 0;
 }
 
-#labs { margin-left: 180px; }
+/*#labs { margin-left: 180px; }
 #vitals { margin-left: 150px; }
 #medications { margin-left: 180px; }
-#inputOutput { margin-left: 160px; }
+#inputOutput { margin-left: 160px; }*/
 
 #vitals, #labs, #medications, #inputOutput table {
   width: auto;
 }
 
+.modal-body {
+  height: 80vh;
+  /*margin: 0 auto;*/
+  width: 60vh;
+}
+
+.blankTh {
+  position: sticky;
+  left: 0;
+  background-color: #fff;
+  z-index: 2;
+}
+
+#ordersModal {
+  
+}
+
+table {
+  overflow-y: scroll;
+  overflow-x: scroll;
+}
+
+table thead {
+  position: sticky;
+  top: 0;  
+  background-color: #FFF;
+}
+
 table thead th {
   border-bottom: none !important;
+  background-color: #FFF;
+  position: sticky;
+  top: 0;  
+}
+
+table tr th {
+  background-color: #FFF;
+  position: sticky;
+  left: 0;    
 }
 
 table td, th {
@@ -83,7 +121,7 @@ td, th {
 
 }
 
-th:first-child {
+/*th:first-child {
   position: fixed;
   left: 5px
-}
+}*/

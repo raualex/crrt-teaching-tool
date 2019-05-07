@@ -303,21 +303,21 @@ var CRRTApp = (function() {
   }
 
   function resetFormInputs() {
-    $("#replacement-fluid-sodium-value").val("");
-    $("#replacement-fluid-potassium-value").val("");
-    $("#replacement-fluid-chloride-value").val("");
-    $("#replacement-fluid-bicarbonate-value").val("");
-    $("#replacement-fluid-calcium-value").val("");
-    $("#replacement-fluid-magnesium-value").val("");
-    $("#replacement-fluid-phosphorous-value").val("");
+    // $("#replacement-fluid-sodium-value").val("");
+    // $("#replacement-fluid-potassium-value").val("");
+    // $("#replacement-fluid-chloride-value").val("");
+    // $("#replacement-fluid-bicarbonate-value").val("");
+    // $("#replacement-fluid-calcium-value").val("");
+    // $("#replacement-fluid-magnesium-value").val("");
+    // $("#replacement-fluid-phosphorous-value").val("");
 
-    $("#bloodFlowRate").val("");
-    $("#fluidFlowRate").val("");
-    $("#grossHourlyFluidRemoval").val("");
+    // $("#bloodFlowRate").val("");
+    // $("#fluidFlowRate").val("");
+    // $("#grossHourlyFluidRemoval").val("");
 
-    $("#other-fluids-sodium-phosphate").prop('checked',false);
-    $("#other-fluids-saline").prop('checked',false);
-    $("#other-fluids-D5W").prop('checked',false);
+    // $("#other-fluids-sodium-phosphate").prop('checked',false);
+    // $("#other-fluids-saline").prop('checked',false);
+    // $("#other-fluids-D5W").prop('checked',false);
 
   }
 
@@ -464,7 +464,7 @@ var CRRTApp = (function() {
     var row = $('<tr></tr>');
     head.append(row);
 
-    row.append($("<th></th>"));
+    row.append($("<th class='blankTh'></th>"));
     for(i=_currentTime-numColumns; i<_currentTime; i++) {
       var th = $('<th></th>').text(_currentCaseStudySheet.inputOutput.elements[i+initialValuesOffset].time);
       row.append(th);
@@ -626,7 +626,7 @@ var CRRTApp = (function() {
     var row = $('<tr></tr>');
     head.append(row);
 
-    row.append($("<th></th>"));
+    row.append($("<th class='blankTh'></th>"));
     for(i=_currentTime-numColumns; i<_currentTime; i++) {
       var th = $('<th></th>').text(_currentCaseStudySheet.vitals.elements[i+initialValuesOffset].time);
       row.append(th);
@@ -673,7 +673,7 @@ var CRRTApp = (function() {
     var head = $('<thead></thead');
     var row = $('<tr></tr>');
     head.append(row);
-    row.append($("<th></th>"));
+    row.append($("<th class='blankTh'></th>"));
     for(var i=0; i<numColumns; i++) {
       var th = $('<th></th>').text(_currentCaseStudySheet.medications.elements[i].time);
       row.append(th);
@@ -760,7 +760,7 @@ var CRRTApp = (function() {
 
     //i should start at the start time (whatever that is) and then increment up by 8 hours for each incrementation of currentLabSet (ex. currentLabSet = 1, 12:00noon, currentLabSet = 2, 8pm, currentLabSet = 3, 4am, etc.)
 
-    row.append($("<th></th>"));
+    row.append($("<th class='blankTh'></th>"));
     for(i=currentLabSet-numColumns; i<currentLabSet; i++) {
       var th = $('<th></th>').text(i-1);
       row.append(th);
