@@ -55,9 +55,9 @@ body.loading .modal-spin {
   overflow-y: scroll !important;
 }
 
-#labs, #medications, #vitals, #inputOutput {
+#labs, #medications, #vitals, #inputOutput, #ordersModal {
   overflow-x: scroll;
-  overflow-y:visible;
+  overflow-y: visible;
   padding: 0 15px 15px 0;
 }
 
@@ -70,10 +70,18 @@ body.loading .modal-spin {
   width: auto;
 }
 
+#vitalsModal .modal-dialog .modal-content,
+#labsModal .modal-dialog .modal-content,
+#medicationsModal .modal-dialog .modal-content,
+#inputOutputModal .modal-dialog .modal-content {
+  background-color: magenta;
+  /*width: 80vw;*/
+}
+
 .modal-body {
-  height: 80vh;
-  /*margin: 0 auto;*/
-  width: 60vh;
+/*  height: 80vh;
+  margin: 0 auto;
+  width: 60vh;*/
 }
 
 .blankTh {
@@ -83,16 +91,27 @@ body.loading .modal-spin {
   z-index: 2;
 }
 
-#ordersModal {
-  
+/*#ordersModal {
+  background-color: magenta;
+}*/
+
+#ordersModal .modal-dialog .modal-content {
+  background-color: magenta;
+  /*width: 80vw;*/
 }
 
-table {
+#vitals table, 
+#labs table, 
+#medications table, 
+#inputOutput table {
   overflow-y: scroll;
   overflow-x: scroll;
 }
 
-table thead {
+#vitals table thead, 
+#labs table thead, 
+#medications table thead, 
+#inputOutput table thead {
   position: sticky;
   top: 0;  
   background-color: #FFF;
@@ -100,12 +119,30 @@ table thead {
 
 table thead th {
   border-bottom: none !important;
+/*  background-color: #FFF;
+  position: sticky;
+  top: 0;  */
+}
+
+/*table tr th {
+  background-color: #FFF;
+  position: sticky;
+  left: 0;    
+}*/
+
+#vitals table thead th, 
+#labs table thead th, 
+#medications table thead th, 
+#inputOutput table thead th {
   background-color: #FFF;
   position: sticky;
   top: 0;  
 }
 
-table tr th {
+#vitals table tr th, 
+#labs table tr th, 
+#medications table tr th, 
+#inputOutput table tr th  {
   background-color: #FFF;
   position: sticky;
   left: 0;    
