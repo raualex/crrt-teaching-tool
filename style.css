@@ -75,8 +75,14 @@ body.loading .modal-spin {
 #medicationsModal .modal-dialog .modal-content,
 #inputOutputModal .modal-dialog .modal-content {
   background-color: magenta;
-  /*width: 80vw;*/
+  height: 80vh;
 }
+
+/*#inputOutputModal .modal-dialog .modal-content {
+  overflow-y: scroll;
+  overflow-x: scroll;
+  height: 80vh;
+}*/
 
 .modal-body {
 /*  height: 80vh;
@@ -102,7 +108,7 @@ body.loading .modal-spin {
 
 #vitals table, 
 #labs table, 
-#medications table, 
+#medications table , 
 #inputOutput table {
   overflow-y: scroll;
   overflow-x: scroll;
