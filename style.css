@@ -107,7 +107,8 @@ body.loading .modal-spin {
 }
 
 #medications .medicationsTable {
-  overflow: hidden;
+  overflow-y: scroll;
+  overflow-x: scroll;
 }
 
 #vitals table, 
