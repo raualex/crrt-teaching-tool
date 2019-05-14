@@ -59,6 +59,7 @@ var CRRTApp = (function() {
   var _physicalExam = ["general", "ENT", "heart", "lungs", "abdomen", "extremities", "psych"];
   // NOTE: Our starting time will be 10am
   var _startingTime = moment(0, 'HH');
+  var _headerTime = 10;
 
   // NOTE:
   // We are storing each of our lab values in an array. This allows
@@ -764,7 +765,7 @@ var CRRTApp = (function() {
 
     row.append($("<th class='blankTh'></th>"));
     for(i=currentLabSet-numColumns; i<currentLabSet; i++) {
-      var th = $('<th></th>').text(i-1);
+      var th = $('<th></th>').text(createLabsHeaders(i));
       row.append(th);
     }
     table.append(head);
@@ -781,6 +782,24 @@ var CRRTApp = (function() {
       table.append(row);
     }
     $("#labs").append(table);
+  }
+
+  function createLabsHeaders(i) {
+    if(i === -1 || i === 0) {
+      _headerTime = 10
+      return _headerTime + ":00";
+    } else {
+      _headerTime = verifyHeaderTime()
+      return _headerTime + ":00";
+    }
+  }
+
+  function verifyHeaderTime() {
+    if ((_headerTime + 8) > 12) {
+      return (_headerTime + 8) - 12
+    } else {
+      return _headerTime + 8
+    }
   }
 
   function setPageTime() {
