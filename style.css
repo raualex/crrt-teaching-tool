@@ -106,9 +106,12 @@ body.loading .modal-spin {
   /*width: 80vw;*/
 }
 
+#medications .medicationsTable {
+  overflow: hidden;
+}
+
 #vitals table, 
 #labs table, 
-#medications table , 
 #inputOutput table {
   overflow-y: scroll;
   overflow-x: scroll;
