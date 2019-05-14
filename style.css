@@ -61,6 +61,10 @@ body.loading .modal-spin {
   padding: 0 15px 15px 0;
 }
 
+.medications-body {
+  overflow-y: scroll;
+}
+
 /*#labs { margin-left: 180px; }
 #vitals { margin-left: 150px; }
 #medications { margin-left: 180px; }
@@ -106,7 +110,7 @@ body.loading .modal-spin {
   /*width: 80vw;*/
 }
 
-#medications .medicationsTable {
+#medications .table {
   overflow-y: scroll;
   overflow-x: scroll;
 }

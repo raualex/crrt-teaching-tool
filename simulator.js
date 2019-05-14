@@ -661,6 +661,8 @@ var CRRTApp = (function() {
       $(".medicationsTable").remove();
     }
 
+    $('.modal-body').addClass('medications-body');
+
     var table = $("<table></table>").addClass('medicationsTable table table-hover');
     var initialValuesOffset = 1;
     var numColumns;
