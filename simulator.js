@@ -794,11 +794,17 @@ var CRRTApp = (function() {
   }
 
   function verifyHeaderTime() {
+    //Create switch statement
+    //Return object with headerTime and AM/PM
     if ((_headerTime + 8) > 12) {
       return (_headerTime + 8) - 12
     } else {
       return _headerTime + 8
     }
+  }
+
+  function evaluateAmPm() {
+
   }
 
   function setPageTime() {
