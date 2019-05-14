@@ -59,6 +59,7 @@ var CRRTApp = (function() {
   var _physicalExam = ["general", "ENT", "heart", "lungs", "abdomen", "extremities", "psych"];
   // NOTE: Our starting time will be 10am
   var _startingTime = moment(0, 'HH');
+  var _headerTime = 10;
 
   // NOTE:
   // We are storing each of our lab values in an array. This allows
@@ -303,21 +304,21 @@ var CRRTApp = (function() {
   }
 
   function resetFormInputs() {
-    $("#replacement-fluid-sodium-value").val("");
-    $("#replacement-fluid-potassium-value").val("");
-    $("#replacement-fluid-chloride-value").val("");
-    $("#replacement-fluid-bicarbonate-value").val("");
-    $("#replacement-fluid-calcium-value").val("");
-    $("#replacement-fluid-magnesium-value").val("");
-    $("#replacement-fluid-phosphorous-value").val("");
+    // $("#replacement-fluid-sodium-value").val("");
+    // $("#replacement-fluid-potassium-value").val("");
+    // $("#replacement-fluid-chloride-value").val("");
+    // $("#replacement-fluid-bicarbonate-value").val("");
+    // $("#replacement-fluid-calcium-value").val("");
+    // $("#replacement-fluid-magnesium-value").val("");
+    // $("#replacement-fluid-phosphorous-value").val("");
 
-    $("#bloodFlowRate").val("");
-    $("#fluidFlowRate").val("");
-    $("#grossHourlyFluidRemoval").val("");
+    // $("#bloodFlowRate").val("");
+    // $("#fluidFlowRate").val("");
+    // $("#grossHourlyFluidRemoval").val("");
 
-    $("#other-fluids-sodium-phosphate").prop('checked',false);
-    $("#other-fluids-saline").prop('checked',false);
-    $("#other-fluids-D5W").prop('checked',false);
+    // $("#other-fluids-sodium-phosphate").prop('checked',false);
+    // $("#other-fluids-saline").prop('checked',false);
+    // $("#other-fluids-D5W").prop('checked',false);
 
   }
 
@@ -464,7 +465,7 @@ var CRRTApp = (function() {
     var row = $('<tr></tr>');
     head.append(row);
 
-    row.append($("<th></th>"));
+    row.append($("<th class='blankTh'></th>"));
     for(i=_currentTime-numColumns; i<_currentTime; i++) {
       var th = $('<th></th>').text(_currentCaseStudySheet.inputOutput.elements[i+initialValuesOffset].time);
       row.append(th);
@@ -626,7 +627,7 @@ var CRRTApp = (function() {
     var row = $('<tr></tr>');
     head.append(row);
 
-    row.append($("<th></th>"));
+    row.append($("<th class='blankTh'></th>"));
     for(i=_currentTime-numColumns; i<_currentTime; i++) {
       var th = $('<th></th>').text(_currentCaseStudySheet.vitals.elements[i+initialValuesOffset].time);
       row.append(th);
@@ -661,6 +662,8 @@ var CRRTApp = (function() {
       $(".medicationsTable").remove();
     }
 
+    $('.modal-body').addClass('medications-body');
+
     var table = $("<table></table>").addClass('medicationsTable table table-hover');
     var initialValuesOffset = 1;
     var numColumns;
@@ -673,7 +676,7 @@ var CRRTApp = (function() {
     var head = $('<thead></thead');
     var row = $('<tr></tr>');
     head.append(row);
-    row.append($("<th></th>"));
+    row.append($("<th class='blankTh'></th>"));
     for(var i=0; i<numColumns; i++) {
       var th = $('<th></th>').text(_currentCaseStudySheet.medications.elements[i].time);
       row.append(th);
@@ -755,9 +758,14 @@ var CRRTApp = (function() {
     var row = $('<tr></tr>');
     head.append(row);
 
-    row.append($("<th></th>"));
+
+    //currentLabSet = the number of lab results starting at the patients default settings (1)
+
+    //i should start at the start time (whatever that is) and then increment up by 8 hours for each incrementation of currentLabSet (ex. currentLabSet = 1, 12:00noon, currentLabSet = 2, 8pm, currentLabSet = 3, 4am, etc.)
+
+    row.append($("<th class='blankTh'></th>"));
     for(i=currentLabSet-numColumns; i<currentLabSet; i++) {
-      var th = $('<th></th>').text(i-1);
+      var th = $('<th></th>').text(createLabsHeaders(i));
       row.append(th);
     }
     table.append(head);
@@ -774,6 +782,24 @@ var CRRTApp = (function() {
       table.append(row);
     }
     $("#labs").append(table);
+  }
+
+  function createLabsHeaders(i) {
+    if(i === -1 || i === 0) {
+      _headerTime = 10
+      return _headerTime + ":00";
+    } else {
+      _headerTime = verifyHeaderTime()
+      return _headerTime + ":00";
+    }
+  }
+
+  function verifyHeaderTime() {
+    if ((_headerTime + 8) > 12) {
+      return (_headerTime + 8) - 12
+    } else {
+      return _headerTime + 8
+    }
   }
 
   function setPageTime() {
@@ -911,11 +937,11 @@ var CRRTApp = (function() {
     console.log("initialEffluentFlowRate :", initialEffluentFlowRate);
 
     switch (_currentCaseStudyId) {
-      case "1":
+      case 1:
         console.log("case 1 : checkFilterClottingCase1()")
         didClot = checkFilterClottingCase1();
         break;
-      case "2":
+      case 2:
         console.log("case 2 : checkFilterClottingCase2()")
         didClot = checkFilterClottingCase2(startingWeight, effluentFlowRate, newLabs["ionizedCalcium"]);
         break;
@@ -923,6 +949,7 @@ var CRRTApp = (function() {
     
     var adjustedEffluentFlowRate = calculateAdjustedEffluentFlowRate(initialEffluentFlowRate, newLabs["filtrationFraction"], startingWeight, newLabs["ionizedCalcium"], didClot);
     var totalHoursOfFiltration = calculateTotalHoursOfFiltration(initialEffluentFlowRate, newLabs["filtrationFraction"], startingWeight, newLabs["ionizedCalcium"], didClot);
+
     console.log("adjustedEffluentFlowRate :", adjustedEffluentFlowRate);
     var effluentFlowRate = adjustedEffluentFlowRate;
 
@@ -956,7 +983,7 @@ var CRRTApp = (function() {
     // NOTE: Because sodium calculations are a bit different than other lab values, we need to recalculate
     // sodium using the calculateSodium() function.
     newLabs["sodium"] = calculateSodium(volumeOfDistribution, effluentFlowRate);
-
+    console.log('Nan Problemmmmmmm: ' + effluentFlowRate)
     // NOTE: If we're using sodium phosphate, we need to recalculate the phosphorous results
     if (orders.otherFluidsSodiumPhosphate) {
       console.log("runLabs : using sodium phosphate");
@@ -1017,6 +1044,7 @@ var CRRTApp = (function() {
 
 
   function calculateSodium(volumeOfDistribution, effluentFlowRate) {
+    console.log('calculateSodium params: ' + volumeOfDistribution, effluentFlowRate)
     var finalSodium;
     // NOTE: This is where we are accounting for hypo/hypertonic solutions and recalculating our sodium values
     var bolusValue = _currentOrders["otherFluidsBolusValue"];
@@ -1067,10 +1095,10 @@ var CRRTApp = (function() {
 
   function calculateTotalHoursOfFiltration(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot) {
     switch (_currentCaseStudyId) {
-      case "1":
+      case 1:
         return calculateTotalHoursOfFiltrationCase1(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium);
         break;
-      case "2":
+      case 2:
         return calculateTotalHoursOfFiltrationCase2(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot);
         break;
     }
@@ -1116,12 +1144,13 @@ var CRRTApp = (function() {
   }
 
   function calculateAdjustedEffluentFlowRate(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot) {
+    console.log(_currentCaseStudyId, typeof _currentCaseStudyId)
     switch (_currentCaseStudyId) {
-      case "1":
-        console.log("case 1 : calculateAdjustedEffluentFlowRateCase1()")
+      case 1:
+        console.log("case 1 : calculateAdjustedEffluentFlowRateCase1():", calculateAdjustedEffluentFlowRateCase1(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium))
         return calculateAdjustedEffluentFlowRateCase1(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium);
         break;
-      case "2":
+      case 2:
         console.log("case 2 : calculateAdjustedEffluentFlowRateCase2()")
         return calculateAdjustedEffluentFlowRateCase2(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot);
         break;
@@ -1501,7 +1530,7 @@ var CRRTApp = (function() {
 
   function postLabChecks() {
     switch (_currentCaseStudyId) {
-      case "1":
+      case 1:
         checkSodium();
         checkPotassium();
         checkChloride();
@@ -1512,7 +1541,7 @@ var CRRTApp = (function() {
         checkGrossUltrafiltration();
         handleSimulationCompletion();
         break;
-      case "2":
+      case 2:
         checkSodiumCase2();
         checkPotassiumCase2();
         checkChloride();

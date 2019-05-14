@@ -55,22 +55,105 @@ body.loading .modal-spin {
   overflow-y: scroll !important;
 }
 
-#labs, #medications, #vitals, #inputOutput {
+#labs, #medications, #vitals, #inputOutput, #ordersModal {
   overflow-x: scroll;
-  overflow-y:visible;
+  overflow-y: visible;
+  padding: 0 15px 15px 0;
 }
 
-#labs { margin-left: 180px; }
+.medications-body {
+  overflow-y: scroll;
+}
+
+/*#labs { margin-left: 180px; }
 #vitals { margin-left: 150px; }
 #medications { margin-left: 180px; }
-#inputOutput { margin-left: 160px; }
+#inputOutput { margin-left: 160px; }*/
 
 #vitals, #labs, #medications, #inputOutput table {
   width: auto;
 }
 
+#vitalsModal .modal-dialog .modal-content,
+#labsModal .modal-dialog .modal-content,
+#medicationsModal .modal-dialog .modal-content,
+#inputOutputModal .modal-dialog .modal-content {
+  height: 80vh;
+}
+
+/*#inputOutputModal .modal-dialog .modal-content {
+  overflow-y: scroll;
+  overflow-x: scroll;
+  height: 80vh;
+}*/
+
+.modal-body {
+/*  height: 80vh;
+  margin: 0 auto;
+  width: 60vh;*/
+}
+
+.blankTh {
+  position: sticky;
+  left: 0;
+  background-color: #fff;
+  z-index: 2;
+}
+
+#ordersModal .modal-dialog .modal-content {
+  /*width: 80vw;*/
+}
+
+#medications .table {
+  overflow-y: scroll;
+  overflow-x: scroll;
+}
+
+#vitals table, 
+#labs table, 
+#inputOutput table {
+  overflow-y: scroll;
+  overflow-x: scroll;
+}
+
+#vitals table thead, 
+#labs table thead, 
+#medications table thead,
+#inputOutput table thead {
+  position: sticky;
+  top: 0;  
+  background-color: #FFF;
+}
+
 table thead th {
   border-bottom: none !important;
+/*  background-color: #FFF;
+  position: sticky;
+  top: 0;  */
+}
+
+/*table tr th {
+  background-color: #FFF;
+  position: sticky;
+  left: 0;    
+}*/
+
+#vitals table thead th, 
+#labs table thead th, 
+#medications table thead th, 
+#inputOutput table thead th {
+  background-color: #FFF;
+  position: sticky;
+  top: 0;  
+}
+
+#vitals table tr th, 
+#labs table tr th, 
+#medications table tr th, 
+#inputOutput table tr th  {
+  background-color: #FFF;
+  position: sticky;
+  left: 0;    
 }
 
 table td, th {
@@ -83,7 +166,7 @@ td, th {
 
 }
 
-th:first-child {
+/*th:first-child {
   position: fixed;
   left: 5px
-}
+}*/
