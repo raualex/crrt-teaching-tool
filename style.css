@@ -78,7 +78,6 @@ body.loading .modal-spin {
 #labsModal .modal-dialog .modal-content,
 #medicationsModal .modal-dialog .modal-content,
 #inputOutputModal .modal-dialog .modal-content {
-  background-color: magenta;
   height: 80vh;
 }
 
@@ -101,12 +100,7 @@ body.loading .modal-spin {
   z-index: 2;
 }
 
-/*#ordersModal {
-  background-color: magenta;
-}*/
-
 #ordersModal .modal-dialog .modal-content {
-  background-color: magenta;
   /*width: 80vw;*/
 }
 
@@ -124,7 +118,7 @@ body.loading .modal-spin {
 
 #vitals table thead, 
 #labs table thead, 
-#medications table thead, 
+#medications table thead,
 #inputOutput table thead {
   position: sticky;
   top: 0;  
