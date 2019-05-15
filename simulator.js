@@ -812,7 +812,7 @@ var CRRTApp = (function() {
 
     const verifyDayCycle = () => {
       if(currentTime24Hour >= 24) {
-        currentTime24Hour = 0
+        currentTime24Hour -= 24
         currentDay++
       }
     }
