@@ -60,6 +60,7 @@ var CRRTApp = (function() {
   // NOTE: Our starting time will be 10am
   var _startingTime = moment(0, 'HH');
   var _headerTime = 10;
+  var _headerTimeAmPm;
 
   // NOTE:
   // We are storing each of our lab values in an array. This allows
@@ -289,36 +290,36 @@ var CRRTApp = (function() {
   }
 
   function setTestFormInputs() {
-    // $("#replacement-fluid-sodium-value").val("140");
-    // $("#replacement-fluid-potassium-value").val("3.6");
-    // $("#replacement-fluid-chloride-value").val("100");
-    // $("#replacement-fluid-bicarbonate-value").val("24");
-    // $("#replacement-fluid-calcium-value").val("2");
-    // $("#replacement-fluid-magnesium-value").val("1.7");
-    // $("#replacement-fluid-phosphorous-value").val(".5");
-    // $("#grossHourlyFluidRemoval").val("500");
-    // $("#bloodFlowRate").val("200");
-    // $("#fluidFlowRate").val("2");
-    // $("#citrateFlowRate").val("300");
-    // $("caclInfusionRate").val("100");
+    $("#replacement-fluid-sodium-value").val("140");
+    $("#replacement-fluid-potassium-value").val("3.6");
+    $("#replacement-fluid-chloride-value").val("100");
+    $("#replacement-fluid-bicarbonate-value").val("24");
+    $("#replacement-fluid-calcium-value").val("2");
+    $("#replacement-fluid-magnesium-value").val("1.7");
+    $("#replacement-fluid-phosphorous-value").val(".5");
+    $("#grossHourlyFluidRemoval").val("500");
+    $("#bloodFlowRate").val("200");
+    $("#fluidFlowRate").val("2");
+    $("#citrateFlowRate").val("300");
+    $("caclInfusionRate").val("100");
   }
 
   function resetFormInputs() {
-    $("#replacement-fluid-sodium-value").val("");
-    $("#replacement-fluid-potassium-value").val("");
-    $("#replacement-fluid-chloride-value").val("");
-    $("#replacement-fluid-bicarbonate-value").val("");
-    $("#replacement-fluid-calcium-value").val("");
-    $("#replacement-fluid-magnesium-value").val("");
-    $("#replacement-fluid-phosphorous-value").val("");
+    // $("#replacement-fluid-sodium-value").val("");
+    // $("#replacement-fluid-potassium-value").val("");
+    // $("#replacement-fluid-chloride-value").val("");
+    // $("#replacement-fluid-bicarbonate-value").val("");
+    // $("#replacement-fluid-calcium-value").val("");
+    // $("#replacement-fluid-magnesium-value").val("");
+    // $("#replacement-fluid-phosphorous-value").val("");
 
-    $("#bloodFlowRate").val("");
-    $("#fluidFlowRate").val("");
-    $("#grossHourlyFluidRemoval").val("");
+    // $("#bloodFlowRate").val("");
+    // $("#fluidFlowRate").val("");
+    // $("#grossHourlyFluidRemoval").val("");
 
-    $("#other-fluids-sodium-phosphate").prop('checked',false);
-    $("#other-fluids-saline").prop('checked',false);
-    $("#other-fluids-D5W").prop('checked',false);
+    // $("#other-fluids-sodium-phosphate").prop('checked',false);
+    // $("#other-fluids-saline").prop('checked',false);
+    // $("#other-fluids-D5W").prop('checked',false);
   }
 
   function initializeOrderForm() {
@@ -803,9 +804,40 @@ var CRRTApp = (function() {
     }
   }
 
-  function evaluateAmPm() {
+  // const createHeader = (currentNumberOfOrders) => {
+  //   let currentTime24Hour = 10;
+  //   let currentTime12Hour = 10;
+  //   let currentAmPm = 'AM';
+  //   let currentDay = 1;
 
-  }
+  //   const verifyDayCycle = () => {
+  //     if(currentTime24Hour >= 24) {
+  //       currentTime24Hour = 0
+  //       currentDay++
+  //     }
+  //   }
+
+  //   const check12HourFormat = () => {
+  //     if(currentTime24Hour <= 12) {
+  //       currentTime12Hour = currentTime24Hour
+  //     } else {
+  //       console.log('this is the error: ' + currentTime24Hour)
+  //       currentTime12Hour = Math.abs(currentTime24Hour - 12)
+  //     }
+  //   }
+
+  //   const checkAmPm = () => {
+
+  //   }
+
+  //   for(let i = 1; i < currentNumberOfOrders; i++) {
+  //     console.log(`The current header should read: ${currentTime12Hour}:00 ${currentAmPm} - Day ${currentDay}`)
+  //     currentTime24Hour += 8
+  //     verifyDayCycle()
+  //     check12HourFormat()
+  //     checkAmPm()
+  //   }
+  // }
 
   function setPageTime() {
     $(".currentTime").text(currentTimeToTimestamp(false));
