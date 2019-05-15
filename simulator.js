@@ -804,40 +804,40 @@ var CRRTApp = (function() {
     }
   }
 
-  // const createHeader = (currentNumberOfOrders) => {
-  //   let currentTime24Hour = 10;
-  //   let currentTime12Hour = 10;
-  //   let currentAmPm = 'AM';
-  //   let currentDay = 1;
+  const createHeader = (currentNumberOfOrders) => {
+    let currentTime24Hour = 10;
+    let currentTime12Hour = 10;
+    let currentAmPm = 'AM';
+    let currentDay = 1;
 
-  //   const verifyDayCycle = () => {
-  //     if(currentTime24Hour >= 24) {
-  //       currentTime24Hour = 0
-  //       currentDay++
-  //     }
-  //   }
+    const verifyDayCycle = () => {
+      if(currentTime24Hour >= 24) {
+        currentTime24Hour = 0
+        currentDay++
+      }
+    }
 
-  //   const check12HourFormat = () => {
-  //     if(currentTime24Hour <= 12) {
-  //       currentTime12Hour = currentTime24Hour
-  //     } else {
-  //       console.log('this is the error: ' + currentTime24Hour)
-  //       currentTime12Hour = Math.abs(currentTime24Hour - 12)
-  //     }
-  //   }
+    const check12HourFormat = () => {
+      if(currentTime24Hour <= 12) {
+        currentTime12Hour = currentTime24Hour
+      } else {
+        console.log('this is the error: ' + currentTime24Hour)
+        currentTime12Hour = Math.abs(currentTime24Hour - 12)
+      }
+    }
 
-  //   const checkAmPm = () => {
+    const checkAmPm = () => {
 
-  //   }
+    }
 
-  //   for(let i = 1; i < currentNumberOfOrders; i++) {
-  //     console.log(`The current header should read: ${currentTime12Hour}:00 ${currentAmPm} - Day ${currentDay}`)
-  //     currentTime24Hour += 8
-  //     verifyDayCycle()
-  //     check12HourFormat()
-  //     checkAmPm()
-  //   }
-  // }
+    for(let i = 1; i < currentNumberOfOrders; i++) {
+      console.log(`The current header should read: ${currentTime12Hour}:00 ${currentAmPm} - Day ${currentDay}`)
+      currentTime24Hour += 8
+      verifyDayCycle()
+      check12HourFormat()
+      checkAmPm()
+    }
+  }
 
   function setPageTime() {
     $(".currentTime").text(currentTimeToTimestamp(false));
