@@ -61,6 +61,12 @@ var CRRTApp = (function() {
   var _startingTime = moment(0, 'HH');
   var _headerTime = 10;
 
+  //AEla lab-header-day-time branch start
+  var _headerTime24Hour = 10;
+  var _headerTimeAmPm = 'AM';
+  var _headerDay = 1;
+  //AEla lab-header-day-time branch end
+
   // NOTE:
   // We are storing each of our lab values in an array. This allows
   // us to keep track of historical values. Since new values will
@@ -289,36 +295,36 @@ var CRRTApp = (function() {
   }
 
   function setTestFormInputs() {
-    // $("#replacement-fluid-sodium-value").val("140");
-    // $("#replacement-fluid-potassium-value").val("3.6");
-    // $("#replacement-fluid-chloride-value").val("100");
-    // $("#replacement-fluid-bicarbonate-value").val("24");
-    // $("#replacement-fluid-calcium-value").val("2");
-    // $("#replacement-fluid-magnesium-value").val("1.7");
-    // $("#replacement-fluid-phosphorous-value").val(".5");
-    // $("#grossHourlyFluidRemoval").val("500");
-    // $("#bloodFlowRate").val("200");
-    // $("#fluidFlowRate").val("2");
-    // $("#citrateFlowRate").val("300");
-    // $("caclInfusionRate").val("100");
+    $("#replacement-fluid-sodium-value").val("140");
+    $("#replacement-fluid-potassium-value").val("3.6");
+    $("#replacement-fluid-chloride-value").val("100");
+    $("#replacement-fluid-bicarbonate-value").val("24");
+    $("#replacement-fluid-calcium-value").val("2");
+    $("#replacement-fluid-magnesium-value").val("1.7");
+    $("#replacement-fluid-phosphorous-value").val(".5");
+    $("#grossHourlyFluidRemoval").val("500");
+    $("#bloodFlowRate").val("200");
+    $("#fluidFlowRate").val("2");
+    $("#citrateFlowRate").val("300");
+    $("caclInfusionRate").val("100");
   }
 
   function resetFormInputs() {
-    $("#replacement-fluid-sodium-value").val("");
-    $("#replacement-fluid-potassium-value").val("");
-    $("#replacement-fluid-chloride-value").val("");
-    $("#replacement-fluid-bicarbonate-value").val("");
-    $("#replacement-fluid-calcium-value").val("");
-    $("#replacement-fluid-magnesium-value").val("");
-    $("#replacement-fluid-phosphorous-value").val("");
+    // $("#replacement-fluid-sodium-value").val("");
+    // $("#replacement-fluid-potassium-value").val("");
+    // $("#replacement-fluid-chloride-value").val("");
+    // $("#replacement-fluid-bicarbonate-value").val("");
+    // $("#replacement-fluid-calcium-value").val("");
+    // $("#replacement-fluid-magnesium-value").val("");
+    // $("#replacement-fluid-phosphorous-value").val("");
 
-    $("#bloodFlowRate").val("");
-    $("#fluidFlowRate").val("");
-    $("#grossHourlyFluidRemoval").val("");
+    // $("#bloodFlowRate").val("");
+    // $("#fluidFlowRate").val("");
+    // $("#grossHourlyFluidRemoval").val("");
 
-    $("#other-fluids-sodium-phosphate").prop('checked',false);
-    $("#other-fluids-saline").prop('checked',false);
-    $("#other-fluids-D5W").prop('checked',false);
+    // $("#other-fluids-sodium-phosphate").prop('checked',false);
+    // $("#other-fluids-saline").prop('checked',false);
+    // $("#other-fluids-D5W").prop('checked',false);
   }
 
   function initializeOrderForm() {
@@ -677,7 +683,7 @@ var CRRTApp = (function() {
     head.append(row);
     row.append($("<th class='blankTh'></th>"));
     for(var i=0; i<numColumns; i++) {
-      var th = $('<th></th>').text(_currentCaseStudySheet.medications.elements[i].time);
+      var th = $('<th></th>').text(createTableHeaders(i-1));
       row.append(th);
     }
     table.append(head);
@@ -764,7 +770,7 @@ var CRRTApp = (function() {
 
     row.append($("<th class='blankTh'></th>"));
     for(i=currentLabSet-numColumns; i<currentLabSet; i++) {
-      var th = $('<th></th>').text(createLabsHeaders(i));
+      var th = $('<th></th>').text(createTableHeaders(i));
       row.append(th);
     }
     table.append(head);
@@ -783,23 +789,62 @@ var CRRTApp = (function() {
     $("#labs").append(table);
   }
 
-  function createLabsHeaders(i) {
-    if(i === -1 || i === 0) {
+//AEla createTableHeaders Edit start
+  function createTableHeaders(i) {
+    if(i === -1) {
       _headerTime = 10
-      return _headerTime + ":00";
+      _headerTime24Hour = 10
+      _headerTimeAmPm = 'AM'
+      _headerDay = 1
+      return `${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`;
+    } else if (i === 0) {
+      _headerTime = 6
+      _headerTime24Hour = 18
+      _headerTimeAmPm = 'PM'
+      _headerDay = 1
+      return `${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`;
     } else {
-      _headerTime = verifyHeaderTime()
-      return _headerTime + ":00";
+      createHeader()
     }
+      return `${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`;
   }
 
-  function verifyHeaderTime() {
-    if ((_headerTime + 8) > 12) {
-      return (_headerTime + 8) - 12
-    } else {
-      return _headerTime + 8
+  //AEla createTableHeaders Edit end
+
+  // AEla createHeader functions start
+
+    function verifyDayCycle(){
+      if(_headerTime24Hour >= 24) {
+        _headerTime24Hour -= 24
+        _headerDay++
+      }
     }
-  }
+
+    function check12HourFormat(){
+      if(_headerTime24Hour <= 12) {
+        _headerTime = _headerTime24Hour
+      } else {
+        _headerTime = Math.abs(_headerTime24Hour - 12)
+      }
+    }
+
+    function checkAmPm(){
+      if(_headerTime24Hour > 11) {
+        _headerTimeAmPm = 'PM'
+      } else {
+        _headerTimeAmPm = 'AM'
+      }
+    }
+
+    function createHeader() {
+      console.log(`The current header should read: ${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`)
+      _headerTime24Hour += 8
+      verifyDayCycle()
+      check12HourFormat()
+      checkAmPm()
+    }
+
+// AEla createHeader functions end
 
   function setPageTime() {
     $(".currentTime").text(currentTimeToTimestamp(false));
@@ -2365,7 +2410,8 @@ var CRRTApp = (function() {
   function processMessages(){
     var newMessages = _newMessages;
     var messageContainer = $('<p></p>').addClass('card-text');
-    var time = $('<p></p>').addClass('case-time').text(currentTimeToTimestamp(false, 0));
+    // var time = $('<p></p>').addClass('case-time').text(currentTimeToTimestamp(false, 0));    
+    var time = $('<p></p>').addClass('case-time').text(`${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`);
     messageContainer.append(time);
 
     for (var i=0; i<newMessages.length;i++){
