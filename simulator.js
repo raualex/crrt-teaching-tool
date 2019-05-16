@@ -683,7 +683,7 @@ var CRRTApp = (function() {
     head.append(row);
     row.append($("<th class='blankTh'></th>"));
     for(var i=0; i<numColumns; i++) {
-      var th = $('<th></th>').text(_currentCaseStudySheet.medications.elements[i].time);
+      var th = $('<th></th>').text(createTableHeaders(i-1));
       row.append(th);
     }
     table.append(head);
@@ -770,7 +770,7 @@ var CRRTApp = (function() {
 
     row.append($("<th class='blankTh'></th>"));
     for(i=currentLabSet-numColumns; i<currentLabSet; i++) {
-      var th = $('<th></th>').text(createLabsHeaders(i));
+      var th = $('<th></th>').text(createTableHeaders(i));
       row.append(th);
     }
     table.append(head);
@@ -789,28 +789,8 @@ var CRRTApp = (function() {
     $("#labs").append(table);
   }
 
-  // function createLabsHeaders(i) {
-  //   if(i === -1 || i === 0) {
-  //     _headerTime = 10
-  //     return _headerTime + ":00";
-  //   } else {
-  //     _headerTime = verifyHeaderTime()
-  //     return _headerTime + ":00";
-  //   }
-  // }
-
-  // function verifyHeaderTime() {
-  //   //Create switch statement
-  //   //Return object with headerTime and AM/PM
-  //   if ((_headerTime + 8) > 12) {
-  //     return (_headerTime + 8) - 12
-  //   } else {
-  //     return _headerTime + 8
-  //   }
-  // }
-
-//AEla createLabsHeaders Edit start
-  function createLabsHeaders(i) {
+//AEla createTableHeaders Edit start
+  function createTableHeaders(i) {
     if(i === -1) {
       _headerTime = 10
       _headerTime24Hour = 10
@@ -825,23 +805,11 @@ var CRRTApp = (function() {
       return `${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`;
     } else {
       createHeader()
-      // _headerTime = verifyHeaderTime()
-      // return _headerTime + ":00";
     }
       return `${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`;
   }
 
-  // function verifyHeaderTime() {
-  //   //Create switch statement
-  //   //Return object with headerTime and AM/PM
-  //   if ((_headerTime + 8) > 12) {
-  //     return (_headerTime + 8) - 12
-  //   } else {
-  //     return _headerTime + 8
-  //   }
-  // }
-
-  //AEla createLabsHeaders Edit end
+  //AEla createTableHeaders Edit end
 
   // AEla createHeader functions start
 
