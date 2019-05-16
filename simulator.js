@@ -60,7 +60,12 @@ var CRRTApp = (function() {
   // NOTE: Our starting time will be 10am
   var _startingTime = moment(0, 'HH');
   var _headerTime = 10;
-  var _headerTimeAmPm;
+
+  //AEla lab-header-day-time branch start
+  var _headerTime24Hour = 10;
+  var _headerTimeAmPm = 'AM';
+  var _headerDay = 1;
+  //AEla lab-header-day-time branch end
 
   // NOTE:
   // We are storing each of our lab values in an array. This allows
@@ -784,64 +789,94 @@ var CRRTApp = (function() {
     $("#labs").append(table);
   }
 
-  function createLabsHeaders(i) {
-    if(i === -1 || i === 0) {
-      _headerTime = 10
-      return _headerTime + ":00";
-    } else {
-      _headerTime = verifyHeaderTime()
-      return _headerTime + ":00";
-    }
-  }
-
-  function verifyHeaderTime() {
-    //Create switch statement
-    //Return object with headerTime and AM/PM
-    if ((_headerTime + 8) > 12) {
-      return (_headerTime + 8) - 12
-    } else {
-      return _headerTime + 8
-    }
-  }
-
-  // const createHeader = (currentNumberOfOrders) => {
-  //   let currentTime24Hour = 10;
-  //   let currentTime12Hour = 10;
-  //   let currentAmPm = 'AM';
-  //   let currentDay = 1;
-
-  //   const verifyDayCycle = () => {
-  //     if(currentTime24Hour >= 24) {
-  //       currentTime24Hour -= 24
-  //       currentDay++
-  //     }
-  //   }
-
-  //   const check12HourFormat = () => {
-  //     if(currentTime24Hour <= 12) {
-  //       currentTime12Hour = currentTime24Hour
-  //     } else {
-  //       console.log('this is the error: ' + currentTime24Hour)
-  //       currentTime12Hour = Math.abs(currentTime24Hour - 12)
-  //     }
-  //   }
-
-  //   const checkAmPm = () => {
-  //     if(currentTime24Hour > 11) {
-  //       currentAmPm = 'PM'
-  //     } else {
-  //       currentAmPm = 'AM'
-  //     }
-  //   }
-
-  //   for(let i = 1; i < currentNumberOfOrders; i++) {
-  //     console.log(`The current header should read: ${currentTime12Hour}:00 ${currentAmPm} - Day ${currentDay}`)
-  //     currentTime24Hour += 8
-  //     verifyDayCycle()
-  //     check12HourFormat()
-  //     checkAmPm()
+  // function createLabsHeaders(i) {
+  //   if(i === -1 || i === 0) {
+  //     _headerTime = 10
+  //     return _headerTime + ":00";
+  //   } else {
+  //     _headerTime = verifyHeaderTime()
+  //     return _headerTime + ":00";
   //   }
   // }
+
+  // function verifyHeaderTime() {
+  //   //Create switch statement
+  //   //Return object with headerTime and AM/PM
+  //   if ((_headerTime + 8) > 12) {
+  //     return (_headerTime + 8) - 12
+  //   } else {
+  //     return _headerTime + 8
+  //   }
+  // }
+
+//AEla createLabsHeaders Edit start
+  function createLabsHeaders(i) {
+    if(i === -1) {
+      _headerTime = 10
+      _headerTime24Hour = 10
+      _headerTimeAmPm = 'AM'
+      _headerDay = 1
+      return `${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`;
+    } else if (i === 0) {
+      _headerTime = 6
+      _headerTime24Hour = 18
+      _headerTimeAmPm = 'PM'
+      _headerDay = 1
+      return `${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`;
+    } else {
+      createHeader()
+      // _headerTime = verifyHeaderTime()
+      // return _headerTime + ":00";
+    }
+      return `${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`;
+  }
+
+  // function verifyHeaderTime() {
+  //   //Create switch statement
+  //   //Return object with headerTime and AM/PM
+  //   if ((_headerTime + 8) > 12) {
+  //     return (_headerTime + 8) - 12
+  //   } else {
+  //     return _headerTime + 8
+  //   }
+  // }
+
+  //AEla createLabsHeaders Edit end
+
+  // AEla createHeader functions start
+
+    function verifyDayCycle(){
+      if(_headerTime24Hour >= 24) {
+        _headerTime24Hour -= 24
+        _headerDay++
+      }
+    }
+
+    function check12HourFormat(){
+      if(_headerTime24Hour <= 12) {
+        _headerTime = _headerTime24Hour
+      } else {
+        _headerTime = Math.abs(_headerTime24Hour - 12)
+      }
+    }
+
+    function checkAmPm(){
+      if(_headerTime24Hour > 11) {
+        _headerTimeAmPm = 'PM'
+      } else {
+        _headerTimeAmPm = 'AM'
+      }
+    }
+
+    function createHeader() {
+      console.log(`The current header should read: ${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`)
+      _headerTime24Hour += 8
+      verifyDayCycle()
+      check12HourFormat()
+      checkAmPm()
+    }
+
+// AEla createHeader functions end
 
   function setPageTime() {
     $(".currentTime").text(currentTimeToTimestamp(false));
@@ -2407,7 +2442,8 @@ var CRRTApp = (function() {
   function processMessages(){
     var newMessages = _newMessages;
     var messageContainer = $('<p></p>').addClass('card-text');
-    var time = $('<p></p>').addClass('case-time').text(currentTimeToTimestamp(false, 0));
+    // var time = $('<p></p>').addClass('case-time').text(currentTimeToTimestamp(false, 0));    
+    var time = $('<p></p>').addClass('case-time').text(`${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`);
     messageContainer.append(time);
 
     for (var i=0; i<newMessages.length;i++){
