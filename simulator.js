@@ -791,19 +791,21 @@ var CRRTApp = (function() {
 
 //AEla createTableHeaders Edit start
   function createTableHeaders(i) {
-    if(i === -1) {
+    if(i === -1 || i === 0) {
       _headerTime = 10
       _headerTime24Hour = 10
       _headerTimeAmPm = 'AM'
       _headerDay = 1
       return `${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`;
-    } else if (i === 0) {
-      _headerTime = 6
-      _headerTime24Hour = 18
-      _headerTimeAmPm = 'PM'
-      _headerDay = 1
-      return `${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`;
-    } else {
+    }
+    //  else if (i === 0) {
+    //   _headerTime = 6
+    //   _headerTime24Hour = 18
+    //   _headerTimeAmPm = 'PM'
+    //   _headerDay = 1
+    //   return `${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`;
+    // } 
+      else {
       createHeader()
     }
       return `${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`;
@@ -2409,27 +2411,29 @@ var CRRTApp = (function() {
 
   function processMessages(){
     var newMessages = _newMessages;
-    var messageContainer = $('<p></p>').addClass('card-text');
+    var messageContainer = $('<ul></ul>').addClass('card-text');
     // var time = $('<p></p>').addClass('case-time').text(currentTimeToTimestamp(false, 0));    
     var time = $('<p></p>').addClass('case-time').text(`${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`);
     messageContainer.append(time);
 
     for (var i=0; i<newMessages.length;i++){
-      var message = $('<samp></samp>').text(newMessages[i]);
+      var message = $('<li></li>').text(newMessages[i]);
       messageContainer.append(message);
-      messageContainer.append("<hr>");
+      // messageContainer.append("<hr>");
     }
 
     if (newMessages.length === 0) {
-      var message = $('<samp></samp>').text("CRRT is running smoothly. There were no reported issues since the previous update.");
+      var message = $('<li></li>').text("CRRT is running smoothly. There were no reported issues since the previous update.");
       messageContainer.append(message);
-      messageContainer.append("<hr>");
+      // messageContainer.append("<hr>");
     }
 
     if (newMessages.length > 0) {
       _messages.push(newMessages);
       _newMessages = [];
     }
+
+    messageContainer.append('<hr>')
 
     $("#message-box").prepend(messageContainer);
   }
