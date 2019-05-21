@@ -682,6 +682,13 @@ var CRRTApp = (function() {
     var row = $('<tr></tr>');
     head.append(row);
     row.append($("<th class='blankTh'></th>"));
+
+    //AEla medications modal fix header start
+      // var thContainer = $("<div class='thContainer'></div>")
+      // row.append(thContainer)
+    //AEla medications modal fix header end
+
+
     for(var i=0; i<numColumns; i++) {
       var th = $('<th></th>').text(createTableHeaders(i-1));
       row.append(th);

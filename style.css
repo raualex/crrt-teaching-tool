@@ -104,14 +104,15 @@ body.loading .modal-spin {
   /*width: 80vw;*/
 }
 
-#medications .table {
+/*#medications .table {
   overflow-y: scroll;
   overflow-x: scroll;
-}
+}*/
 
 #vitals table, 
 #labs table, 
-#inputOutput table {
+#medications table,
+#inputOutput table{
   overflow-y: scroll;
   overflow-x: scroll;
 }
@@ -141,7 +142,8 @@ table thead th {
 #vitals table thead th, 
 #labs table thead th, 
 #medications table thead th, 
-#inputOutput table thead th {
+#inputOutput table thead th,
+.thContainer {
   background-color: #FFF;
   min-width: 160px;
   position: sticky;
