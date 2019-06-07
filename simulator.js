@@ -2,6 +2,8 @@ $( document ).ready(function() {
   CRRTApp.run();
 });
 
+
+
 var CRRTApp = (function() {
 
   var _points = {
@@ -847,6 +849,16 @@ var CRRTApp = (function() {
     }
 
 // AEla createHeader functions end
+
+// AEla resetCase functions start
+
+  $("#restart-case-btn").on("click", resetCase)
+
+  function resetCase() {
+    console.log('deez nuts reset button working')
+  }
+
+// AEla resetCase functions end
 
   function setPageTime() {
     $(".currentTime").text(currentTimeToTimestamp(false));
