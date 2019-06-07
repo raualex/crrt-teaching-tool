@@ -12,7 +12,6 @@
     <script src='https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.1/tabletop.min.js'></script>
     <script src='https://cdn.jsdelivr.net/jquery.validation/1.15.1/jquery.validate.min.js'></script>
     <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js'></script>
-    <script src="simulator.js"></script>
   </head>
   <body class="loading">
     <nav class="navbar navbar-light bg-faded">
@@ -656,11 +655,11 @@
           <!-- Figure out how the following button add show class to orders modal -->
           <button id="ordersButton" type="button" class="btn btn-primary" data-toggle="modal" data-target="#ordersModal">Orders</button>
           <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#CRRTDisplayModal">CRRT Display</button>
-          <a href="./simulator.html?caseId=1">
-            <button type="button" class="btn btn-danger">
+          <!-- <a href="./simulator.html?caseId=1"> -->
+            <button id="restart-case-btn" type="button" class="btn btn-danger">
               Restart Case
             </button>
-          </a>
+          <!-- </a> -->
         </div>
       </div>
       <div class="row">
@@ -681,5 +680,6 @@
       </div>
     </div>
     <div class="modal-spin"><!-- Place at bottom of page --></div>
+    <script src="simulator.js"></script>
   </body>
 </html>

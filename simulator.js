@@ -2,6 +2,8 @@ $( document ).ready(function() {
   CRRTApp.run();
 });
 
+
+
 var CRRTApp = (function() {
 
   var _points = {
@@ -66,6 +68,9 @@ var CRRTApp = (function() {
   var _headerTimeAmPm = 'AM';
   var _headerDay = 1;
   //AEla lab-header-day-time branch end
+  //ARau orders counter start
+  var _ordersCounter = 0;
+  //ARau orders counter end
 
   // NOTE:
   // We are storing each of our lab values in an array. This allows
@@ -269,9 +274,13 @@ var CRRTApp = (function() {
     })
   }
 
-  function initialize() {
+  function initialize(caseId) {
     console.log("CRRTApp : initialize()");
-    initializeCaseStudyID();
+    if (!caseId) {
+      initializeCaseStudyID();
+    } else {
+      initializeCaseStudyID(caseId);
+    }
     var d1 = $.Deferred();
     initializeSpreadsheet(d1);
     $.when(d1).done(function() {
@@ -848,6 +857,19 @@ var CRRTApp = (function() {
 
 // AEla createHeader functions end
 
+// AEla resetCase functions start
+
+  $("#restart-case-btn").on("click", resetCase)
+
+  function resetCase() {
+    for(var i = 1; i <= _ordersCounter; i++) {
+      $('#testing').remove()
+    }
+    initialize(_currentCaseStudyId)
+  }
+
+// AEla resetCase functions end
+
   function setPageTime() {
     $(".currentTime").text(currentTimeToTimestamp(false));
     $(".currentTimeWithElapsed").text(currentTimeToTimestamp(true));
@@ -875,8 +897,11 @@ var CRRTApp = (function() {
     }
   }
 
-  function initializeCaseStudyID(){
-    _currentCaseStudyId = getParameterByName("caseId");
+  function initializeCaseStudyID(caseId){
+    // _currentCaseStudyId = getParameterByName("caseId");
+    if(caseId) {
+      _currentCaseStudyId = caseId
+    }
 
     if (!_currentCaseStudyId) {
       _currentCaseStudyId = promptForID();
@@ -970,6 +995,7 @@ var CRRTApp = (function() {
   }
 
   function runLabs() {
+    _ordersCounter++;
     var newLabs = {};
     var dialysate = {}; 
     var orders = getOrders();
@@ -2411,7 +2437,7 @@ var CRRTApp = (function() {
 
   function processMessages(){
     var newMessages = _newMessages;
-    var messageContainer = $('<ul></ul>').addClass('card-text');
+    var messageContainer = $('<ul id=\'testing\'></ul>').addClass('card-text');
     // var time = $('<p></p>').addClass('case-time').text(currentTimeToTimestamp(false, 0));    
     var time = $('<p></p>').addClass('case-time').text(`${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`);
     messageContainer.append(time);
