@@ -857,6 +857,18 @@ var CRRTApp = (function() {
 
 // AEla createHeader functions end
 
+// AEla toggleLabDataFullscreen functions start
+
+
+// AEla toggleLabDataFullscreen functions end
+$("#toggle-lab-data-fullscreen").on("click", toggleLabDataFullscreen)
+
+function toggleLabDataFullscreen() {
+  console.log('toggleLabDataFullscreen hook the fuck up')
+  $("#modal-content-parent").toggleClass("lab-data-remove-margin")
+  $(".modal-content").toggleClass("lab-data-fullscreen")
+}
+
 // AEla resetCase functions start
 
   $("#restart-case-btn").on("click", resetCase)
