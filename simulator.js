@@ -858,16 +858,21 @@ var CRRTApp = (function() {
 // AEla createHeader functions end
 
 // AEla toggleLabDataFullscreen functions start
+$(".toggle-fullscreen").on("click", toggleLabDataFullscreen)
+$(".fullscreen-close").on("click", closeFullscreen)
+
+function closeFullscreen() {
+  $(".modal-content-parent").removeClass("lab-data-remove-margin")
+  $(".modal-content").removeClass("lab-data-fullscreen")
+}
+
+function toggleLabDataFullscreen() {
+  $(".modal-content-parent").toggleClass("lab-data-remove-margin")
+  $(".modal-content").toggleClass("lab-data-fullscreen")
+}
 
 
 // AEla toggleLabDataFullscreen functions end
-$("#toggle-lab-data-fullscreen").on("click", toggleLabDataFullscreen)
-
-function toggleLabDataFullscreen() {
-  console.log('toggleLabDataFullscreen hook the fuck up')
-  $("#modal-content-parent").toggleClass("lab-data-remove-margin")
-  $(".modal-content").toggleClass("lab-data-fullscreen")
-}
 
 // AEla resetCase functions start
 
@@ -877,6 +882,8 @@ function toggleLabDataFullscreen() {
     for(var i = 1; i <= _ordersCounter; i++) {
       $('#testing').remove()
     }
+    $('#ordersButton').show()
+    _caseOver = false;
     initialize(_currentCaseStudyId)
   }
 
@@ -1067,7 +1074,6 @@ function toggleLabDataFullscreen() {
     // NOTE: Because sodium calculations are a bit different than other lab values, we need to recalculate
     // sodium using the calculateSodium() function.
     newLabs["sodium"] = calculateSodium(volumeOfDistribution, effluentFlowRate);
-    console.log('Nan Problemmmmmmm: ' + effluentFlowRate)
     // NOTE: If we're using sodium phosphate, we need to recalculate the phosphorous results
     if (orders.otherFluidsSodiumPhosphate) {
       console.log("runLabs : using sodium phosphate");

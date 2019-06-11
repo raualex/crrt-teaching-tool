@@ -317,11 +317,15 @@
         <!-- History of Present Illness Modal -->
         <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#historyOfPresentIllnessModal">History of Present Illness</button>
         <div class="modal fade" id="historyOfPresentIllnessModal" tabindex="-1" role="dialog" aria-labelledby="historyOfPresentIllnessModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-dialog modal-lg modal-content-parent" role="document">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="historyOfPresentIllnessModalLabel">History of Present Illness</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button 
+                  type='button'
+                  class='btn btn-primary toggle-fullscreen'
+                >Toggle Full Screen</button>
+                <button type="button" class="close fullscreen-close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
@@ -338,7 +342,7 @@
                 <div id="familyHistory"></div>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary fullscreen-close" data-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
@@ -347,18 +351,22 @@
         <!-- Input / Output Modal -->
         <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#inputOutputModal">Input/Output</button>
         <div class="modal fade" id="inputOutputModal" tabindex="-1" role="dialog" aria-labelledby="inputOutputModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-dialog modal-lg modal-content-parent" role="document">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="inputOutputModalLabel">Input/Output</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button 
+                  type='button'
+                  class='btn btn-primary toggle-fullscreen'
+                >Toggle Full Screen</button>
+                <button type="button" class="close fullscreen-close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
               <div id="inputOutput"class="modal-body">
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary fullscreen-close" data-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
@@ -367,18 +375,22 @@
         <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#vitalsModal">Vitals</button>
         <!-- Vitals Modal -->
         <div class="modal fade" id="vitalsModal" tabindex="-1" role="dialog" aria-labelledby="vitalsModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-dialog modal-lg modal-content-parent" role="document">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="vitalsModalLabel">Vitals</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button 
+                  type='button'
+                  class='btn btn-primary toggle-fullscreen'
+                >Toggle Full Screen</button>
+                <button type="button" class="close fullscreen-close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
               <div id="vitals"class="modal-body">
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary fullscreen-close" data-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
@@ -387,25 +399,24 @@
         <!-- Labs Modal -->
         <div class="modal fade" id="labsModal" tabindex="-1" role="dialog" aria-labelledby="labsModalLabel" aria-hidden="true">
           <div 
-            class="modal-dialog modal-lg" 
-            role="document"
-            id="modal-content-parent">
+            class="modal-dialog modal-lg 
+            modal-content-parent" 
+            role="document">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="labsModalLabel">Laboratory Data</h5>
                 <button 
                   type='button'
-                  class='btn btn-primary'
-                  id='toggle-lab-data-fullscreen'
+                  class='btn btn-primary toggle-fullscreen'
                 >Toggle Full Screen</button>
-                <button type="button" class="close"data-dismiss="modal" aria-label="Close">
+                <button type="button" class="close fullscreen-close"data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
               <div id="labs"class="modal-body">
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary fullscreen-close" data-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
@@ -414,11 +425,15 @@
         <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#medicationsModal">Medications</button>
         <!-- Medications Modal -->
         <div class="modal fade" id="medicationsModal" tabindex="-1" role="dialog" aria-labelledby="medicationsModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-dialog modal-lg modal-content-parent" role="document">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="medicationsModalLabel">Medications</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button 
+                  type='button'
+                  class='btn btn-primary toggle-fullscreen'
+                >Toggle Full Screen</button>
+                <button type="button" class="close fullscreen-close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
@@ -427,7 +442,7 @@
                 </div>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary fullscreen-close" data-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
@@ -435,11 +450,15 @@
         <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#imagingModal">Imaging</button>
         <!-- Imaging Modal -->
         <div class="modal fade" id="imagingModal" tabindex="-1" role="dialog" aria-labelledby="imagingModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-dialog modal-lg modal-content-parent" role="document">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="imagingModalLabel">Imaging</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button 
+                  type='button'
+                  class='btn btn-primary toggle-fullscreen'
+                >Toggle Full Screen</button>
+                <button type="button" class="close fullscreen-close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
@@ -447,7 +466,7 @@
                 <div id="imaging"></div>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary fullscreen-close" data-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
@@ -455,11 +474,15 @@
         <button type="button" class="btn btn-secondary" data-toggle="modal" data-target="#physicalExamModal">Physical Exam</button>
         <!-- Physical Exam Modal -->
         <div class="modal fade" id="physicalExamModal" tabindex="-1" role="dialog" aria-labelledby="physicalExamModalLabel" aria-hidden="true">
-          <div class="modal-dialog modal-lg" role="document">
+          <div class="modal-dialog modal-lg modal-content-parent" role="document">
             <div class="modal-content">
               <div class="modal-header">
                 <h5 class="modal-title" id="physicalExamModalLabel">Physical Exam</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <button 
+                  type='button'
+                  class='btn btn-primary toggle-fullscreen'
+                >Toggle Full Screen</button>
+                <button type="button" class="close fullscreen-close" data-dismiss="modal" aria-label="Close">
                   <span aria-hidden="true">&times;</span>
                 </button>
               </div>
@@ -505,7 +528,7 @@
                 </div>
               </div>
               <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary fullscreen-close" data-dismiss="modal">Close</button>
               </div>
             </div>
           </div>
