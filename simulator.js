@@ -858,16 +858,16 @@ var CRRTApp = (function() {
 // AEla createHeader functions end
 
 // AEla toggleLabDataFullscreen functions start
-$("#toggle-lab-data-fullscreen").on("click", toggleLabDataFullscreen)
+$(".toggle-fullscreen").on("click", toggleLabDataFullscreen)
 $(".fullscreen-close").on("click", closeFullscreen)
 
 function closeFullscreen() {
-  $("#modal-content-parent").removeClass("lab-data-remove-margin")
+  $(".modal-content-parent").removeClass("lab-data-remove-margin")
   $(".modal-content").removeClass("lab-data-fullscreen")
 }
 
 function toggleLabDataFullscreen() {
-  $("#modal-content-parent").toggleClass("lab-data-remove-margin")
+  $(".modal-content-parent").toggleClass("lab-data-remove-margin")
   $(".modal-content").toggleClass("lab-data-fullscreen")
 }
 
