@@ -882,6 +882,7 @@ function toggleLabDataFullscreen() {
     for(var i = 1; i <= _ordersCounter; i++) {
       $('#testing').remove()
     }
+    $('#ordersButton').show()
     initialize(_currentCaseStudyId)
   }
 
