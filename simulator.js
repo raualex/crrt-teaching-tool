@@ -883,6 +883,7 @@ function toggleLabDataFullscreen() {
       $('#testing').remove()
     }
     $('#ordersButton').show()
+    _caseOver = false;
     initialize(_currentCaseStudyId)
   }
 
@@ -1073,7 +1074,6 @@ function toggleLabDataFullscreen() {
     // NOTE: Because sodium calculations are a bit different than other lab values, we need to recalculate
     // sodium using the calculateSodium() function.
     newLabs["sodium"] = calculateSodium(volumeOfDistribution, effluentFlowRate);
-    console.log('Nan Problemmmmmmm: ' + effluentFlowRate)
     // NOTE: If we're using sodium phosphate, we need to recalculate the phosphorous results
     if (orders.otherFluidsSodiumPhosphate) {
       console.log("runLabs : using sodium phosphate");
