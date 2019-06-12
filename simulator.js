@@ -48,6 +48,8 @@ var CRRTApp = (function() {
   var _currentCaseStudy;
   var _currentCaseStudySheet;
   var _currentDose;
+  var _currentTime;
+  var newTime;
   var _usedCitrate = false;
   var _usedCitrateFirst = false;
   var _historicalDose = [];
@@ -614,12 +616,20 @@ var CRRTApp = (function() {
     $("td:empty").html("-");
   }
 
+  function checkCurrentTime(time) {
+    if (time === 6) {
+      return 8
+    } else {
+      let newTime = time + 8
+      return newTime
+    }
+  }
+
   function createVitalsTable() {
     // If table already exists, remove, so we can rebuid it.
     if ($(".vitalsTable")) {
       $(".vitalsTable").remove();
     }
-
     var initialValuesOffset = 1;
     var table = $('<table></table>').addClass('vitalsTable table table-hover');
     // NOTE: This number reflects the number of rows of initial data.
@@ -632,9 +642,12 @@ var CRRTApp = (function() {
     var numColumns;
     if (_currentTime === 0) {
       numColumns = 1;
+    } else if (_currentTime === 6) {
+      newTime = checkCurrentTime(_currentTime)
+      numColumns = newTime + 1;
     } else {
-      //numColumns = 6;
-      numColumns = _currentTime + 1;
+      newTime = checkCurrentTime(newTime)
+      numColumns = newTime + 1;
     }
 
     var head = $('<thead></thead');
@@ -642,7 +655,8 @@ var CRRTApp = (function() {
     head.append(row);
 
     row.append($("<th class='blankTh'></th>"));
-    for(i=_currentTime-numColumns; i<_currentTime; i++) {
+    for(i=newTime-numColumns; i<newTime; i++) {
+
       var th = $('<th></th>').text(_currentCaseStudySheet.vitals.elements[i+initialValuesOffset].time);
       row.append(th);
     }
@@ -652,8 +666,9 @@ var CRRTApp = (function() {
       var row = $('<tr></tr>');
       var data = $('<th></th>').text(_currentCaseStudySheet.vitals.columnNames[i+columnOffset]);
       row.append(data);
-      for(j=_currentTime-numColumns; j<_currentTime; j++) {
-
+      for(j=newTime-numColumns; j<newTime; j++) {
+          // console.log('_currentTime: nuts: ' + _currentTime)
+          // console.log('numColumns: nuts: ' + numColumns)
         // NOTE: While most vitals are coming from the spreadsheet, we are dynamically calculating
         // the patient's weight. So, we're jumping in here and inserting that dynamic value (I know it's dirty)
         //if (_currentCaseStudySheet.vitals.columnNames[i+columnOffset] === "weight" && j === (_currentTime-1)) {
