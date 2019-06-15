@@ -463,7 +463,7 @@ var CRRTApp = (function() {
 
   function createInputOutputTable() {
     // If table already exists, remove, so we can rebuid it.
-    console.log('deez nuts: ' + JSON.stringify(_currentCaseStudySheet.inputOutput.elements))
+
     if ($(".inputOutputTable")) {
       $(".inputOutputTable").remove();
     }
@@ -477,7 +477,7 @@ var CRRTApp = (function() {
     // if the spreadsheet is modified and additional columns are added before the columns storing our data.
     var columnOffset = 3;
     var numColumns;
-    console.log('THIS IS THE _currentTime: ' + _currentTime)
+
     if (_currentTime === 0) {
       numColumns = 2;
     } else {
@@ -490,8 +490,7 @@ var CRRTApp = (function() {
 
     row.append($("<th class='blankTh'></th>"));
     for(i=_currentTime-numColumns; i<_currentTime; i++) {
-      // console.log('_currentCaseStudySheet.inputOutput.elements: ' + JSON.stringify(_currentCaseStudySheet.inputOutput.elements))
-      var th = $('<th></th>').text(_currentCaseStudySheet.inputOutput.elements[i+initialValuesOffset].time);
+      var th = $('<th></th>').text(createHourlyTableHeaders(i));
       row.append(th);
     }
     table.append(head);
@@ -589,10 +588,8 @@ var CRRTApp = (function() {
         rowNetInputOutput.append(data);
       }
     } else {
-      console.log('Hohhhhhhhh 1: ' + _currentCaseStudySheet.inputOutput.elements[0]["total"])
       var data = $('<td></td>').text(_currentCaseStudySheet.inputOutput.elements[0]["total"]);
       rowNetInputOutput.append(data);
-      console.log('Hohhhhhhhh 2: ' + _currentCaseStudySheet.inputOutput.elements[1]["total"])
       var data = $('<td></td>').text(_currentCaseStudySheet.inputOutput.elements[1]["total"]);
       rowNetInputOutput.append(data);
     }
@@ -839,7 +836,7 @@ var CRRTApp = (function() {
   }
 
     function createHourlyTableHeaders(i) {
-    if(i === -1 || i === 0) {
+    if(i === -2 || i === -1 || i === 0) {
       _hourlyHeaderTime = 10
       _hourlyHeaderTime24Hour = 10
       _hourlyHeaderTimeAmPm = 'AM'
@@ -1466,8 +1463,6 @@ function toggleLabDataFullscreen() {
   }
 
   function incrementTime() {
-    console.log('Heeeeeeeeee _currentTime: ' + _currentTime)
-    console.log('Heeeeeeeeee _currentOrders["timeToNextLabs"]: ' + _currentOrders["timeToNextLabs"])
     _currentTime = _currentTime + _currentOrders["timeToNextLabs"];
   }
 
