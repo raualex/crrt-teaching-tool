@@ -463,6 +463,7 @@ var CRRTApp = (function() {
 
   function createInputOutputTable() {
     // If table already exists, remove, so we can rebuid it.
+    console.log('deez nuts: ' + JSON.stringify(_currentCaseStudySheet.inputOutput.elements))
     if ($(".inputOutputTable")) {
       $(".inputOutputTable").remove();
     }
@@ -476,6 +477,7 @@ var CRRTApp = (function() {
     // if the spreadsheet is modified and additional columns are added before the columns storing our data.
     var columnOffset = 3;
     var numColumns;
+    console.log('THIS IS THE _currentTime: ' + _currentTime)
     if (_currentTime === 0) {
       numColumns = 2;
     } else {
@@ -488,6 +490,7 @@ var CRRTApp = (function() {
 
     row.append($("<th class='blankTh'></th>"));
     for(i=_currentTime-numColumns; i<_currentTime; i++) {
+      // console.log('_currentCaseStudySheet.inputOutput.elements: ' + JSON.stringify(_currentCaseStudySheet.inputOutput.elements))
       var th = $('<th></th>').text(_currentCaseStudySheet.inputOutput.elements[i+initialValuesOffset].time);
       row.append(th);
     }
@@ -586,8 +589,10 @@ var CRRTApp = (function() {
         rowNetInputOutput.append(data);
       }
     } else {
+      console.log('Hohhhhhhhh 1: ' + _currentCaseStudySheet.inputOutput.elements[0]["total"])
       var data = $('<td></td>').text(_currentCaseStudySheet.inputOutput.elements[0]["total"]);
       rowNetInputOutput.append(data);
+      console.log('Hohhhhhhhh 2: ' + _currentCaseStudySheet.inputOutput.elements[1]["total"])
       var data = $('<td></td>').text(_currentCaseStudySheet.inputOutput.elements[1]["total"]);
       rowNetInputOutput.append(data);
     }
@@ -679,7 +684,7 @@ var CRRTApp = (function() {
         // the patient's weight. So, we're jumping in here and inserting that dynamic value (I know it's dirty)
         //if (_currentCaseStudySheet.vitals.columnNames[i+columnOffset] === "weight" && j === (_currentTime-1)) {
         if (_currentCaseStudySheet.vitals.columnNames[i+columnOffset] === "weight" && ((j+1)%6) === 0) {
-          var currentWeight = _historicalVitals["weight"][(j+1)/6];
+          var currentWeight = _historicalVitals["weight"][(j+1)/8];
           var data = $('<td></td>').text(currentWeight);
         } else {
           var data = $('<td></td>').text(_currentCaseStudySheet.vitals.elements[j+initialValuesOffset][_currentCaseStudySheet.vitals.columnNames[i+columnOffset]]);
@@ -705,7 +710,7 @@ var CRRTApp = (function() {
     if (_currentTime === 0) {
       numColumns = 1;
     } else {
-      numColumns = (_currentTime/6) + 1;
+      numColumns = (_currentTime/8) + 1;
     }
 
     var head = $('<thead></thead');
@@ -784,8 +789,8 @@ var CRRTApp = (function() {
       currentLabSet = 1;
       previousLabSet = 0;
     } else {
-      numColumns = (_currentTime/6)+2;
-      currentLabSet = (_currentTime/6) + 1;
+      numColumns = (_currentTime/8)+2;
+      currentLabSet = (_currentTime/8) + 1;
       previousLabSet = currentLabSet - 1;
     }
 
@@ -810,7 +815,7 @@ var CRRTApp = (function() {
       var data = $('<th></th>').text(_allLabs[i]);
       row.append(data);
 
-      for(j=(_currentTime/6)-numColumns; j<(_currentTime/6); j++) {
+      for(j=(_currentTime/8)-numColumns; j<(_currentTime/8); j++) {
         var data = $('<td></td>').text(_historicalLabs[_allLabs[i]][j+initialValuesOffset]);
         row.append(data);
       }
@@ -1067,14 +1072,14 @@ function toggleLabDataFullscreen() {
     if (_currentTime === 0) {
       currentLabSetIndex = 1;
     } else {
-      currentLabSetIndex = (_currentTime/6) + 1;
+      currentLabSetIndex = (_currentTime/8) + 1;
     }
 
     return parseFloat(_currentCaseStudySheet.labs.elements[currentLabSetIndex][lab]);
   }
 
   function getCurrentAccessPressure(pressure) {
-    currentLabSetIndex = _currentTime/6;
+    currentLabSetIndex = _currentTime/8;
     return parseFloat(_currentCaseStudySheet.accessPressures.elements[currentLabSetIndex][pressure]);
   }
 
@@ -1181,7 +1186,7 @@ function toggleLabDataFullscreen() {
   }
 
   function copyStaticLabsToHistorical() {
-    var currentLabSet = (_currentTime/6) + 1;
+    var currentLabSet = (_currentTime/8) + 1;
 
     for(var i = 0; i < _staticLabs.length; i++) {
       if(_currentCaseStudySheet.labs.elements[currentLabSet][_staticLabs[i]]) {
@@ -1461,6 +1466,8 @@ function toggleLabDataFullscreen() {
   }
 
   function incrementTime() {
+    console.log('Heeeeeeeeee _currentTime: ' + _currentTime)
+    console.log('Heeeeeeeeee _currentOrders["timeToNextLabs"]: ' + _currentOrders["timeToNextLabs"])
     _currentTime = _currentTime + _currentOrders["timeToNextLabs"];
   }
 
@@ -1479,25 +1486,25 @@ function toggleLabDataFullscreen() {
     var otherFluidsSaline = _currentOrders["otherFluidsSaline"];
     var otherFluidsD5W = _currentOrders["otherFluidsD5W"];
     var otherFluidsSodiumPhosphate = _currentOrders["otherFluidsSodiumPhosphate"];
-    var labFluidsInPastSixHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
+    var labFluidsInPastEightHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
 
-    totalInputInL += labFluidsInPastSixHoursInLiters;
-    console.log("labFluidsInPastSixHoursInLiters :", labFluidsInPastSixHoursInLiters);
+    totalInputInL += labFluidsInPastEightHoursInLiters;
+    console.log("labFluidsInPastEightHoursInLiters :", labFluidsInPastEightHoursInLiters);
     console.log("totalInputInL :", totalInputInL);
 
     if(orders.anticoagulation === 'citrate') {
       var citrateFlowRateInLPerHr = (parseFloat($('#citrateFlowRate').val())/1000);
-      var citratePastSixHoursInLiters = citrateFlowRateInLPerHr*6;
-      totalInputInL += citratePastSixHoursInLiters;
+      var citratePastEightHoursInLiters = citrateFlowRateInLPerHr*8;
+      totalInputInL += citratePastEightHoursInLiters;
 
-      console.log("citratePastSixHoursInLiters : ", citratePastSixHoursInLiters);
+      console.log("citratePastEightHoursInLiters : ", citratePastEightHoursInLiters);
       console.log("totalInputInL :", totalInputInL);
 
       var calciumClFlowRateInLPerHr = (parseFloat($('#caclInfusionRate').val())/1000);
-      var calciumClPastSixHoursInLiters = calciumClFlowRateInLPerHr*6;
-      totalInputInL += calciumClPastSixHoursInLiters;
+      var calciumClPastEightHoursInLiters = calciumClFlowRateInLPerHr*8;
+      totalInputInL += calciumClPastEightHoursInLiters;
 
-      console.log("calciumClPastSixHoursInLiters : ", calciumClPastSixHoursInLiters);
+      console.log("calciumClPastEightHoursInLiters : ", calciumClPastEightHoursInLiters);
       console.log("totalInputInL :", totalInputInL);
     }
 
@@ -1517,14 +1524,14 @@ function toggleLabDataFullscreen() {
 
     if (infusionValue) {
       var infusionInL = infusionValue/1000;
-      var infusionPastSixHours = infusionInL*6;
-      totalInputInL += infusionPastSixHours;
-      console.log("infusionPastSixHours : ", infusionPastSixHours);
+      var infusionPastEightHours = infusionInL*8;
+      totalInputInL += infusionPastEightHours;
+      console.log("infusionPastEightHours : ", infusionPastEightHours);
       console.log("totalInputInL :", totalInputInL);
     }
 
-    var startingTime = _currentTime - 6;
-    for(var i=0;i<6;i++) {
+    var startingTime = _currentTime - 8;
+    for(var i=0;i<8;i++) {
       var input = 0;
       input += parseFloat(_currentCaseStudySheet.inputOutput.elements[startingTime+i+2]["total"]);
 
@@ -1560,7 +1567,7 @@ function toggleLabDataFullscreen() {
       _historicalInputOutput["totalInput"].push(input);
     }
 
-    var startingTime = _currentTime-6;
+    var startingTime = _currentTime-8;
     var ultrafiltrationStartingTime = _currentTime - totalHoursOfFiltration;
     var differenceBetweenStartingTimeAndHoursOfFiltration = _currentTime - totalHoursOfFiltration;
 
@@ -1578,7 +1585,7 @@ function toggleLabDataFullscreen() {
       _historicalInputOutput["totalOutput"][ultrafiltrationStartingTime+i] = orders["grossUF"];
     }
 
-    for (var i=0;i<6;i++) {
+    for (var i=0;i<8;i++) {
       var input = _historicalInputOutput["totalInput"][startingTime+i];
       var output= _historicalInputOutput["totalOutput"][startingTime+i];
       _historicalInputOutput["netInputOutput"][startingTime+i]=input-output;
@@ -1589,10 +1596,10 @@ function toggleLabDataFullscreen() {
       }
     }
 
-    var grossFiltrationPastSixHoursInLiters = (orders["grossUF"]/1000)*totalHoursOfFiltration;
+    var grossFiltrationPastEightHoursInLiters = (orders["grossUF"]/1000)*totalHoursOfFiltration;
     var previousWeightInKilos = parseFloat(_historicalVitals['weight'][_historicalVitals['weight'].length-1]);
 
-    var currentWeightInKilos = previousWeightInKilos + (totalInputInL - grossFiltrationPastSixHoursInLiters);
+    var currentWeightInKilos = previousWeightInKilos + (totalInputInL - grossFiltrationPastEightHoursInLiters);
     return currentWeightInKilos;
   }
 
@@ -1654,7 +1661,7 @@ function toggleLabDataFullscreen() {
   function calculateTimeToNextSetOfLabs() {
     // NOTE: Certain things, like clotting, could alter
     // this value. For now, we're just setting it to 6 hours.
-    return 6;
+    return 8;
   }
 
   function arrayToHTMLList(array){
@@ -1715,7 +1722,7 @@ function toggleLabDataFullscreen() {
     if(orders.anticoagulation === 'citrate') {
       _usedCitrate = true;
 
-      if(currentTime === 6) {
+      if(currentTime === 8) {
         _usedCitrateFirst = true;
       }
     }
@@ -1773,7 +1780,7 @@ function toggleLabDataFullscreen() {
     var currentSodium = _historicalLabs["sodium"][_historicalLabs["sodium"].length-1];
 
     // Bonus 150 points if sodium is 154-156 (inclusive) after the first order
-    if ((_currentTime === 6) && (currentSodium >= 154 && currentSodium <= 156)){
+    if ((_currentTime === 8) && (currentSodium >= 154 && currentSodium <= 156)){
       totalPoints = totalPoints + 150;
     }
 
@@ -2110,14 +2117,14 @@ function toggleLabDataFullscreen() {
 
   function checkGrossUltrafiltration() {
     var totalPoints = 0;
-    var fluidInPastSixHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
-    var totalHoursOfFiltration = 6;
+    var fluidInPastEightHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
+    var totalHoursOfFiltration = 8;
     // NOTE: If BFR is <= 150, grossUF for two hours is 0, therefore, we only have 4 hours of filtration. (This *might* only be for case study #1)
     if (_currentOrders["BFR"] <= 150) {
       totalHoursOfFiltration = 4;
     }
-    var grossFiltrationPastSixHoursInLiters = (_currentOrders["grossUF"]/1000)*totalHoursOfFiltration;
-    var filtrationRate = (grossFiltrationPastSixHoursInLiters - fluidInPastSixHoursInLiters)*1000;
+    var grossFiltrationPastEightHoursInLiters = (_currentOrders["grossUF"]/1000)*totalHoursOfFiltration;
+    var filtrationRate = (grossFiltrationPastEightHoursInLiters - fluidInPastEightHoursInLiters)*1000;
 
     if (filtrationRate > 1500) {
       console.log("checkGrossUltrafiltration() : > 200 ", filtrationRate);
@@ -2293,7 +2300,7 @@ function toggleLabDataFullscreen() {
 
   function setResultsTableVariables() {
     console.log("setResultsTableVariables()");
-    var numRounds = _currentTime/6;
+    var numRounds = _currentTime/8;
     console.log("numRounds :", numRounds);
 
     var dosePointsEarned = sum(_points.doseInRange);
@@ -2390,8 +2397,8 @@ function toggleLabDataFullscreen() {
 
     var volumeCumulativeChange = excelRound(Math.abs(initialWeight-finalWeight),2);
     var volumeOverloadInitial = _historicalOverload[0];
-    var volumeOverload48Hours = _historicalOverload[48/6];
-    var volumeOverload72Hours = _historicalOverload[72/6];
+    var volumeOverload48Hours = _historicalOverload[48/8];
+    var volumeOverload72Hours = _historicalOverload[72/8];
 
     if (volumeOverload48Hours < 15){
       volumePointsEarned += 100;
