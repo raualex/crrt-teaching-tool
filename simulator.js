@@ -48,6 +48,8 @@ var CRRTApp = (function() {
   var _currentCaseStudy;
   var _currentCaseStudySheet;
   var _currentDose;
+  var _currentTime;
+  var newTime = 0;
   var _usedCitrate = false;
   var _usedCitrateFirst = false;
   var _historicalDose = [];
@@ -67,6 +69,11 @@ var CRRTApp = (function() {
   var _headerTime24Hour = 10;
   var _headerTimeAmPm = 'AM';
   var _headerDay = 1;
+
+  var _hourlyHeaderTime = 10;
+  var _hourlyHeaderTime24Hour = 10;
+  var _hourlyHeaderTimeAmPm = 'AM';
+  var _hourlyHeaderDay = 1;
   //AEla lab-header-day-time branch end
   //ARau orders counter start
   var _ordersCounter = 0;
@@ -614,12 +621,20 @@ var CRRTApp = (function() {
     $("td:empty").html("-");
   }
 
+  function checkCurrentTime(time) {
+    if (time === 6) {
+      return 8
+    } else {
+      let updatedTime = time + 8
+      return updatedTime
+    }
+  }
+
   function createVitalsTable() {
     // If table already exists, remove, so we can rebuid it.
     if ($(".vitalsTable")) {
       $(".vitalsTable").remove();
     }
-
     var initialValuesOffset = 1;
     var table = $('<table></table>').addClass('vitalsTable table table-hover');
     // NOTE: This number reflects the number of rows of initial data.
@@ -632,9 +647,12 @@ var CRRTApp = (function() {
     var numColumns;
     if (_currentTime === 0) {
       numColumns = 1;
+    } else if (_currentTime === 6) {
+      newTime = checkCurrentTime(_currentTime)
+      numColumns = newTime + 1;
     } else {
-      //numColumns = 6;
-      numColumns = _currentTime + 1;
+      newTime = checkCurrentTime(newTime)
+      numColumns = newTime + 1;
     }
 
     var head = $('<thead></thead');
@@ -642,8 +660,9 @@ var CRRTApp = (function() {
     head.append(row);
 
     row.append($("<th class='blankTh'></th>"));
-    for(i=_currentTime-numColumns; i<_currentTime; i++) {
-      var th = $('<th></th>').text(_currentCaseStudySheet.vitals.elements[i+initialValuesOffset].time);
+    for(i=newTime-numColumns; i<newTime; i++) {
+
+      var th = $('<th></th>').text(createHourlyTableHeaders(i));
       row.append(th);
     }
     table.append(head);
@@ -652,8 +671,9 @@ var CRRTApp = (function() {
       var row = $('<tr></tr>');
       var data = $('<th></th>').text(_currentCaseStudySheet.vitals.columnNames[i+columnOffset]);
       row.append(data);
-      for(j=_currentTime-numColumns; j<_currentTime; j++) {
-
+      for(j=newTime-numColumns; j<newTime; j++) {
+          // console.log('_currentTime: nuts: ' + _currentTime)
+          // console.log('numColumns: nuts: ' + numColumns)
         // NOTE: While most vitals are coming from the spreadsheet, we are dynamically calculating
         // the patient's weight. So, we're jumping in here and inserting that dynamic value (I know it's dirty)
         //if (_currentCaseStudySheet.vitals.columnNames[i+columnOffset] === "weight" && j === (_currentTime-1)) {
@@ -806,54 +826,98 @@ var CRRTApp = (function() {
       _headerTimeAmPm = 'AM'
       _headerDay = 1
       return `${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`;
-    }
-    //  else if (i === 0) {
-    //   _headerTime = 6
-    //   _headerTime24Hour = 18
-    //   _headerTimeAmPm = 'PM'
-    //   _headerDay = 1
-    //   return `${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`;
-    // } 
-      else {
+    } else {
       createHeader()
     }
       return `${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`;
   }
 
-  //AEla createTableHeaders Edit end
+    function createHourlyTableHeaders(i) {
+    if(i === -1 || i === 0) {
+      _hourlyHeaderTime = 10
+      _hourlyHeaderTime24Hour = 10
+      _hourlyHeaderTimeAmPm = 'AM'
+      _hourlyHeaderDay = 1
+      return `${_hourlyHeaderTime}:00 ${_hourlyHeaderTimeAmPm} - Day ${_hourlyHeaderDay}`;
+    } else {
+      createHourlyHeader()
+    }
+      return `${checkHourlyHeaderForZeroes(_hourlyHeaderTime)}:00 ${_hourlyHeaderTimeAmPm} - Day ${_hourlyHeaderDay}`;
+  }
 
+  //AEla createTableHeaders Edit end
+  function checkHourlyHeaderForZeroes(headerTime) {
+    if (headerTime === 0) {
+      return 12
+    } else {
+      return headerTime
+    }
+  }
   // AEla createHeader functions start
 
-    function verifyDayCycle(){
-      if(_headerTime24Hour >= 24) {
-        _headerTime24Hour -= 24
-        _headerDay++
+    function verifyDayCycle(str){
+      if(str === 'eightHours') {
+        if(_headerTime24Hour >= 24) {
+          _headerTime24Hour -= 24
+          _headerDay++
+        }        
+      } else if(str === 'oneHour') {
+         if(_hourlyHeaderTime24Hour >= 24) {
+           _hourlyHeaderTime24Hour -= 24
+           _hourlyHeaderDay++
+         }
       }
     }
 
-    function check12HourFormat(){
-      if(_headerTime24Hour <= 12) {
-        _headerTime = _headerTime24Hour
-      } else {
-        _headerTime = Math.abs(_headerTime24Hour - 12)
+    function check12HourFormat(str){
+      if(str === 'eightHours') {
+        if(_headerTime24Hour <= 12) {
+          _headerTime = _headerTime24Hour
+        } else {
+          _headerTime = Math.abs(_headerTime24Hour - 12)
+        }
+      } else if(str === 'oneHour') {
+        if(_hourlyHeaderTime24Hour <= 12) {
+          _hourlyHeaderTime = _hourlyHeaderTime24Hour
+        } else {
+          _hourlyHeaderTime = Math.abs(_hourlyHeaderTime24Hour - 12)
+        }
       }
     }
 
-    function checkAmPm(){
-      if(_headerTime24Hour > 11) {
-        _headerTimeAmPm = 'PM'
-      } else {
-        _headerTimeAmPm = 'AM'
+    function checkAmPm(str){
+      if(str === 'eightHours') {
+        if(_headerTime24Hour > 11) {
+          _headerTimeAmPm = 'PM'
+        } else {
+          _headerTimeAmPm = 'AM'
+        }
+      } else if(str === 'oneHour') {
+        if(_hourlyHeaderTime24Hour > 11) {
+          _hourlyHeaderTimeAmPm = 'PM'
+        } else {
+          _hourlyHeaderTimeAmPm = 'AM'
+        }
       }
     }
 
     function createHeader() {
       console.log(`The current header should read: ${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`)
       _headerTime24Hour += 8
-      verifyDayCycle()
-      check12HourFormat()
-      checkAmPm()
+      verifyDayCycle('eightHours')
+      check12HourFormat('eightHours')
+      checkAmPm('eightHours')
     }
+
+    function createHourlyHeader() {
+      console.log(`The current hourly header should read: ${_hourlyHeaderTime}:00 ${_hourlyHeaderTimeAmPm} - Day ${_hourlyHeaderDay}`)
+      _hourlyHeaderTime24Hour ++
+      verifyDayCycle('oneHour')
+      check12HourFormat('oneHour')
+      checkAmPm('oneHour')
+    }
+
+
 
 // AEla createHeader functions end
 
