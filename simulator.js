@@ -49,7 +49,7 @@ var CRRTApp = (function() {
   var _currentCaseStudySheet;
   var _currentDose;
   var _currentTime;
-  var newTime;
+  var newTime = 0;
   var _usedCitrate = false;
   var _usedCitrateFirst = false;
   var _historicalDose = [];
@@ -620,8 +620,8 @@ var CRRTApp = (function() {
     if (time === 6) {
       return 8
     } else {
-      let newTime = time + 8
-      return newTime
+      let updatedTime = time + 8
+      return updatedTime
     }
   }
 
