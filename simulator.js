@@ -647,6 +647,7 @@ var CRRTApp = (function() {
     var numColumns;
     if (_currentTime === 0) {
       numColumns = 1;
+      newTime = 0
     } else if (_currentTime === 6) {
       newTime = checkCurrentTime(_currentTime)
       numColumns = newTime + 1;
