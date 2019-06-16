@@ -281,8 +281,30 @@ var CRRTApp = (function() {
     })
   }
 
+  function addHighlight() {
+    $('#inputOutputBtn').addClass('updatedInfoHighlight')
+    $('#vitalsBtn').addClass('updatedInfoHighlight')
+    $('#labsBtn').addClass('updatedInfoHighlight')
+    $('#medicationsBtn').addClass('updatedInfoHighlight')
+  }
+
+  $('#inputOutputBtn').on('click', removeHighlight)  
+  $('#vitalsBtn').on('click', removeHighlight)  
+  $('#labsBtn').on('click', removeHighlight)  
+  $('#medicationsBtn').on('click', removeHighlight)  
+  $('.resultsClose').on('click', removeAllHighlights)
+
+  function removeHighlight(event) {
+    $('#' + event.target.id).removeClass('updatedInfoHighlight')
+  }
+
+  function removeAllHighlights() {
+    $('.updatedInfoHighlight').removeClass('updatedInfoHighlight')
+  }
+
   function initialize(caseId) {
     console.log("CRRTApp : initialize()");
+    removeAllHighlights()
     if (!caseId) {
       initializeCaseStudyID();
     } else {
@@ -412,6 +434,7 @@ var CRRTApp = (function() {
       submitHandler: function(form) {
         $('#ordersModal').modal('hide');
         runLabs();
+        addHighlight();
         resetFormInputs();
       }
     });
