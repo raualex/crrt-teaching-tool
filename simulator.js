@@ -281,6 +281,22 @@ var CRRTApp = (function() {
     })
   }
 
+  function addHighlight() {
+    $('#inputOutputBtn').addClass('updatedInfoHighlight')
+    $('#vitalsBtn').addClass('updatedInfoHighlight')
+    $('#labsBtn').addClass('updatedInfoHighlight')
+    $('#medicationsBtn').addClass('updatedInfoHighlight')
+  }
+
+  $('#inputOutputBtn').on('click', removeHighlight)  
+  $('#vitalsBtn').on('click', removeHighlight)  
+  $('#labsBtn').on('click', removeHighlight)  
+  $('#medicationsBtn').on('click', removeHighlight)  
+
+  function removeHighlight(event) {
+    $('#' + event.target.id).removeClass('updatedInfoHighlight')
+  }
+
   function initialize(caseId) {
     console.log("CRRTApp : initialize()");
     if (!caseId) {
@@ -412,6 +428,7 @@ var CRRTApp = (function() {
       submitHandler: function(form) {
         $('#ordersModal').modal('hide');
         runLabs();
+        addHighlight();
         resetFormInputs();
       }
     });

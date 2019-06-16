@@ -176,6 +176,16 @@ td, th {
 
 }
 
+.updatedInfoHighlight {
+  background-color: #0bbae9f5 !important;
+  border-color: #0bbae9f5 !important;
+  color: #fff !important;
+}
+
+.updatedInfoHighlight:hover {
+  background-color: #0b7ce9f5 !important;
+}
+
 /*th:first-child {
   position: fixed;
   left: 5px
