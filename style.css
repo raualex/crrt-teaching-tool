@@ -186,6 +186,23 @@ td, th {
   background-color: #0b7ce9f5 !important;
 }
 
+.new-case-form-header {
+  margin: 1rem 0 1rem 2rem;
+}
+
+.new-case-form-main {
+  margin: 0 0 0 3rem;  
+}
+
+.new-case-form-submit-btn {
+  display: block;
+  margin: 1rem 0 1rem;
+}
+
+.new-case-form-exit {
+  margin: 0 0 1rem 2rem;  
+}
+
 /*th:first-child {
   position: fixed;
   left: 5px

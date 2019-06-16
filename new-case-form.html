@@ -2,10 +2,93 @@
 <html lang='en'>
   <head>
     <title>CRRT - Add a New Case</title>
+ 		<link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     <script src="https://code.jquery.com/jquery-3.1.1.slim.min.js" integrity="sha384-A7FZj7v+d/sdmMqp/nOQwliLvUsJfDHW+k9Omg/a/EheAdgtzNs3hpfag6Ed950n" crossorigin="anonymous"></script>
+ 		<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js" integrity="sha384-DztdAPBWPRXSA/3eYEEUWrWCy7G5KFbe8fFjk5JAIxUYHKkDx6Qin1DkWx51bBrb" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js" integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/tabletop.js/1.5.1/tabletop.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/jquery.validation/1.15.1/jquery.validate.min.js'></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.js'></script>
   </head>
   <body>
-    <h1>Add a New Case Form</h1>
-    <a class="btn" href="./index.html" role="button">Exit</a>
+    <h1 class="new-case-form-header">Add a New Case Form</h1>
+    <a class="btn new-case-form-exit" href="./index.html" role="button">Exit</a>
+    <form class="new-case-form-main">
+    	<legend>Sodium Production Rate
+	      <span>
+	        <a href="./material.html#sodium" target="_blank">
+	          <i class="fa fa-question-circle-o ml-1"></i>
+	        </a>
+	      </span>
+	    </legend>
+	    <input required name="new-case-sodiumProductionRate-value" id="new-case-sodiumProductionRate-value" autocomplete="off" value="">
+	    <legend>Potassium Production Rate
+	    	<span>
+	    		<a href="./material.html#potassium" target="_blank">
+	    			<i class="fa fa-question-circle-o ml-1"></i>
+	    		</a>
+	    	</span>
+	    </legend>
+	    <input required name="new-case-potassiumProductionRate-value" id="new-case-potassiumProductionRate-value" autocomplete="off" value="">
+    	<legend>Chloride Production Rate
+	      <span>
+	        <a href="./material.html#chloride" target="_blank">
+	          <i class="fa fa-question-circle-o ml-1"></i>
+	        </a>
+	      </span>
+	    </legend>
+	    <input required name="new-case-chlorideProductionRate-value" id="new-case-chlorideProductionRate-value" autocomplete="off" value="">
+    	<legend>Bicarbonate Production Rate
+	      <span>
+	        <a href="./material.html#bicarbonate" target="_blank">
+	          <i class="fa fa-question-circle-o ml-1"></i>
+	        </a>
+	      </span>
+	    </legend>
+	    <input required name="new-case-bicarbonateProductionRate-value" id="new-case-bicarbonateProductionRate-value" autocomplete="off" value="">
+	    <legend>BUN Production Rate
+	    </legend>
+	    <input required name="new-case-BUNProductionRate-value" id="new-case-BUNProductionRate-value" autocomplete="off" value="">
+    	<legend>Creatinine Production Rate
+	    </legend>
+	    <input required name="new-case-creatinineProductionRate-value" id="new-case-creatinineProductionRate-value" autocomplete="off" value="">
+    	<legend>Calcium Production Rate
+	      <span>
+	        <a href="./material.html#calcium" target="_blank">
+	          <i class="fa fa-question-circle-o ml-1"></i>
+	        </a>
+	      </span>
+	    </legend>
+	    <input required name="new-case-calciumProductionRate-value" id="new-case-calciumProductionRate-value" autocomplete="off" value="">
+    	<legend>Filtration Fraction Starting
+	    </legend>
+	    <input required name="new-case-filtrationFractionStarting-value" id="new-case-filtrationFractionStarting-value" autocomplete="off" value="">
+    	<legend>Gender
+	    </legend>
+	    <input required name="new-case-gender" id="new-case-gender" autocomplete="off" value="">
+    	<legend>Usual Weight
+	    </legend>
+	    <input required name="new-case-usual-weight-value" id="new-case-usual-weight-value" autocomplete="off" value="">
+    	<legend>History of Present Illness
+	    </legend>
+	    <input required name="new-case-historyOfPresentIllness-value" id="new-case-historyOfPresentIllness-value" autocomplete="off" value="">
+    	<legend>Vital Signs
+	    </legend>
+	    <input required name="new-case-vitalSigns-value" id="new-case-vitalSigns-value" autocomplete="off" value="">
+    	<legend>Medications
+	    </legend>
+	    <input required name="new-case-medications-value" id="new-case-medications-value" autocomplete="off" value="">
+    	<legend>Imaging
+	    </legend>
+	    <input required name="new-case-imaging-value" id="new-case-imaging-value" autocomplete="off" value="">
+    	<legend>Physical Exam
+	    </legend>
+	    <input required name="new-case-physicalExam-value" id="new-case-physicalExam-value" autocomplete="off" value="">
+    	<button class="new-case-form-submit-btn">
+    	Add Case
+    	</button>
+    </form>
   </body>
 </html>
