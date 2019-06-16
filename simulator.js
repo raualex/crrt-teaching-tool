@@ -292,13 +292,19 @@ var CRRTApp = (function() {
   $('#vitalsBtn').on('click', removeHighlight)  
   $('#labsBtn').on('click', removeHighlight)  
   $('#medicationsBtn').on('click', removeHighlight)  
+  $('.resultsClose').on('click', removeAllHighlights)
 
   function removeHighlight(event) {
     $('#' + event.target.id).removeClass('updatedInfoHighlight')
   }
 
+  function removeAllHighlights() {
+    $('.updatedInfoHighlight').removeClass('updatedInfoHighlight')
+  }
+
   function initialize(caseId) {
     console.log("CRRTApp : initialize()");
+    removeAllHighlights()
     if (!caseId) {
       initializeCaseStudyID();
     } else {
