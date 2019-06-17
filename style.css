@@ -127,7 +127,7 @@ body.loading .modal-spin {
 
 #vitals table thead, 
 #labs table thead, 
-#medications table thead,
+#medications table thead tr,
 #inputOutput table thead {
   position: sticky;
   top: 0;  
@@ -149,7 +149,7 @@ table thead th {
 
 #vitals table thead th, 
 #labs table thead th, 
-#medications table thead th, 
+#medications table thead tr th, 
 #inputOutput table thead th {
   background-color: #FFF;
   min-width: 160px;
