@@ -3,7 +3,6 @@ $( document ).ready(function() {
 });
 
 
-
 var CRRTApp = (function() {
 
   var _points = {
@@ -333,36 +332,36 @@ var CRRTApp = (function() {
   }
 
   function setTestFormInputs() {
-    // $("#replacement-fluid-sodium-value").val("140");
-    // $("#replacement-fluid-potassium-value").val("3.6");
-    // $("#replacement-fluid-chloride-value").val("100");
-    // $("#replacement-fluid-bicarbonate-value").val("24");
-    // $("#replacement-fluid-calcium-value").val("2");
-    // $("#replacement-fluid-magnesium-value").val("1.7");
-    // $("#replacement-fluid-phosphorous-value").val(".5");
-    // $("#grossHourlyFluidRemoval").val("500");
-    // $("#bloodFlowRate").val("200");
-    // $("#fluidFlowRate").val("2");
-    // $("#citrateFlowRate").val("300");
-    // $("caclInfusionRate").val("100");
+    $("#replacement-fluid-sodium-value").val("140");
+    $("#replacement-fluid-potassium-value").val("3.6");
+    $("#replacement-fluid-chloride-value").val("100");
+    $("#replacement-fluid-bicarbonate-value").val("24");
+    $("#replacement-fluid-calcium-value").val("2");
+    $("#replacement-fluid-magnesium-value").val("1.7");
+    $("#replacement-fluid-phosphorous-value").val(".5");
+    $("#grossHourlyFluidRemoval").val("500");
+    $("#bloodFlowRate").val("200");
+    $("#fluidFlowRate").val("2");
+    $("#citrateFlowRate").val("300");
+    $("caclInfusionRate").val("100");
   }
 
   function resetFormInputs() {
-    $("#replacement-fluid-sodium-value").val("");
-    $("#replacement-fluid-potassium-value").val("");
-    $("#replacement-fluid-chloride-value").val("");
-    $("#replacement-fluid-bicarbonate-value").val("");
-    $("#replacement-fluid-calcium-value").val("");
-    $("#replacement-fluid-magnesium-value").val("");
-    $("#replacement-fluid-phosphorous-value").val("");
+    // $("#replacement-fluid-sodium-value").val("");
+    // $("#replacement-fluid-potassium-value").val("");
+    // $("#replacement-fluid-chloride-value").val("");
+    // $("#replacement-fluid-bicarbonate-value").val("");
+    // $("#replacement-fluid-calcium-value").val("");
+    // $("#replacement-fluid-magnesium-value").val("");
+    // $("#replacement-fluid-phosphorous-value").val("");
 
-    $("#bloodFlowRate").val("");
-    $("#fluidFlowRate").val("");
-    $("#grossHourlyFluidRemoval").val("");
+    // $("#bloodFlowRate").val("");
+    // $("#fluidFlowRate").val("");
+    // $("#grossHourlyFluidRemoval").val("");
 
-    $("#other-fluids-sodium-phosphate").prop('checked',false);
-    $("#other-fluids-saline").prop('checked',false);
-    $("#other-fluids-D5W").prop('checked',false);
+    // $("#other-fluids-sodium-phosphate").prop('checked',false);
+    // $("#other-fluids-saline").prop('checked',false);
+    // $("#other-fluids-D5W").prop('checked',false);
   }
 
   function initializeOrderForm() {
@@ -2619,8 +2618,10 @@ function toggleLabDataFullscreen() {
   }
 
   function excelRound(val, num) {
-    var coef = Math.pow(10, num);
-    return (Math.round(val * coef))/coef;
+    // var coef = Math.pow(10, num);
+    // return (Math.round(val * coef))/coef;
+
+    return Number.parseFloat(val).toFixed(2)
   }
 
   String.prototype.capitalize = function() {
