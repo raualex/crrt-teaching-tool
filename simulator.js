@@ -78,6 +78,19 @@ var CRRTApp = (function() {
   var _ordersCounter = 0;
   //ARau orders counter end
 
+  var _ordersSodium = '';
+  var _ordersPotassium = '';
+  var _ordersChloride = '';
+  var _ordersBicarbonate = '';
+  var _ordersCalcium = '';
+  var _ordersMagnesium = '';
+  var _ordersPhosphorous = '';
+  var _ordersGrossUltrafiltration = '';
+  var _ordersBloodFlowRate = '';
+  var _ordersReplacementFluidFlowRate = '';
+  var _ordersCitrateFlowRate = '';
+  var _ordersCaClInfusionRate = '';
+
   // NOTE:
   // We are storing each of our lab values in an array. This allows
   // us to keep track of historical values. Since new values will
@@ -332,18 +345,48 @@ var CRRTApp = (function() {
   }
 
   function setTestFormInputs() {
-    $("#replacement-fluid-sodium-value").val("140");
-    $("#replacement-fluid-potassium-value").val("3.6");
-    $("#replacement-fluid-chloride-value").val("100");
-    $("#replacement-fluid-bicarbonate-value").val("24");
-    $("#replacement-fluid-calcium-value").val("2");
-    $("#replacement-fluid-magnesium-value").val("1.7");
-    $("#replacement-fluid-phosphorous-value").val(".5");
-    $("#grossHourlyFluidRemoval").val("500");
-    $("#bloodFlowRate").val("200");
-    $("#fluidFlowRate").val("2");
-    $("#citrateFlowRate").val("300");
-    $("caclInfusionRate").val("100");
+    $("#replacement-fluid-sodium-value").val(_ordersSodium);
+    $("#replacement-fluid-potassium-value").val(_ordersPotassium);
+    $("#replacement-fluid-chloride-value").val(_ordersChloride);
+    $("#replacement-fluid-bicarbonate-value").val(_ordersBicarbonate);
+    $("#replacement-fluid-calcium-value").val(_ordersCalcium);
+    $("#replacement-fluid-magnesium-value").val(_ordersMagnesium);
+    $("#replacement-fluid-phosphorous-value").val(_ordersPhosphorous);
+    $("#grossHourlyFluidRemoval").val(_ordersGrossUltrafiltration);
+    $("#bloodFlowRate").val(_ordersBloodFlowRate);
+    $("#fluidFlowRate").val(_ordersReplacementFluidFlowRate);
+    $("#citrateFlowRate").val(_ordersCitrateFlowRate);
+    $("caclInfusionRate").val(_ordersCaClInfusionRate);
+  }
+
+  function saveOrderFormInputValues() {
+    _ordersSodium = $("#replacement-fluid-sodium-value").val()
+    _ordersPotassium = $("#replacement-fluid-potassium-value").val()
+    _ordersChloride = $("#replacement-fluid-chloride-value").val()
+    _ordersBicarbonate = $("#replacement-fluid-bicarbonate-value").val()
+    _ordersCalcium = $("#replacement-fluid-calcium-value").val()
+    _ordersMagnesium = $("#replacement-fluid-magnesium-value").val()
+    _ordersPhosphorous = $("#replacement-fluid-phosphorous-value").val()
+    _ordersGrossUltrafiltration = $("#grossHourlyFluidRemoval").val();
+    _ordersBloodFlowRate = $("#bloodFlowRate").val();
+    _ordersReplacementFluidFlowRate = $("#fluidFlowRate").val();
+    _ordersCitrateFlowRate = $("#citrateFlowRate").val();
+    _ordersCaClInfusionRate = $("caclInfusionRate").val();
+  }
+
+  function clearFormInputVariables() {
+    _ordersSodium = '';
+    _ordersPotassium = '';
+    _ordersChloride = '';
+    _ordersBicarbonate = '';
+    _ordersCalcium = '';
+    _ordersMagnesium = '';
+    _ordersPhosphorous = '';
+    _ordersGrossUltrafiltration = '';
+    _ordersBloodFlowRate = '';
+    _ordersReplacementFluidFlowRate = '';
+    _ordersCitrateFlowRate = '';
+    _ordersCaClInfusionRate = '';
   }
 
   function resetFormInputs() {
@@ -432,6 +475,7 @@ var CRRTApp = (function() {
       },
       submitHandler: function(form) {
         $('#ordersModal').modal('hide');
+        saveOrderFormInputValues();
         runLabs();
         addHighlight();
         resetFormInputs();
@@ -968,6 +1012,7 @@ function toggleLabDataFullscreen() {
   $("#restart-case-btn").on("click", resetCase)
 
   function resetCase() {
+    clearFormInputVariables()
     for(var i = 1; i <= _ordersCounter; i++) {
       $('#testing').remove()
     }
