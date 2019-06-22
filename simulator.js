@@ -389,24 +389,6 @@ var CRRTApp = (function() {
     _ordersCaClInfusionRate = '';
   }
 
-  function resetFormInputs() {
-    // $("#replacement-fluid-sodium-value").val("");
-    // $("#replacement-fluid-potassium-value").val("");
-    // $("#replacement-fluid-chloride-value").val("");
-    // $("#replacement-fluid-bicarbonate-value").val("");
-    // $("#replacement-fluid-calcium-value").val("");
-    // $("#replacement-fluid-magnesium-value").val("");
-    // $("#replacement-fluid-phosphorous-value").val("");
-
-    // $("#bloodFlowRate").val("");
-    // $("#fluidFlowRate").val("");
-    // $("#grossHourlyFluidRemoval").val("");
-
-    // $("#other-fluids-sodium-phosphate").prop('checked',false);
-    // $("#other-fluids-saline").prop('checked',false);
-    // $("#other-fluids-D5W").prop('checked',false);
-  }
-
   function initializeOrderForm() {
     handleOrderFormChanges();
     var startingAnticoagulationValue = $('input[name=anticoagulation]:checked').val();
@@ -478,7 +460,6 @@ var CRRTApp = (function() {
         saveOrderFormInputValues();
         runLabs();
         addHighlight();
-        resetFormInputs();
       }
     });
   }
