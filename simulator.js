@@ -136,6 +136,7 @@ var CRRTApp = (function() {
   var _dynamicLabs = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "ionizedCalcium", "magnesium", "phosphorous", "pH", "filtrationFraction"];
   var _dynamicComponents = ["sodium", "potassium", "chloride", "bicarbonate", "BUN", "creatinine", "calcium", "phosphorous", "magnesium"];
   var _staticLabs = ["lactate", "albumin", "WBC", "hemoglobin", "hematocrit", "plateletCount", "PC02", "granularCasts", "renalEpithelialCasts", "bloodCulture", "urineCulture"];
+
   var _historicalVitals = {
     bloodPressure: [],
     respiratoryRate: [],
@@ -727,8 +728,9 @@ var CRRTApp = (function() {
         // NOTE: While most vitals are coming from the spreadsheet, we are dynamically calculating
         // the patient's weight. So, we're jumping in here and inserting that dynamic value (I know it's dirty)
         //if (_currentCaseStudySheet.vitals.columnNames[i+columnOffset] === "weight" && j === (_currentTime-1)) {
-        if (_currentCaseStudySheet.vitals.columnNames[i+columnOffset] === "weight" && ((j+1)%6) === 0) {
-          var currentWeight = _historicalVitals["weight"][(j+1)/8];
+        if (_currentCaseStudySheet.vitals.columnNames[i+columnOffset] === "weight" && ((j+1)%8) === 0) {
+          // var currentWeight = _historicalVitals["weight"][(j+1)/8];
+          var currentWeight = _caseStudies[_currentCaseStudyId].startingData.vitalSigns.weightStarting
           var data = $('<td></td>').text(currentWeight);
         } else {
           var data = $('<td></td>').text(_currentCaseStudySheet.vitals.elements[j+initialValuesOffset][_currentCaseStudySheet.vitals.columnNames[i+columnOffset]]);
@@ -1311,7 +1313,7 @@ function toggleLabDataFullscreen() {
 
   function calculateTotalHoursOfFiltrationCase1(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium) {
     var initialEFR = effluentFlowRate;
-    var defaultHoursOfFiltration = 6;
+    var defaultHoursOfFiltration = 8;
     var hoursOfFiltration = defaultHoursOfFiltration;
 
     if ((_currentOrders["BFR"] <= 150 ) || (currentFiltrationFraction > 25 && currentFiltrationFraction <= 30 && _currentOrders.anticoagulation === 'none')) {
@@ -1334,7 +1336,7 @@ function toggleLabDataFullscreen() {
 
   function calculateTotalHoursOfFiltrationCase2(effluentFlowRate, currentFiltrationFraction, startingWeight, ionizedCalcium, didClot) {
     var initialEFR = effluentFlowRate;
-    var defaultHoursOfFiltration = 6;
+    var defaultHoursOfFiltration = 8;
     var hoursOfFiltration = defaultHoursOfFiltration;
 
     if (_currentOrders["BFR"] < 150) {
@@ -1529,7 +1531,7 @@ function toggleLabDataFullscreen() {
     var otherFluidsSaline = _currentOrders["otherFluidsSaline"];
     var otherFluidsD5W = _currentOrders["otherFluidsD5W"];
     var otherFluidsSodiumPhosphate = _currentOrders["otherFluidsSodiumPhosphate"];
-    var labFluidsInPastEightHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
+    var labFluidsInPastEightHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousEightHourTotal"]))/1000;
 
     totalInputInL += labFluidsInPastEightHoursInLiters;
     console.log("labFluidsInPastEightHoursInLiters :", labFluidsInPastEightHoursInLiters);
@@ -1638,7 +1640,7 @@ function toggleLabDataFullscreen() {
         _historicalInputOutput["cumulativeInputOutput"][startingTime+i] = _historicalInputOutput["netInputOutput"][startingTime+i] + _historicalInputOutput["cumulativeInputOutput"][startingTime+i-1];
       }
     }
-
+    debugger
     var grossFiltrationPastEightHoursInLiters = (orders["grossUF"]/1000)*totalHoursOfFiltration;
     var previousWeightInKilos = parseFloat(_historicalVitals['weight'][_historicalVitals['weight'].length-1]);
 
@@ -2160,7 +2162,7 @@ function toggleLabDataFullscreen() {
 
   function checkGrossUltrafiltration() {
     var totalPoints = 0;
-    var fluidInPastEightHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousSixHourTotal"]))/1000;
+    var fluidInPastEightHoursInLiters = (parseFloat(_currentCaseStudySheet.inputOutput.elements[_currentTime+1]["previousEightHourTotal"]))/1000;
     var totalHoursOfFiltration = 8;
     // NOTE: If BFR is <= 150, grossUF for two hours is 0, therefore, we only have 4 hours of filtration. (This *might* only be for case study #1)
     if (_currentOrders["BFR"] <= 150) {
@@ -2388,11 +2390,11 @@ function toggleLabDataFullscreen() {
     var electrolytePointsMaxBonus = 200;
     var electrolytePointsEarned = finalSodiumScore+finalPotassiumScore+finalCalciumScore+finalMagnesiumScore+finalPhosphorousScore;
     var electrolytePointsPossible =
-      (_points.maxPointsPerCycle["sodiumInRange"]*6)+
-      (_points.maxPointsPerCycle["potassiumInRange"]*6)+
-      (_points.maxPointsPerCycle["calciumInRange"]*6)+
-      (_points.maxPointsPerCycle["magnesiumInRange"]*6)+
-      (_points.maxPointsPerCycle["phosphorousInRange"]*6)+electrolytePointsMaxBonus;
+      (_points.maxPointsPerCycle["sodiumInRange"]*8)+
+      (_points.maxPointsPerCycle["potassiumInRange"]*8)+
+      (_points.maxPointsPerCycle["calciumInRange"]*8)+
+      (_points.maxPointsPerCycle["magnesiumInRange"]*8)+
+      (_points.maxPointsPerCycle["phosphorousInRange"]*8)+electrolytePointsMaxBonus;
 
     if (electrolytePointsEarned === electrolytePointsPossible) {
       electrolyteBonus += 200;
