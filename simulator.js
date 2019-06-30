@@ -1236,16 +1236,16 @@ function toggleLabDataFullscreen() {
   }
 
   function roundLabs(newLabs){
-    newLabs["sodium"] = excelRound(newLabs["sodium"],0);
-    newLabs["potassium"] = excelRound(newLabs["potassium"],1);
-    newLabs["chloride"] = excelRound(newLabs["chloride"],0);
-    newLabs["bicarbonate"] = excelRound(newLabs["bicarbonate"],0);
-    newLabs["BUN"] = excelRound(newLabs["BUN"],0);
-    newLabs["creatinine"] = excelRound(newLabs["creatinine"],2);
-    newLabs["calcium"] = excelRound(newLabs["calcium"],1);
-    newLabs["ionizedCalcium"] = excelRound(newLabs["ionizedCalcium"],2);
-    newLabs["magnesium"] = excelRound(newLabs["magnesium"],1);
-    newLabs["phosphorous"] = excelRound(newLabs["phosphorous"],1);
+    newLabs["sodium"] = Number.parseFloat(newLabs["sodium"]).toFixed(0);
+    newLabs["potassium"] = Number.parseFloat(newLabs["potassium"]).toFixed(1);
+    newLabs["chloride"] = Number.parseFloat(newLabs["chloride"]).toFixed(0);
+    newLabs["bicarbonate"] = Number.parseFloat(newLabs["bicarbonate"]).toFixed(0);
+    newLabs["BUN"] = Number.parseFloat(newLabs["BUN"]).toFixed(0);
+    newLabs["creatinine"] = Number.parseFloat(newLabs["creatinine"]).toFixed(2);
+    newLabs["calcium"] = Number.parseFloat(newLabs["calcium"]).toFixed(1);
+    newLabs["ionizedCalcium"] = Number.parseFloat(newLabs["ionizedCalcium"]).toFixed(2);
+    newLabs["magnesium"] = Number.parseFloat(newLabs["magnesium"]).toFixed(1);
+    newLabs["phosphorous"] = Number.parseFloat(newLabs["phosphorous"]).toFixed(1);
     return newLabs;
   }
 
