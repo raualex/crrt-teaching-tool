@@ -2328,7 +2328,7 @@ function toggleLabDataFullscreen() {
     var currentPH = _historicalLabs["pH"][_historicalLabs["pH"].length-1];
     var resultsOverview;
     var caseEndingTime = 90;
-
+    
     console.log("handleSimulationCompletion : currentTime", _currentTime);
 
     if (currentPH < 7.0) {
@@ -2339,7 +2339,7 @@ function toggleLabDataFullscreen() {
       console.log("checkSimulationCompletion() : Patient has expired.");
       resultsOverview = "Your patient died after developing positive blood cultures.";
       _caseOver = true;
-    } else if (_currentTime === 90 && currentWeight < 100) {
+    } else if (_currentTime === 88) {
       console.log("checkSimulationCompletion() : You won!");
       resultsOverview = "Your patient survived her episode of sepsis due to pneumonia, complicated by severe AKI requiring CRRT.";
       setResultsTableVariables();
