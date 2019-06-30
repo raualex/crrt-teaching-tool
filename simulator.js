@@ -971,7 +971,6 @@ var CRRTApp = (function() {
     }
 
     function createHeader() {
-      console.log(`The current header should read: ${_headerTime}:00 ${_headerTimeAmPm} - Day ${_headerDay}`)
       _headerTime24Hour += 8
       verifyDayCycle('eightHours')
       check12HourFormat('eightHours')
@@ -979,7 +978,6 @@ var CRRTApp = (function() {
     }
 
     function createHourlyHeader() {
-      console.log(`The current hourly header should read: ${_hourlyHeaderTime}:00 ${_hourlyHeaderTimeAmPm} - Day ${_hourlyHeaderDay}`)
       _hourlyHeaderTime24Hour ++
       verifyDayCycle('oneHour')
       check12HourFormat('oneHour')
@@ -2337,7 +2335,11 @@ function toggleLabDataFullscreen() {
       console.log("checkSimulationCompletion() : Patient has expired.");
       resultsOverview = "Your patient died of overwhelming acidosis and infection.  Mortality is high in critically ill patients who require dialysis, but your patient would have benefitted from more efficient CRRT.  Try increasing the bicarbonate concentration in the replacement or  dialysate fluid, or using more effective anticoagulation.  Restart the case and see if you can improve the outcome!";
       _caseOver = true;
-    } else if (_currentTime === 72 && currentWeight < 98) {
+    } else if (_currentTime === 72 && currentWeight > 100) {
+      console.log("checkSimulationCompletion() : Patient has expired.");
+      resultsOverview = "Your patient died after developing positive blood cultures.";
+      _caseOver = true;
+    } else if (_currentTime === 72 && currentWeight < 100) {
       console.log("checkSimulationCompletion() : You won!");
       resultsOverview = "Your patient survived her episode of sepsis due to pneumonia, complicated by severe AKI requiring CRRT.";
       setResultsTableVariables();
