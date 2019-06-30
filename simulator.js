@@ -2339,7 +2339,7 @@ function toggleLabDataFullscreen() {
       _caseOver = true;
     } else if (_currentTime === 72 && currentWeight > 100) {
       console.log("checkSimulationCompletion() : Patient has expired.");
-      resultsOverview = "Your patient died of ...";
+      resultsOverview = "Your patient died after developing positive blood cultures.";
       _caseOver = true;
     } else if (_currentTime === 72 && currentWeight < 100) {
       console.log("checkSimulationCompletion() : You won!");
