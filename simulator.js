@@ -2339,7 +2339,7 @@ function toggleLabDataFullscreen() {
       console.log("checkSimulationCompletion() : Patient has expired.");
       resultsOverview = "Your patient died after developing positive blood cultures.";
       _caseOver = true;
-    } else if (_currentTime === 72 && currentWeight < 100) {
+    } else if (_currentTime === 90 && currentWeight < 100) {
       console.log("checkSimulationCompletion() : You won!");
       resultsOverview = "Your patient survived her episode of sepsis due to pneumonia, complicated by severe AKI requiring CRRT.";
       setResultsTableVariables();
