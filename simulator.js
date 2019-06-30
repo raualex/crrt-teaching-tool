@@ -1260,8 +1260,6 @@ function toggleLabDataFullscreen() {
   function setVolumeOverload() {
     var usualWeight = _currentCaseStudy.startingData["usualWeight"];
     var currentWeight = _historicalVitals["weight"][_historicalVitals["weight"].length-1];
-    console.log('THIS IS THE USUAL WEIGHT' + usualWeight)
-    console.log('THIS IS THE CURRENT WEIGHT' + currentWeight)
     var overload = excelRound(((currentWeight - usualWeight)/usualWeight)*100, 2);
     _historicalOverload.push(overload);
   }
